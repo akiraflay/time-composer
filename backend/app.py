@@ -1,0 +1,284 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from datetime import datetime
+import openai
+import sys
+import os
+import tempfile
+import csv
+import io
+
+# Add shared modules to path
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from shared.agents import AgentPipeline
+
+from config import Config
+from models import db, TimeEntry
+
+app = Flask(__name__)
+app.config.from_object(Config)
+
+# Initialize extensions
+db.init_app(app)
+CORS(app, origins=Config.CORS_ORIGINS)
+
+# Initialize OpenAI
+openai.api_key = Config.OPENAI_API_KEY
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Health check endpoint"""
+    return jsonify({'status': 'healthy', 'timestamp': datetime.utcnow().isoformat()})
+
+@app.route('/api/transcribe', methods=['POST'])
+def transcribe():
+    """Transcribe audio using OpenAI Whisper"""
+    try:
+        if 'audio' not in request.files:
+            return jsonify({'error': 'No audio file provided'}), 400
+        
+        audio_file = request.files['audio']
+        
+        # Save temporarily
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.webm') as tmp_file:
+            audio_file.save(tmp_file.name)
+            temp_path = tmp_file.name
+        
+        try:
+            # Transcribe with Whisper
+            client = openai.OpenAI(api_key=Config.OPENAI_API_KEY)
+            with open(temp_path, 'rb') as audio:
+                transcript = client.audio.transcriptions.create(
+                    model="whisper-1",
+                    file=audio
+                )
+            
+            return jsonify({'text': transcript.text})
+        
+        finally:
+            # Clean up temp file
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+    
+    except Exception as e:
+        app.logger.error(f"Transcription error: {str(e)}")
+        return jsonify({'error': 'Transcription failed'}), 500
+
+@app.route('/api/enhance', methods=['POST'])
+def enhance():
+    """Run text through agent pipeline"""
+    try:
+        data = request.get_json()
+        if not data or 'text' not in data:
+            return jsonify({'error': 'No text provided'}), 400
+        
+        text = data.get('text', '')
+        if not text.strip():
+            return jsonify({'error': 'Empty text provided'}), 400
+        
+        # Initialize agent pipeline
+        pipeline = AgentPipeline()
+        
+        # Process through agents
+        result = pipeline.process(text)
+        
+        # Create separate database entries for each narrative
+        created_entries = []
+        
+        for narrative in result['narratives']:
+            entry = TimeEntry(
+                original_text=text,
+                cleaned_text=result['cleaned'],
+                narratives=[narrative],  # Single narrative per entry
+                total_hours=narrative['hours']
+            )
+            db.session.add(entry)
+            db.session.flush()  # Get ID without committing
+            created_entries.append({
+                'id': entry.id,
+                'narrative': narrative,
+                'hours': narrative['hours']
+            })
+        
+        db.session.commit()
+        
+        return jsonify({
+            'entries': created_entries,
+            'total_entries': len(created_entries),
+            'total_hours': result['total_hours'],
+            'original_text': text,
+            'cleaned_text': result['cleaned']
+        })
+    
+    except Exception as e:
+        app.logger.error(f"Enhancement error: {str(e)}")
+        print(f"Enhancement error: {str(e)}")  # Debug output
+        db.session.rollback()
+        return jsonify({'error': f'Enhancement failed: {str(e)}'}), 500
+
+@app.route('/api/entries', methods=['GET'])
+def get_entries():
+    """Get all time entries with optional filtering"""
+    try:
+        # Get query parameters
+        status = request.args.get('status')
+        client_code = request.args.get('client_code')
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        
+        # Build query
+        query = TimeEntry.query
+        
+        if status:
+            query = query.filter_by(status=status)
+        if client_code:
+            query = query.filter_by(client_code=client_code)
+        if start_date:
+            start = datetime.fromisoformat(start_date)
+            query = query.filter(TimeEntry.created_at >= start)
+        if end_date:
+            end = datetime.fromisoformat(end_date)
+            query = query.filter(TimeEntry.created_at <= end)
+        
+        # Execute query
+        entries = query.order_by(TimeEntry.created_at.desc()).all()
+        
+        return jsonify([entry.to_dict() for entry in entries])
+    
+    except Exception as e:
+        app.logger.error(f"Error fetching entries: {str(e)}")
+        return jsonify({'error': 'Failed to fetch entries'}), 500
+
+@app.route('/api/entries/<int:entry_id>', methods=['GET'])
+def get_entry(entry_id):
+    """Get a specific time entry"""
+    entry = TimeEntry.query.get_or_404(entry_id)
+    return jsonify(entry.to_dict())
+
+@app.route('/api/entries/<int:entry_id>', methods=['PUT'])
+def update_entry(entry_id):
+    """Update a time entry"""
+    try:
+        entry = TimeEntry.query.get_or_404(entry_id)
+        data = request.get_json()
+        
+        # Update fields
+        if 'client_code' in data:
+            entry.client_code = data['client_code']
+        if 'matter_number' in data:
+            entry.matter_number = data['matter_number']
+        if 'narratives' in data:
+            entry.narratives = data['narratives']
+        if 'total_hours' in data:
+            entry.total_hours = data['total_hours']
+        if 'status' in data:
+            entry.status = data['status']
+        if 'attorney_email' in data:
+            entry.attorney_email = data['attorney_email']
+        if 'attorney_name' in data:
+            entry.attorney_name = data['attorney_name']
+        if 'task_codes' in data:
+            entry.task_codes = data['task_codes']
+        if 'tags' in data:
+            entry.tags = data['tags']
+        
+        entry.updated_at = datetime.utcnow()
+        
+        db.session.commit()
+        return jsonify(entry.to_dict())
+    
+    except Exception as e:
+        app.logger.error(f"Error updating entry: {str(e)}")
+        db.session.rollback()
+        return jsonify({'error': 'Failed to update entry'}), 500
+
+@app.route('/api/entries/<int:entry_id>', methods=['DELETE'])
+def delete_entry(entry_id):
+    """Delete a time entry"""
+    try:
+        entry = TimeEntry.query.get_or_404(entry_id)
+        db.session.delete(entry)
+        db.session.commit()
+        return jsonify({'success': True})
+    
+    except Exception as e:
+        app.logger.error(f"Error deleting entry: {str(e)}")
+        db.session.rollback()
+        return jsonify({'error': 'Failed to delete entry'}), 500
+
+@app.route('/api/export', methods=['POST'])
+def export_entries():
+    """Export entries as CSV"""
+    try:
+        data = request.get_json()
+        entry_ids = data.get('entry_ids', [])
+        
+        # Get entries
+        if entry_ids:
+            entries = TimeEntry.query.filter(TimeEntry.id.in_(entry_ids)).all()
+        else:
+            entries = TimeEntry.query.all()
+        
+        # Create CSV
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
+        # Write header
+        writer.writerow([
+            'Date', 'Client Code', 'Matter Number', 'Hours', 
+            'Narrative', 'Task Code', 'Status', 'Attorney'
+        ])
+        
+        # Write data
+        for entry in entries:
+            for narrative in (entry.narratives or []):
+                writer.writerow([
+                    entry.created_at.strftime('%Y-%m-%d'),
+                    entry.client_code or '',
+                    entry.matter_number or '',
+                    narrative.get('hours', 0.0),
+                    narrative.get('text', ''),
+                    narrative.get('task_code', ''),
+                    entry.status,
+                    entry.attorney_name or entry.attorney_email or ''
+                ])
+        
+        # Return CSV content
+        csv_content = output.getvalue()
+        response = app.response_class(
+            csv_content,
+            mimetype='text/csv',
+            headers={
+                'Content-Disposition': f'attachment; filename=time_entries_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
+            }
+        )
+        return response
+    
+    except Exception as e:
+        app.logger.error(f"Error exporting entries: {str(e)}")
+        return jsonify({'error': 'Failed to export entries'}), 500
+
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({'error': 'Not found'}), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    db.session.rollback()
+    return jsonify({'error': 'Internal server error'}), 500
+
+def init_db():
+    """Initialize the database"""
+    with app.app_context():
+        db.create_all()
+        print("Database initialized successfully")
+
+if __name__ == '__main__':
+    # Ensure data directory exists
+    os.makedirs(Config.DATA_DIR, exist_ok=True)
+    
+    # Initialize database
+    init_db()
+    
+    # Run the app on port 5001 to avoid macOS AirPlay conflict
+    app.run(debug=True, host='0.0.0.0', port=5001)

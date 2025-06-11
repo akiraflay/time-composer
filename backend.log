@@ -1,0 +1,503 @@
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+ * Serving Flask app 'simple_app'
+ * Debug mode: on
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.1.246:5001
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+ * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/config.py', reloading
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+ * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/config.py', reloading
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+ * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/config.py', reloading
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+ * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/config.py', reloading
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+ * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/config.py', reloading
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+ * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/config.py', reloading
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+ * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/app.py', reloading
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+ * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/config.py', reloading
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+ * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/run.py', reloading
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:34: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  return jsonify({'status': 'healthy', 'timestamp': datetime.utcnow().isoformat()})
+127.0.0.1 - - [10/Jun/2025 22:03:57] "GET /health HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:04:09] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:04:55] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:04:57] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:05:45] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:06:15] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:06:45] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:07:00] "GET /health HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:07:06] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:07:15] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:07:45] "GET /api/entries HTTP/1.1" 200 -
+[2025-06-10 22:08:12,197] ERROR in simple_app: Transcription error: Client.__init__() got an unexpected keyword argument 'proxies'
+127.0.0.1 - - [10/Jun/2025 22:08:12] "[35m[1mPOST /api/transcribe HTTP/1.1[0m" 500 -
+127.0.0.1 - - [10/Jun/2025 22:11:02] "GET /health HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:12:07] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:12:36] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:12:58] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:13:07] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:13:28] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:13:37] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:13:58] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:14:07] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:14:28] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:14:37] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:14:58] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:15:07] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:15:16] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:15:28] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:15:36] "GET /api/entries HTTP/1.1" 200 -
+[2025-06-10 22:15:39,955] ERROR in simple_app: Transcription error: Client.__init__() got an unexpected keyword argument 'proxies'
+127.0.0.1 - - [10/Jun/2025 22:15:39] "[35m[1mPOST /api/transcribe HTTP/1.1[0m" 500 -
+127.0.0.1 - - [10/Jun/2025 22:15:55] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:15:58] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:15:58] "GET /api/entries HTTP/1.1" 200 -
+[2025-06-10 22:16:04,290] ERROR in simple_app: Transcription error: Client.__init__() got an unexpected keyword argument 'proxies'
+127.0.0.1 - - [10/Jun/2025 22:16:04] "[35m[1mPOST /api/transcribe HTTP/1.1[0m" 500 -
+127.0.0.1 - - [10/Jun/2025 22:16:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:16:16] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:16:46] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:17:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:17:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:17:16] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:17:46] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:18:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:18:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:18:16] "GET /api/entries HTTP/1.1" 200 -
+[2025-06-10 22:18:24,220] ERROR in simple_app: Enhancement error: 
+
+You tried to access openai.ChatCompletion, but this is no longer supported in openai>=1.0.0 - see the README at https://github.com/openai/openai-python for the API.
+
+You can run `openai migrate` to automatically upgrade your codebase to use the 1.0.0 interface. 
+
+Alternatively, you can pin your installation to the old version, e.g. `pip install openai==0.28`
+
+A detailed migration guide is available here: https://github.com/openai/openai-python/discussions/742
+
+127.0.0.1 - - [10/Jun/2025 22:18:24] "[35m[1mPOST /api/enhance HTTP/1.1[0m" 500 -
+127.0.0.1 - - [10/Jun/2025 22:18:46] "GET /api/entries HTTP/1.1" 200 -
+ * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/base.py', reloading
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+OpenAI client initialization error: Client.__init__() got an unexpected keyword argument 'proxies'
+OpenAI client initialization error: Client.__init__() got an unexpected keyword argument 'proxies'
+OpenAI client initialization error: Client.__init__() got an unexpected keyword argument 'proxies'
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+ * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/base.py', reloading
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+[2025-06-10 22:19:12,859] ERROR in simple_app: Enhancement error: Client.__init__() got an unexpected keyword argument 'proxies'
+127.0.0.1 - - [10/Jun/2025 22:19:12] "[35m[1mPOST /api/enhance HTTP/1.1[0m" 500 -
+127.0.0.1 - - [10/Jun/2025 22:19:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:19:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:19:16] "GET /api/entries HTTP/1.1" 200 -
+ * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/base.py', reloading
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+[2025-06-10 22:19:35,331] ERROR in simple_app: Enhancement error: Client.__init__() got an unexpected keyword argument 'proxies'
+127.0.0.1 - - [10/Jun/2025 22:19:35] "[35m[1mPOST /api/enhance HTTP/1.1[0m" 500 -
+127.0.0.1 - - [10/Jun/2025 22:19:46] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:20:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:20:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:20:16] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:20:46] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:21:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:21:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:21:16] "GET /api/entries HTTP/1.1" 200 -
+[2025-06-10 22:21:42,218] ERROR in simple_app: Enhancement error: Client.__init__() got an unexpected keyword argument 'proxies'
+127.0.0.1 - - [10/Jun/2025 22:21:42] "[35m[1mPOST /api/enhance HTTP/1.1[0m" 500 -
+127.0.0.1 - - [10/Jun/2025 22:21:46] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:22:08] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:22:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:22:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:22:16] "GET /api/entries HTTP/1.1" 200 -
+[2025-06-10 22:22:18,811] ERROR in simple_app: Enhancement error: Client.__init__() got an unexpected keyword argument 'proxies'
+127.0.0.1 - - [10/Jun/2025 22:22:18] "[35m[1mPOST /api/enhance HTTP/1.1[0m" 500 -
+127.0.0.1 - - [10/Jun/2025 22:22:38] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:22:46] "GET /api/entries HTTP/1.1" 200 -
+ * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/base.py', reloading
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+[2025-06-10 22:22:59,860] ERROR in simple_app: Enhancement error: Client.__init__() got an unexpected keyword argument 'proxies'
+127.0.0.1 - - [10/Jun/2025 22:22:59] "[35m[1mPOST /api/enhance HTTP/1.1[0m" 500 -
+ * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/base.py', reloading
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+127.0.0.1 - - [10/Jun/2025 22:23:08] "GET /api/entries HTTP/1.1" 200 -
+ * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/base.py', reloading
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+127.0.0.1 - - [10/Jun/2025 22:23:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:23:13] "GET /api/entries HTTP/1.1" 200 -
+[2025-06-10 22:23:23,057] ERROR in simple_app: Enhancement error: Client.__init__() got an unexpected keyword argument 'proxies'
+127.0.0.1 - - [10/Jun/2025 22:23:23] "[35m[1mPOST /api/enhance HTTP/1.1[0m" 500 -
+[2025-06-10 22:23:28,548] ERROR in simple_app: Enhancement error: Client.__init__() got an unexpected keyword argument 'proxies'
+127.0.0.1 - - [10/Jun/2025 22:23:28] "[35m[1mPOST /api/enhance HTTP/1.1[0m" 500 -
+127.0.0.1 - - [10/Jun/2025 22:23:38] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:23:43] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:24:08] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:24:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:24:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:24:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:24:13] "GET /api/entries HTTP/1.1" 200 -
+[2025-06-10 22:24:15,385] ERROR in simple_app: Enhancement error: Client.__init__() got an unexpected keyword argument 'proxies'
+127.0.0.1 - - [10/Jun/2025 22:24:15] "[35m[1mPOST /api/enhance HTTP/1.1[0m" 500 -
+ * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/venv/lib/python3.13/site-packages/openai/types/fine_tuning/jobs/checkpoint_list_params.py', reloading
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+127.0.0.1 - - [10/Jun/2025 22:24:38] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:24:43] "GET /api/entries HTTP/1.1" 200 -
+[2025-06-10 22:24:44,046] ERROR in simple_app: Enhancement error: Client.__init__() got an unexpected keyword argument 'proxies'
+127.0.0.1 - - [10/Jun/2025 22:24:44] "[35m[1mPOST /api/enhance HTTP/1.1[0m" 500 -
+ * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/venv/lib/python3.13/site-packages/httpx/_transports/__init__.py', reloading
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+127.0.0.1 - - [10/Jun/2025 22:25:08] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:25:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:25:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:25:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:25:13] "GET /api/entries HTTP/1.1" 200 -
+/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:93: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  'created_at': datetime.utcnow().isoformat(),
+/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:94: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  'updated_at': datetime.utcnow().isoformat(),
+127.0.0.1 - - [10/Jun/2025 22:25:38] "POST /api/enhance HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:25:43] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:26:05] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:26:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:26:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:26:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:26:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:26:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:26:15] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:26:43] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:26:45] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:27:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:27:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:27:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:27:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:27:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:27:15] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:27:45] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:28:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:28:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:28:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:28:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:28:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:28:15] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:28:45] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:29:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:29:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:29:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:29:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:29:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:29:15] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:29:45] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:30:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:30:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:30:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:30:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:30:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:30:15] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:30:41] "POST /api/transcribe HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:30:41] "OPTIONS /api/enhance HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:30:44] "POST /api/enhance HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:30:45] "OPTIONS /api/entries/2 HTTP/1.1" 200 -
+/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:148: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  entry['updated_at'] = datetime.utcnow().isoformat()
+127.0.0.1 - - [10/Jun/2025 22:30:45] "PUT /api/entries/2 HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:30:45] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:31:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:31:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:31:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:31:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:31:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:31:15] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:31:45] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:32:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:32:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:32:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:32:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:32:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:32:15] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:32:45] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:33:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:33:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:33:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:33:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:33:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:33:15] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:33:45] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:34:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:34:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:34:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:34:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:34:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:34:15] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:34:45] "OPTIONS /api/entries/2 HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:34:45] "PUT /api/entries/2 HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:34:45] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:35:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:35:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:35:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:35:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:35:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:35:15] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:35:40] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:35:45] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:36:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:36:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:36:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:36:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:36:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:36:15] "GET /api/entries HTTP/1.1" 200 -
+ * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/separator.py', reloading
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+ * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/separator.py', reloading
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+127.0.0.1 - - [10/Jun/2025 22:36:45] "GET /api/entries HTTP/1.1" 200 -
+/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:93: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  'created_at': datetime.utcnow().isoformat(),
+/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:94: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  'updated_at': datetime.utcnow().isoformat(),
+127.0.0.1 - - [10/Jun/2025 22:37:10] "POST /api/enhance HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:37:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:37:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:37:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:37:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:37:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:37:15] "GET /api/entries HTTP/1.1" 200 -
+ * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/separator.py', reloading
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+127.0.0.1 - - [10/Jun/2025 22:37:45] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:38:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:38:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:38:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:38:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:38:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:38:15] "GET /api/entries HTTP/1.1" 200 -
+ * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/refiner.py', reloading
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+127.0.0.1 - - [10/Jun/2025 22:38:45] "GET /api/entries HTTP/1.1" 200 -
+/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:93: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  'created_at': datetime.utcnow().isoformat(),
+/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:94: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  'updated_at': datetime.utcnow().isoformat(),
+127.0.0.1 - - [10/Jun/2025 22:38:48] "POST /api/enhance HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:39:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:39:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:39:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:39:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:39:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:39:15] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:39:16] "POST /api/enhance HTTP/1.1" 200 -
+ * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/pipeline.py', reloading
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+127.0.0.1 - - [10/Jun/2025 22:39:45] "GET /api/entries HTTP/1.1" 200 -
+/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:93: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  'created_at': datetime.utcnow().isoformat(),
+/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:94: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  'updated_at': datetime.utcnow().isoformat(),
+127.0.0.1 - - [10/Jun/2025 22:39:58] "POST /api/enhance HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:40:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:40:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:40:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:40:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:40:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:40:15] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:40:45] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:41:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:41:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:41:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:41:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:41:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:41:15] "GET /api/entries HTTP/1.1" 200 -
+ * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/grammar.py', reloading
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+ * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/separator.py', reloading
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+ * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/refiner.py', reloading
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+127.0.0.1 - - [10/Jun/2025 22:41:45] "GET /api/entries HTTP/1.1" 200 -
+/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:93: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  'created_at': datetime.utcnow().isoformat(),
+/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:94: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  'updated_at': datetime.utcnow().isoformat(),
+127.0.0.1 - - [10/Jun/2025 22:42:05] "POST /api/enhance HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:42:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:42:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:42:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:42:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:42:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:42:15] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:42:26] "POST /api/enhance HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:42:45] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:43:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:43:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:43:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:43:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:43:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:43:15] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:43:45] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:44:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:44:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:44:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:44:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:44:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:44:15] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:44:45] "GET /api/entries HTTP/1.1" 200 -
+ * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/app.py', reloading
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:93: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  'created_at': datetime.utcnow().isoformat(),
+/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:94: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  'updated_at': datetime.utcnow().isoformat(),
+127.0.0.1 - - [10/Jun/2025 22:45:02] "POST /api/enhance HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:45:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:45:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:45:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:45:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:45:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:45:15] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:45:16] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:45:45] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:45:46] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:46:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:46:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:46:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:46:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:46:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:46:15] "POST /api/enhance HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:46:15] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:46:16] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:46:23] "POST /api/enhance HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:46:29] "GET /api/entries HTTP/1.1" 200 -
+ * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/app.py', reloading
+🚀 Starting Time Composer API...
+OpenAI API Key: Set
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 575-830-486
+127.0.0.1 - - [10/Jun/2025 22:46:45] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:46:46] "GET /api/entries HTTP/1.1" 200 -
+/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:93: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  'created_at': datetime.utcnow().isoformat(),
+/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:94: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  'updated_at': datetime.utcnow().isoformat(),
+127.0.0.1 - - [10/Jun/2025 22:46:58] "POST /api/enhance HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:47:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:47:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:47:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:47:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:47:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:47:15] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2025 22:47:16] "GET /api/entries HTTP/1.1" 200 -
+/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/resource_tracker.py:276: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown: {'/mp-6bwe75k3'}
+  warnings.warn(
