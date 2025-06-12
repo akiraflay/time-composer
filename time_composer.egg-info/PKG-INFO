@@ -1,0 +1,121 @@
+Metadata-Version: 2.4
+Name: time-composer
+Version: 1.0.0
+Summary: Speech-first AI agent for legal billing narratives
+Author: Time Composer Team
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Intended Audience :: Legal Industry
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: flask>=2.3.2
+Requires-Dist: flask-cors>=4.0.0
+Requires-Dist: flask-sqlalchemy>=3.0.5
+Requires-Dist: openai>=1.35.3
+Requires-Dist: click>=8.1.7
+Requires-Dist: rich>=13.7.1
+Requires-Dist: requests>=2.31.0
+Requires-Dist: python-dotenv>=1.0.0
+Dynamic: author
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+# Time Composer
+
+A speech-first AI agent for legal billing narratives. Time Composer helps legal professionals create accurate, detailed billing entries through voice recording and AI-powered narrative enhancement.
+
+## Features
+
+- **Voice Recording**: Record billing narratives using your microphone with real-time transcription
+- **AI Enhancement**: Three-agent pipeline (Grammar, Separator, Refiner) processes raw notes into professional narratives
+- **Multi-Platform**: Web interface, CLI tool, and API all sharing the same backend
+- **Offline-First**: IndexedDB local storage with SQLite sync
+- **Export Options**: CSV export for billing systems
+
+## Tech Stack
+
+- **Backend**: Flask, SQLAlchemy, OpenAI API
+- **Frontend**: Vanilla JavaScript, Web Speech API, IndexedDB
+- **CLI**: Click, Rich terminal UI
+- **Database**: SQLite
+
+## Quick Start
+
+### Installation
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd time-composer
+
+# Install Python dependencies
+pip install -r requirements.txt
+
+# Install CLI tool
+pip install -e .
+
+# Set up environment variables
+cp .env.example .env
+# Edit .env and add your OpenAI API key
+```
+
+### Running the Application
+
+1. **Start the Backend API**:
+```bash
+python backend/app.py
+```
+
+2. **Open the Web Interface**:
+```bash
+# In a new terminal
+python -m http.server 8080 --directory frontend
+# Open http://localhost:8080 in your browser
+```
+
+3. **Use the CLI**:
+```bash
+# Record a new entry
+time-composer record "Met with client regarding contract negotiations"
+
+# View dashboard
+time-composer dashboard
+
+# Export entries
+time-composer export --output billing_entries.csv
+```
+
+## Project Structure
+
+```
+time-composer/
+├── backend/          # Flask API server
+├── frontend/         # Vanilla JS web interface
+├── cli/             # Command-line interface
+├── shared/          # Shared agent architecture
+├── data/            # SQLite database
+└── tests/           # Test suite
+```
+
+## API Endpoints
+
+- `POST /api/transcribe` - Transcribe audio using Whisper
+- `POST /api/enhance` - Process text through AI agents
+- `GET /api/entries` - Get all time entries
+- `PUT /api/entries/<id>` - Update a time entry
+- `POST /api/export` - Export entries as CSV
+
+## Agent Pipeline
+
+1. **Grammar Agent**: Fixes spelling, grammar, and expands abbreviations
+2. **Separator Agent**: Identifies distinct billable activities and time allocations
+3. **Refiner Agent**: Transforms activities into professional billing narratives
+
+## License
+
+MIT

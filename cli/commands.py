@@ -20,7 +20,7 @@ from .display import (
 )
 
 console = Console()
-API_BASE = os.getenv('API_BASE_URL', 'http://localhost:5000/api')
+API_BASE = os.getenv('API_BASE_URL', 'http://localhost:5001/api')
 
 def record_command(text, client=None, matter=None):
     """Process and record a new billing narrative"""

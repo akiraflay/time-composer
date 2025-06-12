@@ -88,30 +88,82 @@
                 </div>
                 
                 <div class="recording-area">
-                    <button id="record-btn" class="record-btn">
-                        <svg class="mic-icon" viewBox="0 0 24 24" fill="currentColor" width="32" height="32">
-                            <path d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"/>
-                        </svg>
-                        <span class="record-text">Click to Record</span>
-                    </button>
-                    <div id="recording-time" class="hidden">00:00</div>
+                    <div class="recording-controls">
+                        <button id="record-btn" class="record-btn">
+                            <svg class="mic-icon" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                                <path d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"/>
+                            </svg>
+                            <span class="record-text">Click to Record</span>
+                        </button>
+                        
+                        <div class="recording-controls-secondary hidden" id="recording-controls-secondary">
+                            <button id="pause-btn" class="control-btn">
+                                <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                                    <path d="M14,19H18V5H14M6,19H10V5H6V19Z"/>
+                                </svg>
+                                Pause
+                            </button>
+                            <button id="stop-btn" class="control-btn stop">
+                                <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                                    <path d="M18,18H6V6H18V18Z"/>
+                                </svg>
+                                Stop
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="recording-status">
+                        <div id="recording-time" class="hidden">00:00</div>
+                        <div id="audio-level" class="audio-level hidden">
+                            <div class="level-bars">
+                                <div class="level-bar"></div>
+                                <div class="level-bar"></div>
+                                <div class="level-bar"></div>
+                                <div class="level-bar"></div>
+                                <div class="level-bar"></div>
+                            </div>
+                        </div>
+                        <div id="waveform-animation" class="waveform hidden">
+                            <div class="waveform-bar"></div>
+                            <div class="waveform-bar"></div>
+                            <div class="waveform-bar"></div>
+                            <div class="waveform-bar"></div>
+                            <div class="waveform-bar"></div>
+                        </div>
+                    </div>
                     
                     <!-- Real-time transcription display -->
                     <div id="live-transcription" class="live-transcription hidden">
-                        <div class="transcription-label">Live Transcription:</div>
-                        <div id="live-text" class="live-text"></div>
+                        <div class="transcription-header-live">
+                            <span class="transcription-label">Live Transcription:</span>
+                            <button id="edit-transcription" class="edit-transcription-btn hidden">
+                                <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                                    <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+                                </svg>
+                                Edit
+                            </button>
+                        </div>
+                        <div id="live-text" class="live-text" contenteditable="false"></div>
                     </div>
                 </div>
                 
                 <div id="transcription" class="hidden">
                     <div class="transcription-header">
                         <h3>Transcription</h3>
-                        <button id="toggle-transcription" class="toggle-btn" type="button">
-                            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                                <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"/>
-                            </svg>
-                            Show Details
-                        </button>
+                        <div class="transcription-actions">
+                            <button id="re-record-btn" class="control-btn secondary">
+                                <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                                    <path d="M12,5V1L7,6L12,11V7A6,6 0 0,1 18,13A6,6 0 0,1 12,19A6,6 0 0,1 6,13H4A8,8 0 0,0 12,21A8,8 0 0,0 20,13A8,8 0 0,0 12,5Z"/>
+                                </svg>
+                                Re-record
+                            </button>
+                            <button id="toggle-transcription" class="toggle-btn" type="button">
+                                <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                                    <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"/>
+                                </svg>
+                                Show Details
+                            </button>
+                        </div>
                     </div>
                     <div id="transcription-content" class="transcription-content hidden">
                         <p id="transcription-text"></p>
@@ -139,10 +191,76 @@
             </div>
         </div>
 
-        <!-- Loading Overlay -->
+        <!-- Processing Overlay -->
         <div id="loading-overlay" class="loading-overlay hidden">
-            <div class="spinner"></div>
-            <p id="loading-text">Processing...</p>
+            <div class="processing-container">
+                <div class="processing-header">
+                    <h3 id="processing-title">Processing your time entry</h3>
+                    <p id="processing-subtitle">AI agents are transforming your speech into professional billing narratives</p>
+                </div>
+                
+                <div class="agent-pipeline">
+                    <div class="agent-step" id="step-transcription">
+                        <div class="step-icon">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                                <path d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"/>
+                            </svg>
+                        </div>
+                        <div class="step-content">
+                            <div class="step-title">Transcribing Audio</div>
+                            <div class="step-description">Converting speech to text using Whisper AI</div>
+                        </div>
+                        <div class="step-status">
+                            <div class="status-spinner"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="agent-step" id="step-grammar">
+                        <div class="step-icon">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                                <path d="M14.6,16.6L19.2,12L14.6,7.4L16,6L22,12L16,18L14.6,16.6M9.4,16.6L4.8,12L9.4,7.4L8,6L2,12L8,18L9.4,16.6M17,2V4H15V2H17M13,2V4H11V2H13M9,2V4H7V2H9Z"/>
+                            </svg>
+                        </div>
+                        <div class="step-content">
+                            <div class="step-title">Grammar Agent</div>
+                            <div class="step-description">Fixing grammar, spelling, and expanding abbreviations</div>
+                        </div>
+                        <div class="step-status">
+                            <div class="status-pending"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="agent-step" id="step-separator">
+                        <div class="step-icon">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                                <path d="M14,2A8,8 0 0,1 22,10A8,8 0 0,1 14,18A8,8 0 0,1 6,10A8,8 0 0,1 14,2M14,4A6,6 0 0,0 8,10A6,6 0 0,0 14,16A6,6 0 0,0 20,10A6,6 0 0,0 14,4M14,6A4,4 0 0,1 18,10A4,4 0 0,1 14,14A4,4 0 0,1 10,10A4,4 0 0,1 14,6M14,8A2,2 0 0,0 12,10A2,2 0 0,0 14,12A2,2 0 0,0 16,10A2,2 0 0,0 14,8Z"/>
+                            </svg>
+                        </div>
+                        <div class="step-content">
+                            <div class="step-title">Separator Agent</div>
+                            <div class="step-description">Identifying distinct billable activities and time allocations</div>
+                        </div>
+                        <div class="step-status">
+                            <div class="status-pending"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="agent-step" id="step-refiner">
+                        <div class="step-icon">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                                <path d="M12,2L13.09,8.26L22,9L13.09,9.74L12,16L10.91,9.74L2,9L10.91,8.26L12,2Z"/>
+                            </svg>
+                        </div>
+                        <div class="step-content">
+                            <div class="step-title">Refiner Agent</div>
+                            <div class="step-description">Transforming activities into professional billing narratives</div>
+                        </div>
+                        <div class="step-status">
+                            <div class="status-pending"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
