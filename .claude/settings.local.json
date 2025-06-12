@@ -6,7 +6,8 @@
       "Bash(source:*)",
       "Bash(pip install:*)",
       "Bash(pkill:*)",
-      "WebFetch(domain:docs.anthropic.com)"
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(ls:*)"
     ],
     "deny": []
   }

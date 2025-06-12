@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Dual Transcription</title>
+    <style>
+        body {
+            font-family: -apple-system, system-ui, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 20px;
+        }
+        
+        .test-area {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        .user-message {
+            background: #3a3a3a;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .message-text {
+            color: #ffffff;
+        }
+        
+        /* Whisper-confirmed text - normal style, white */
+        .whisper-confirmed {
+            color: #ffffff;
+            font-style: normal;
+        }
+        
+        /* Browser-pending text - italic, slightly grayed */
+        .browser-pending {
+            color: #cccccc;
+            font-style: italic;
+        }
+        
+        /* Interim text - very light, italic */
+        .interim {
+            color: #999999;
+            font-style: italic;
+        }
+        
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: #45a049;
+        }
+        
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            background: #444;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-area">
+        <h1>Test Dual Transcription System</h1>
+        
+        <div class="status">
+            <h3>Current Status:</h3>
+            <p id="status-text">Click "Test Function" to see the current implementation</p>
+        </div>
+        
+        <div class="user-message">
+            <div class="message-text" id="test-message">
+                <span class="transcription-placeholder">Transcription will appear here...</span>
+            </div>
+        </div>
+        
+        <button onclick="testHandleSpeechResult()">Test handleSpeechResult</button>
+        <button onclick="testProcessAudioChunk()">Test processAudioChunk</button>
+        <button onclick="testUpdateDisplay()">Test updateTranscriptionDisplay</button>
+        <button onclick="clearTest()">Clear</button>
+        
+        <h3>Test Scenarios:</h3>
+        <ul>
+            <li>Browser transcription appears fast in italics</li>
+            <li>Whisper confirmation replaces browser text with normal style</li>
+            <li>All text should be white (not colored)</li>
+            <li>Incremental processing without reprocessing old chunks</li>
+        </ul>
+    </div>
+    
+    <script>
+        // Mock AI Assistant for testing
+        const mockAssistant = {
+            browserTranscript: '',
+            whisperTranscript: '',
+            lastProcessedChunkIndex: 0,
+            audioChunks: [],
+            
+            updateTranscriptionDisplay() {
+                const messageEl = document.getElementById('test-message');
+                let displayHtml = '';
+                
+                if (this.whisperTranscript) {
+                    displayHtml += `<span class="whisper-confirmed">${this.whisperTranscript}</span>`;
+                }
+                
+                const browserPendingText = this.browserTranscript.substring(this.whisperTranscript.length);
+                if (browserPendingText) {
+                    displayHtml += `<span class="browser-pending">${browserPendingText}</span>`;
+                }
+                
+                if (displayHtml) {
+                    messageEl.innerHTML = displayHtml;
+                } else {
+                    messageEl.innerHTML = '<span class="transcription-placeholder">Transcription will appear here...</span>';
+                }
+                
+                updateStatus(`Browser: "${this.browserTranscript}" | Whisper: "${this.whisperTranscript}"`);
+            }
+        };
+        
+        function updateStatus(text) {
+            document.getElementById('status-text').textContent = text;
+        }
+        
+        function testHandleSpeechResult() {
+            // Simulate browser speech results
+            mockAssistant.browserTranscript = "I spent two hours reviewing the contract and then had a call with the client ";
+            mockAssistant.updateTranscriptionDisplay();
+            updateStatus("Added browser transcription (should be italic)");
+        }
+        
+        function testProcessAudioChunk() {
+            // Simulate Whisper processing first part
+            mockAssistant.whisperTranscript = "I spent two hours reviewing the contract";
+            mockAssistant.lastProcessedChunkIndex = 5;
+            mockAssistant.updateTranscriptionDisplay();
+            updateStatus("Whisper confirmed first part (should be normal style, white)");
+        }
+        
+        function testUpdateDisplay() {
+            // Simulate more browser text while Whisper catches up
+            mockAssistant.browserTranscript = "I spent two hours reviewing the contract and then had a call with the client about the terms and conditions";
+            mockAssistant.whisperTranscript = "I spent two hours reviewing the contract and then had a call";
+            mockAssistant.updateTranscriptionDisplay();
+            updateStatus("Mixed display: Whisper confirmed + browser pending");
+        }
+        
+        function clearTest() {
+            mockAssistant.browserTranscript = '';
+            mockAssistant.whisperTranscript = '';
+            mockAssistant.lastProcessedChunkIndex = 0;
+            mockAssistant.updateTranscriptionDisplay();
+            updateStatus("Cleared all transcripts");
+        }
+    </script>
+</body>
+</html>

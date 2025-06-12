@@ -2,33 +2,59 @@ const API_BASE = 'http://localhost:5001/api';
 
 const api = {
     async transcribe(audioBlob) {
-        const formData = new FormData();
-        formData.append('audio', audioBlob, 'recording.webm');
-        
-        const response = await fetch(`${API_BASE}/transcribe`, {
-            method: 'POST',
-            body: formData
-        });
-        
-        if (!response.ok) {
-            throw new Error('Transcription failed');
+        try {
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'recording.webm');
+            
+            const response = await fetch(`${API_BASE}/transcribe`, {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Transcription API error:', response.status, errorText);
+                throw new Error(`Transcription failed: ${response.status}`);
+            }
+            
+            return response.json();
+        } catch (error) {
+            console.error('API transcribe error:', error);
+            
+            // Check if it's a network error (server not running)
+            if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                throw new Error('Backend server is not running. Please start the server with "python run.py"');
+            }
+            
+            throw error;
         }
-        
-        return response.json();
     },
     
     async enhance(text) {
-        const response = await fetch(`${API_BASE}/enhance`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text })
-        });
-        
-        if (!response.ok) {
-            throw new Error('Enhancement failed');
+        try {
+            const response = await fetch(`${API_BASE}/enhance`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text })
+            });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Enhancement API error:', response.status, errorText);
+                throw new Error(`Enhancement failed: ${response.status}`);
+            }
+            
+            return response.json();
+        } catch (error) {
+            console.error('API enhance error:', error);
+            
+            // Check if it's a network error (server not running)
+            if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                throw new Error('Backend server is not running. Please start the server with "python run.py"');
+            }
+            
+            throw error;
         }
-        
-        return response.json();
     },
     
     async getEntries(filters = {}) {

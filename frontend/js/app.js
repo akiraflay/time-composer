@@ -48,27 +48,18 @@ function setupEventListeners() {
         statusFilter.addEventListener('change', () => loadDashboard());
     }
     
-    // Modal controls
+    // AI Assistant controls
     const addButton = document.getElementById('add-time-entry');
-    const modal = document.getElementById('add-modal');
-    const closeButton = document.getElementById('close-modal');
-    const cancelButton = document.getElementById('cancel-modal');
-    const saveButton = document.getElementById('save-entries');
     
     if (addButton) {
-        addButton.addEventListener('click', () => openModal());
-    }
-    
-    if (closeButton) {
-        closeButton.addEventListener('click', () => closeModal());
-    }
-    
-    if (cancelButton) {
-        cancelButton.addEventListener('click', () => closeModal());
-    }
-    
-    if (saveButton) {
-        saveButton.addEventListener('click', () => saveEntries());
+        addButton.addEventListener('click', () => {
+            if (window.aiAssistant) {
+                window.aiAssistant.open();
+            } else {
+                // Fallback to old modal if AI assistant isn't loaded
+                openModal();
+            }
+        });
     }
     
     // Export controls
@@ -87,6 +78,24 @@ function setupEventListeners() {
     
     if (nextMonth) {
         nextMonth.addEventListener('click', () => navigateCalendar(1));
+    }
+    
+    // Keep old modal functionality for fallback
+    const modal = document.getElementById('add-modal');
+    const closeButton = document.getElementById('close-modal');
+    const cancelButton = document.getElementById('cancel-modal');
+    const saveButton = document.getElementById('save-entries');
+    
+    if (closeButton) {
+        closeButton.addEventListener('click', () => closeModal());
+    }
+    
+    if (cancelButton) {
+        cancelButton.addEventListener('click', () => closeModal());
+    }
+    
+    if (saveButton) {
+        saveButton.addEventListener('click', () => saveEntries());
     }
     
     // Modal backdrop click
