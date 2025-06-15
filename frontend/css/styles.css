@@ -1453,24 +1453,37 @@ main {
     padding: 0.25rem;
     border-radius: 0.25rem;
     transition: all 0.2s ease;
-    color: var(--text-secondary);
+    color: #d1d5db;
     display: flex;
     align-items: center;
     justify-content: center;
+    opacity: 0.6;
 }
 
 .narrative-status-icon:hover {
     background: var(--background);
     color: var(--primary-color);
+    opacity: 1;
 }
 
 .narrative-status-icon[data-status="ready"] {
     color: var(--success-color);
+    opacity: 1;
 }
 
 .narrative-status-icon[data-status="ready"]:hover {
     background: #f0fdf4;
     color: var(--success-color);
+}
+
+.narrative-status-icon[data-status="draft"] {
+    color: #d1d5db;
+    opacity: 0.5;
+}
+
+.narrative-status-icon[data-status="draft"]:hover {
+    color: var(--text-secondary);
+    opacity: 0.8;
 }
 
 .narrative-draft {
@@ -3855,14 +3868,15 @@ main {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    min-height: 0; /* Ensures flex children can shrink */
 }
 
 .messages-container {
     flex: 1;
     padding: 2rem;
     overflow-y: auto;
-    min-height: 300px;
-    max-height: 500px;
+    min-height: 200px;
+    max-height: 400px;
 }
 
 .message {
@@ -4019,11 +4033,26 @@ main {
     left: 100%;
 }
 
+.suggestion-btn.icon-only {
+    padding: 0.75rem;
+    min-width: auto;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.suggestion-btn.icon-only svg {
+    margin: 0;
+}
+
 .voice-interface,
 .text-interface {
     padding: 2rem;
     border-top: 1px solid var(--border);
     background: var(--background);
+    flex-shrink: 0; /* Prevents the text interface from being pushed out of view */
 }
 
 .voice-recording-area {
@@ -4136,6 +4165,10 @@ main {
     position: relative;
     overflow: hidden;
     min-width: 150px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
 .voice-btn.primary {
@@ -4169,6 +4202,18 @@ main {
 .voice-btn.danger:hover {
     background: var(--error-color);
     color: white;
+}
+
+.voice-btn.large {
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+    min-width: 200px;
+}
+
+.voice-btn.large .btn-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 0.5rem;
 }
 
 .recording-timer {
@@ -4327,6 +4372,7 @@ main {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    flex: 1;
 }
 
 .recording-label {
@@ -4520,6 +4566,13 @@ main {
 .text-input-area {
     max-width: 600px;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.text-prompt {
+    display: flex;
+    flex-direction: column;
 }
 
 .text-prompt p {
@@ -4538,7 +4591,8 @@ main {
     font-size: 1rem;
     line-height: 1.6;
     resize: vertical;
-    min-height: 150px;
+    min-height: 100px;
+    max-height: 200px;
     font-family: inherit;
     transition: border-color 0.3s ease;
 }
@@ -4554,6 +4608,13 @@ main {
     gap: 1rem;
     justify-content: center;
     margin-top: 1rem;
+}
+
+.keyboard-hint {
+    font-size: 0.85em;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+    text-align: center;
 }
 
 .input-area {
@@ -5158,14 +5219,13 @@ EOF < /dev/null
     transform: none;
 }
 
-/* Entry Status Toggle Styles */
-.status-toggle-group {
+/* Entry Status Single Toggle Styles */
+.status-single-toggle {
     display: flex;
-    gap: 0.25rem;
     align-items: center;
 }
 
-.status-toggle-btn {
+.status-toggle-single {
     padding: 0.25rem 0.75rem;
     border: 1px solid var(--border);
     background: var(--surface);
@@ -5178,37 +5238,40 @@ EOF < /dev/null
     transition: all 0.2s ease;
     color: var(--text-secondary);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    min-width: 60px;
 }
 
-.status-toggle-btn:hover {
+.status-toggle-single:hover {
     border-color: var(--primary-color);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
 }
 
-.status-toggle-btn.active[data-status="draft"] {
+.status-toggle-single.draft {
     background: var(--text-secondary);
     color: white;
     border-color: var(--text-secondary);
 }
 
-.status-toggle-btn.active[data-status="ready"] {
+.status-toggle-single.ready {
     background: var(--success-color);
     color: white;
     border-color: var(--success-color);
 }
 
 /* Ultra-compact view status toggle styling */
-.ultra-compact-view .status-toggle-btn {
+.ultra-compact-view .status-toggle-single {
     padding: 0.125rem 0.5rem;
     font-size: 0.625rem;
+    min-width: 50px;
 }
 
 /* Mixed status indicator */
-.status-toggle-group.mixed-status {
+.status-single-toggle.mixed-status {
     position: relative;
 }
 
-.status-toggle-group.mixed-status::before {
+.status-single-toggle.mixed-status::before {
     content: '';
     position: absolute;
     top: -2px;
