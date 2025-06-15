@@ -4,6 +4,7 @@ let currentEntries = [];
 let currentEntry = null;
 let viewMode = 'expanded'; // expanded, condensed
 let dateFilter = '';
+let statusFilter = '';
 let clientFilter = '';
 let matterFilter = '';
 let hoursFilter = '';
@@ -11,6 +12,22 @@ let taskFilter = '';
 let customDateRange = null;
 let quickTimeFilter = 'all';
 let advancedFiltersVisible = false;
+let datePickerVisible = false;
+let bulkSelectionMode = false;
+let selectedEntries = new Set();
+
+// Helper function to create status dropdown
+function createStatusDropdown(entryId, currentStatus) {
+    return `
+        <div class="status-dropdown">
+            <select class="status-select" onchange="changeEntryStatus(${entryId}, this.value)">
+                <option value="draft" ${currentStatus === 'draft' ? 'selected' : ''}>Draft</option>
+                <option value="ready" ${currentStatus === 'ready' ? 'selected' : ''}>Ready</option>
+                <option value="exported" ${currentStatus === 'exported' || currentStatus === 'billed' ? 'selected' : ''}>Exported</option>
+            </select>
+        </div>
+    `;
+}
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
@@ -31,11 +48,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Set up event listeners
     setupEventListeners();
     
+    
     // Load initial view
     loadDashboard();
 });
 
-// Event listeners
+// Event listeners - Streamlined
 function setupEventListeners() {
     // Navigation
     document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -45,116 +63,81 @@ function setupEventListeners() {
         });
     });
     
-    // Dashboard controls
-    const searchInput = document.getElementById('search');
-    const statusFilter = document.getElementById('status-filter');
-    const clientFilterEl = document.getElementById('client-filter');
-    const matterFilterEl = document.getElementById('matter-filter');
-    const hoursFilterEl = document.getElementById('hours-filter');
-    const taskFilterEl = document.getElementById('task-filter');
-    const clearFiltersBtn = document.getElementById('clear-filters');
-    const filterToggleBtn = document.getElementById('filter-toggle');
-    const advancedFiltersPanel = document.getElementById('advanced-filters-panel');
-    const applyFiltersBtn = document.getElementById('apply-filters');
-    const dateRangeStart = document.getElementById('date-range-start');
-    const dateRangeEnd = document.getElementById('date-range-end');
+    // App title navigation
+    const appTitle = document.getElementById('app-title');
+    if (appTitle) {
+        appTitle.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchView('dashboard');
+        });
+    }
     
+    // Streamlined controls
+    const searchInput = document.getElementById('search');
+    const viewToggleBtn = document.getElementById('view-toggle');
+    const filtersBtn = document.getElementById('filters-btn');
+    const addButton = document.getElementById('add-time-entry');
+    
+    // Search functionality
     if (searchInput) {
         searchInput.addEventListener('input', debounce(() => loadDashboard(), 300));
     }
     
-    if (statusFilter) {
-        statusFilter.addEventListener('change', () => loadDashboard());
-    }
-    
-    // Quick time filter buttons
-    document.querySelectorAll('.time-filter-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            // Update active state
-            document.querySelectorAll('.time-filter-btn').forEach(b => b.classList.remove('active'));
-            e.target.classList.add('active');
-            
-            quickTimeFilter = e.target.dataset.period;
-            updateDateFiltering();
-            loadDashboard();
-        });
-    });
-    
-    // Date range inputs
-    if (dateRangeStart) {
-        dateRangeStart.addEventListener('change', () => {
-            updateDateFiltering();
-            loadDashboard();
+    // View toggle - single button that switches between modes
+    if (viewToggleBtn) {
+        viewToggleBtn.addEventListener('click', () => {
+            toggleViewMode();
         });
     }
     
-    if (dateRangeEnd) {
-        dateRangeEnd.addEventListener('change', () => {
-            updateDateFiltering();
-            loadDashboard();
+    // Status filter dropdown
+    const statusFilterBtn = document.getElementById('status-filter-btn');
+    const statusDropdown = document.getElementById('status-dropdown');
+    
+    if (statusFilterBtn && statusDropdown) {
+        statusFilterBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            statusDropdown.classList.toggle('hidden');
+        });
+        
+        // Handle dropdown item clicks
+        statusDropdown.addEventListener('click', (e) => {
+            if (e.target.classList.contains('dropdown-item')) {
+                e.stopPropagation();
+                
+                // Update active state
+                statusDropdown.querySelectorAll('.dropdown-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                e.target.classList.add('active');
+                
+                // Update button text
+                const statusText = document.getElementById('status-filter-text');
+                if (statusText) {
+                    statusText.textContent = e.target.textContent;
+                }
+                
+                // Update filter and reload
+                statusFilter = e.target.dataset.status;
+                // Update the hidden status filter element if it exists
+                const statusFilterElement = document.getElementById('status-filter');
+                if (statusFilterElement) {
+                    statusFilterElement.value = statusFilter;
+                }
+                loadDashboard();
+                
+                // Hide dropdown
+                statusDropdown.classList.add('hidden');
+            }
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+            statusDropdown.classList.add('hidden');
         });
     }
     
-    // Filter toggle button
-    if (filterToggleBtn) {
-        filterToggleBtn.addEventListener('click', () => {
-            advancedFiltersVisible = !advancedFiltersVisible;
-            advancedFiltersPanel.classList.toggle('hidden', !advancedFiltersVisible);
-            filterToggleBtn.classList.toggle('active', advancedFiltersVisible);
-        });
-    }
-    
-    // Apply filters button
-    if (applyFiltersBtn) {
-        applyFiltersBtn.addEventListener('click', () => {
-            loadDashboard();
-        });
-    }
-    
-    if (clientFilterEl) {
-        clientFilterEl.addEventListener('change', (e) => {
-            clientFilter = e.target.value;
-            loadDashboard();
-        });
-    }
-    
-    if (matterFilterEl) {
-        matterFilterEl.addEventListener('change', (e) => {
-            matterFilter = e.target.value;
-            loadDashboard();
-        });
-    }
-    
-    if (hoursFilterEl) {
-        hoursFilterEl.addEventListener('change', (e) => {
-            hoursFilter = e.target.value;
-            loadDashboard();
-        });
-    }
-    
-    if (taskFilterEl) {
-        taskFilterEl.addEventListener('input', debounce((e) => {
-            taskFilter = e.target.value;
-            loadDashboard();
-        }, 300));
-    }
-    
-    if (clearFiltersBtn) {
-        clearFiltersBtn.addEventListener('click', () => clearAllFilters());
-    }
-    
-    
-    // View mode toggles
-    document.querySelectorAll('.view-toggle-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const mode = e.currentTarget.dataset.viewMode;
-            setViewMode(mode);
-        });
-    });
-    
-    // AI Assistant controls
-    const addButton = document.getElementById('add-time-entry');
-    
+    // Add Entry button
     if (addButton) {
         addButton.addEventListener('click', () => {
             if (window.aiAssistant) {
@@ -163,6 +146,84 @@ function setupEventListeners() {
                 // Fallback to old modal if AI assistant isn't loaded
                 openModal();
             }
+        });
+    }
+    
+    
+    
+    // Bulk actions
+    const bulkDuplicateBtn = document.getElementById('bulk-duplicate');
+    const bulkDeleteBtn = document.getElementById('bulk-delete');
+    const bulkCancelBtn = document.getElementById('bulk-cancel');
+    
+    if (bulkDuplicateBtn) {
+        bulkDuplicateBtn.addEventListener('click', bulkDuplicateEntries);
+    }
+    
+    if (bulkDeleteBtn) {
+        bulkDeleteBtn.addEventListener('click', bulkDeleteEntries);
+    }
+    
+    if (bulkCancelBtn) {
+        bulkCancelBtn.addEventListener('click', cancelBulkSelection);
+    }
+    
+    // Advanced filters panel controls
+    const statusFilter = document.getElementById('status-filter');
+    const clientFilterEl = document.getElementById('client-filter');
+    const matterFilterEl = document.getElementById('matter-filter');
+    const hoursFilterEl = document.getElementById('hours-filter');
+    const taskFilterEl = document.getElementById('task-filter');
+    const clearAllFiltersBtn = document.getElementById('clear-all-filters');
+    const applyFiltersBtn = document.getElementById('apply-filters');
+    
+    if (statusFilter) {
+        statusFilter.addEventListener('change', () => {
+            loadDashboard();
+            updateActiveFiltersCount();
+        });
+    }
+    
+    if (clientFilterEl) {
+        clientFilterEl.addEventListener('change', (e) => {
+            clientFilter = e.target.value;
+            loadDashboard();
+            updateActiveFiltersCount();
+        });
+    }
+    
+    if (matterFilterEl) {
+        matterFilterEl.addEventListener('change', (e) => {
+            matterFilter = e.target.value;
+            loadDashboard();
+            updateActiveFiltersCount();
+        });
+    }
+    
+    if (hoursFilterEl) {
+        hoursFilterEl.addEventListener('change', (e) => {
+            hoursFilter = e.target.value;
+            loadDashboard();
+            updateActiveFiltersCount();
+        });
+    }
+    
+    if (taskFilterEl) {
+        taskFilterEl.addEventListener('input', debounce((e) => {
+            taskFilter = e.target.value;
+            loadDashboard();
+            updateActiveFiltersCount();
+        }, 300));
+    }
+    
+    if (clearAllFiltersBtn) {
+        clearAllFiltersBtn.addEventListener('click', () => clearAllFilters());
+    }
+    
+    if (applyFiltersBtn) {
+        applyFiltersBtn.addEventListener('click', () => {
+            loadDashboard();
+            updateActiveFiltersCount();
         });
     }
     
@@ -184,7 +245,7 @@ function setupEventListeners() {
         nextMonth.addEventListener('click', () => navigateCalendar(1));
     }
     
-    // Keep old modal functionality for fallback
+    // Modal functionality for fallback
     const modal = document.getElementById('add-modal');
     const closeButton = document.getElementById('close-modal');
     const cancelButton = document.getElementById('cancel-modal');
@@ -202,7 +263,6 @@ function setupEventListeners() {
         saveButton.addEventListener('click', () => saveEntries());
     }
     
-    // Modal backdrop click
     modal?.addEventListener('click', (e) => {
         if (e.target === modal) {
             closeModal();
@@ -232,12 +292,23 @@ function setupEventListeners() {
         addPresetBtn.addEventListener('click', addNewPreset);
     }
     
-    // Edit modal backdrop click
     editModal?.addEventListener('click', (e) => {
         if (e.target === editModal) {
             closeEditModal();
         }
     });
+    
+    // Bulk assignment event listeners
+    const bulkApplyClientBtn = document.getElementById('bulk-apply-client');
+    const bulkApplyMatterBtn = document.getElementById('bulk-apply-matter');
+    
+    if (bulkApplyClientBtn) {
+        bulkApplyClientBtn.addEventListener('click', bulkAssignClient);
+    }
+    
+    if (bulkApplyMatterBtn) {
+        bulkApplyMatterBtn.addEventListener('click', bulkAssignMatter);
+    }
 }
 
 // View switching
@@ -268,14 +339,56 @@ function switchView(view) {
     }
 }
 
-// View mode management
+// View mode management - Streamlined
+function toggleViewMode() {
+    // Toggle between expanded and condensed
+    viewMode = viewMode === 'expanded' ? 'condensed' : 'expanded';
+    
+    // Update the view toggle button icons
+    const listIcon = document.getElementById('list-view-icon');
+    const cardIcon = document.getElementById('card-view-icon');
+    const viewToggleBtn = document.getElementById('view-toggle');
+    
+    if (listIcon && cardIcon) {
+        if (viewMode === 'condensed') {
+            // Show card icon when in condensed/list mode (button shows what we'll switch TO)
+            listIcon.style.display = 'none';
+            cardIcon.style.display = 'block';
+        } else {
+            // Show list icon when in expanded/card mode (button shows what we'll switch TO)
+            listIcon.style.display = 'block';
+            cardIcon.style.display = 'none';
+        }
+    }
+    
+    // Update tooltip
+    if (viewToggleBtn) {
+        viewToggleBtn.title = viewMode === 'condensed' ? 'Switch to card view' : 'Switch to list view';
+    }
+    
+    // Update container classes
+    const container = document.getElementById('entries-list');
+    if (container) {
+        if (viewMode === 'condensed') {
+            container.className = 'entries-condensed';
+        } else {
+            container.className = 'entries-container';
+        }
+    }
+    
+    // Show/hide bulk assignment controls based on view mode
+    if (viewMode === 'expanded') {
+        showBulkAssignmentControls();
+    } else {
+        hideBulkAssignmentControls();
+    }
+    
+    loadDashboard();
+}
+
+// Legacy function for compatibility
 function setViewMode(mode) {
     viewMode = mode;
-    
-    // Update toggle buttons
-    document.querySelectorAll('.view-toggle-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.viewMode === mode);
-    });
     
     // Update container classes
     const container = document.getElementById('entries-list');
@@ -290,28 +403,94 @@ function setViewMode(mode) {
     loadDashboard();
 }
 
-// New date filtering logic
-function updateDateFiltering() {
-    const startDate = document.getElementById('date-range-start')?.value;
-    const endDate = document.getElementById('date-range-end')?.value;
+// Date picker functionality
+function toggleDatePicker() {
+    datePickerVisible = !datePickerVisible;
+    const popover = document.getElementById('date-picker-popover');
+    const btn = document.getElementById('date-picker-btn');
     
-    if (startDate || endDate) {
-        // If manual dates are set, use them regardless of quick filter
-        customDateRange = {
-            start: startDate || null,
-            end: endDate || null
-        };
-        // Clear quick filter active state when manual dates are used
-        if (startDate || endDate) {
-            document.querySelectorAll('.time-filter-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector('.time-filter-btn[data-period="all"]')?.classList.add('active');
-            quickTimeFilter = 'all';
-        }
+    if (popover) {
+        popover.classList.toggle('hidden', !datePickerVisible);
+    }
+    if (btn) {
+        btn.classList.toggle('active', datePickerVisible);
+    }
+}
+
+function updateDateDisplay() {
+    const display = document.getElementById('date-display');
+    if (!display) return;
+    
+    if (customDateRange && (customDateRange.start || customDateRange.end)) {
+        const start = customDateRange.start || 'Start';
+        const end = customDateRange.end || 'End';
+        display.textContent = `${start} to ${end}`;
     } else {
-        customDateRange = null;
+        const displayText = {
+            'all': 'All Time',
+            'today': 'Today',
+            'week': 'This Week',
+            'month': 'This Month'
+        };
+        display.textContent = displayText[quickTimeFilter] || 'All Time';
+    }
+}
+
+function updateCustomDateRange() {
+    const startInput = document.getElementById('custom-start');
+    const endInput = document.getElementById('custom-end');
+    
+    if (startInput?.value || endInput?.value) {
+        customDateRange = {
+            start: startInput?.value || null,
+            end: endInput?.value || null
+        };
+        
+        // Clear quick filter selection when using custom dates
+        quickTimeFilter = 'all';
+        document.querySelectorAll('.quick-date-btn').forEach(b => b.classList.remove('active'));
+        
+        updateDateDisplay();
+        loadDashboard();
+    }
+}
+
+function toggleAdvancedFilters() {
+    advancedFiltersVisible = !advancedFiltersVisible;
+    const panel = document.getElementById('advanced-filters');
+    const btn = document.getElementById('more-filters-btn');
+    const btnMobile = document.getElementById('more-filters-btn-mobile');
+    
+    if (panel) {
+        panel.classList.toggle('hidden', !advancedFiltersVisible);
     }
     
-    updateDateRangeDisplay();
+    updateActiveFiltersCount();
+}
+
+function updateActiveFiltersCount() {
+    let activeCount = 0;
+    
+    // Count active filters
+    const searchInput = document.getElementById('search');
+    const statusFilterEl = document.getElementById('status-filter');
+    
+    if (searchInput && searchInput.value.trim()) activeCount++;
+    if (statusFilter || (statusFilterEl && statusFilterEl.value)) activeCount++;
+    if (clientFilter) activeCount++;
+    if (matterFilter) activeCount++;
+    if (hoursFilter) activeCount++;
+    if (taskFilter) activeCount++;
+    
+    const countElement = document.getElementById('active-filters-count');
+    if (countElement) {
+        if (activeCount > 0) {
+            countElement.textContent = activeCount;
+            countElement.classList.remove('hidden');
+        } else {
+            countElement.classList.add('hidden');
+        }
+    }
 }
 
 function getQuickTimeRange(period) {
@@ -319,19 +498,19 @@ function getQuickTimeRange(period) {
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     
     switch (period) {
-        case 'daily':
+        case 'today':
             return {
                 start: today,
                 end: new Date(today.getTime() + 24 * 60 * 60 * 1000)
             };
-        case 'weekly':
+        case 'week':
             const weekStart = new Date(today);
             weekStart.setDate(today.getDate() - today.getDay());
             return {
                 start: weekStart,
                 end: new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000)
             };
-        case 'monthly':
+        case 'month':
             return {
                 start: new Date(now.getFullYear(), now.getMonth(), 1),
                 end: new Date(now.getFullYear(), now.getMonth() + 1, 0)
@@ -345,29 +524,54 @@ function getQuickTimeRange(period) {
 // Clear all filters
 function clearAllFilters() {
     // Reset filter variables
+    statusFilter = '';
     clientFilter = '';
     matterFilter = '';
     hoursFilter = '';
     taskFilter = '';
-    customDateRange = null;
     quickTimeFilter = 'all';
     
     // Reset UI elements
-    document.getElementById('search').value = '';
-    document.getElementById('client-filter').value = '';
-    document.getElementById('matter-filter').value = '';
-    document.getElementById('hours-filter').value = '';
-    document.getElementById('status-filter').value = '';
-    document.getElementById('task-filter').value = '';
-    document.getElementById('date-range-start').value = '';
-    document.getElementById('date-range-end').value = '';
+    const searchInput = document.getElementById('search');
+    const statusFilterEl = document.getElementById('status-filter');
+    const clientFilterEl = document.getElementById('client-filter');
+    const matterFilterEl = document.getElementById('matter-filter');
+    const hoursFilterEl = document.getElementById('hours-filter');
+    const taskFilterEl = document.getElementById('task-filter');
     
-    // Reset quick time filter buttons
-    document.querySelectorAll('.time-filter-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelector('.time-filter-btn[data-period="all"]')?.classList.add('active');
+    if (searchInput) searchInput.value = '';
+    if (statusFilterEl) statusFilterEl.value = '';
+    if (clientFilterEl) clientFilterEl.value = '';
+    if (matterFilterEl) matterFilterEl.value = '';
+    if (hoursFilterEl) hoursFilterEl.value = '';
+    if (taskFilterEl) taskFilterEl.value = '';
+    
+    // Reset dropdown button text
+    const statusText = document.getElementById('status-filter-text');
+    if (statusText) statusText.textContent = 'All';
+    
+    // Reset dropdown active state
+    const statusDropdown = document.getElementById('status-dropdown');
+    if (statusDropdown) {
+        statusDropdown.querySelectorAll('.dropdown-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        const allStatusItem = statusDropdown.querySelector('[data-status=""]');
+        if (allStatusItem) allStatusItem.classList.add('active');
+    }
+    
+    // Reset time filter buttons (only in condensed view)
+    if (viewMode === 'condensed') {
+        document.querySelectorAll('.time-filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.filter === 'all') {
+                btn.classList.add('active');
+            }
+        });
+    }
     
     // Update display and reload
-    updateDateRangeDisplay();
+    updateActiveFiltersCount();
     loadDashboard();
 }
 
@@ -437,43 +641,15 @@ function updateDateRangeDisplay() {
 }
 
 
-// Dashboard functionality
+// Dashboard functionality - Streamlined
 async function loadDashboard() {
     try {
+        // Get search and status from streamlined inputs
         const search = document.getElementById('search')?.value || '';
-        const status = document.getElementById('status-filter')?.value || '';
+        const status = statusFilter || document.getElementById('status-filter')?.value || '';
         
         // Get entries from IndexedDB
         let entries = await dbOperations.getEntries({ search, status });
-        
-        // Apply date filter - use quick time filter or custom range
-        let dateRange = null;
-        if (customDateRange && (customDateRange.start || customDateRange.end)) {
-            // Use custom date range
-            dateRange = {
-                start: customDateRange.start ? new Date(customDateRange.start) : null,
-                end: customDateRange.end ? new Date(customDateRange.end + 'T23:59:59.999Z') : null
-            };
-        } else if (quickTimeFilter !== 'all') {
-            // Use quick time filter
-            dateRange = getQuickTimeRange(quickTimeFilter);
-        }
-        
-        if (dateRange) {
-            entries = entries.filter(entry => {
-                const entryDate = new Date(entry.created_at);
-                let withinRange = true;
-                
-                if (dateRange.start && entryDate < dateRange.start) {
-                    withinRange = false;
-                }
-                if (dateRange.end && entryDate >= dateRange.end) {
-                    withinRange = false;
-                }
-                
-                return withinRange;
-            });
-        }
         
         // Apply client filter
         if (clientFilter) {
@@ -515,6 +691,42 @@ async function loadDashboard() {
                     n.task_code && n.task_code.toLowerCase().includes(taskLower)
                 )
             );
+        }
+        
+        // Apply quick time filter
+        if (quickTimeFilter && quickTimeFilter !== 'all') {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            let filterDate;
+            switch (quickTimeFilter) {
+                case 'today':
+                    filterDate = today;
+                    entries = entries.filter(entry => {
+                        const entryDate = new Date(entry.created_at);
+                        const entryday = new Date(entryDate.getFullYear(), entryDate.getMonth(), entryDate.getDate());
+                        return entryday.getTime() === filterDate.getTime();
+                    });
+                    break;
+                case 'week':
+                    const weekStart = new Date(today);
+                    weekStart.setDate(today.getDate() - today.getDay());
+                    const weekEnd = new Date(weekStart);
+                    weekEnd.setDate(weekStart.getDate() + 6);
+                    entries = entries.filter(entry => {
+                        const entryDate = new Date(entry.created_at);
+                        return entryDate >= weekStart && entryDate <= weekEnd;
+                    });
+                    break;
+                case 'month':
+                    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+                    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                    entries = entries.filter(entry => {
+                        const entryDate = new Date(entry.created_at);
+                        return entryDate >= monthStart && entryDate <= monthEnd;
+                    });
+                    break;
+            }
         }
         
         currentEntries = entries;
@@ -635,30 +847,54 @@ function createEntryCard(entry) {
     card.className = 'entry-card';
     card.dataset.entryId = entry.id;
     
+    // Add bulk selection checkbox
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.className = 'bulk-checkbox';
+    checkbox.dataset.entryId = entry.id;
+    checkbox.addEventListener('change', updateBulkSelection);
+    card.appendChild(checkbox);
+    
     const totalHours = entry.total_hours || 0;
     const date = new Date(entry.created_at);
     const dateStr = date.toLocaleDateString();
     const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     
-    const narrativesHtml = (entry.narratives || []).map(n => `
-        <div class="narrative-item">
+    const narrativesHtml = (entry.narratives || []).map((n, index) => `
+        <div class="narrative-item" data-narrative-index="${index}">
             <div class="narrative-header">
-                <span>${n.hours} hours</span>
+                <span class="editable-field editable-hours" data-field="hours" data-entry-id="${entry.id}" data-narrative-index="${index}">
+                    ${n.hours} hours
+                    <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+                    </svg>
+                </span>
             </div>
-            <div class="narrative-text">${n.text}</div>
+            <div class="narrative-text editable-field editable-narrative" data-field="text" data-entry-id="${entry.id}" data-narrative-index="${index}">
+                ${n.text}
+                <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+                </svg>
+            </div>
             <div class="narrative-meta">
-                <div class="narrative-client">
+                <div class="narrative-client editable-field editable-client" data-field="client_code" data-entry-id="${entry.id}" data-narrative-index="${index}">
                     <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
                         <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/>
                     </svg>
                     ${n.client_code || entry.client_code || 'No Client'}
+                    <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+                    </svg>
                 </div>
                 ${n.matter_number || entry.matter_number ? `
-                    <div class="narrative-matter">
+                    <div class="narrative-matter editable-field editable-matter" data-field="matter_number" data-entry-id="${entry.id}" data-narrative-index="${index}">
                         <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
                             <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
                         </svg>
                         ${n.matter_number || entry.matter_number}
+                        <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+                        </svg>
                     </div>
                 ` : ''}
             </div>
@@ -700,13 +936,14 @@ function createEntryCard(entry) {
                     </span>
                     <span class="entry-description">${truncatedText}</span>
                 </div>
-                <span class="entry-status status-${entry.status || 'draft'}">${entry.status || 'draft'}</span>
+                ${createStatusDropdown(entry.id, entry.status || 'draft')}
             </div>
             <div class="narrative-item expanded-content hidden">
                 ${narrativesHtml}
             </div>
             <div class="entry-actions">
                 <button class="edit-btn" onclick="openEditModal(${entry.id})">Edit</button>
+                <button class="duplicate-btn" onclick="duplicateEntry(${entry.id})">Duplicate</button>
                 <button class="delete-btn" onclick="deleteEntry(${entry.id})">Delete</button>
             </div>
         `;
@@ -719,7 +956,12 @@ function createEntryCard(entry) {
                         <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                             <path d="M19,3H18V1H16V3H8V1H6V3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,19H5V8H19V19M5,6V5H19V6H5Z"/>
                         </svg>
-                        ${dateStr} ${timeStr}
+                        <span class="editable-field editable-date" data-field="created_at" data-entry-id="${entry.id}">
+                            ${dateStr} ${timeStr}
+                            <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+                            </svg>
+                        </span>
                     </span>
                     <span class="entry-meta-item">
                         <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
@@ -731,35 +973,362 @@ function createEntryCard(entry) {
                         <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                             <path d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"/>
                         </svg>
-                        ${totalHours} hours
+                        <span class="editable-field editable-total-hours" data-field="total_hours" data-entry-id="${entry.id}">
+                            ${totalHours} hours
+                            <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+                            </svg>
+                        </span>
                     </span>
                 </div>
-                <span class="entry-status status-${entry.status || 'draft'}">${entry.status || 'draft'}</span>
+                ${createStatusDropdown(entry.id, entry.status || 'draft')}
             </div>
             ${narrativesHtml}
             <div class="entry-actions">
                 <button class="edit-btn" onclick="openEditModal(${entry.id})">Edit</button>
+                <button class="duplicate-btn" onclick="duplicateEntry(${entry.id})">Duplicate</button>
                 <button class="delete-btn" onclick="deleteEntry(${entry.id})">Delete</button>
             </div>
         `;
     }
     
+    // Add inline editing event listeners
+    setupInlineEditing(card);
+    
     return card;
+}
+
+// Inline editing functionality
+function setupInlineEditing(card) {
+    const editableFields = card.querySelectorAll('.editable-field');
+    
+    editableFields.forEach(field => {
+        field.addEventListener('click', (e) => {
+            e.stopPropagation();
+            startInlineEdit(field);
+        });
+    });
+}
+
+async function startInlineEdit(field) {
+    if (field.classList.contains('editing')) return;
+    
+    const entryId = field.dataset.entryId;
+    const fieldType = field.dataset.field;
+    const narrativeIndex = field.dataset.narrativeIndex;
+    
+    // Get current value
+    let currentValue = '';
+    if (fieldType === 'hours') {
+        currentValue = field.textContent.replace(' hours', '').trim();
+    } else if (fieldType === 'total_hours') {
+        currentValue = field.textContent.replace(' hours', '').trim();
+    } else if (fieldType === 'text') {
+        currentValue = field.textContent.trim();
+    } else if (fieldType === 'created_at') {
+        // For date, we need to get the ISO string from the entry data
+        try {
+            const entry = await dbOperations.getEntry(parseInt(entryId));
+            if (entry && entry.created_at) {
+                const date = new Date(entry.created_at);
+                // Convert to datetime-local format (YYYY-MM-DDTHH:mm)
+                currentValue = date.toISOString().slice(0, 16);
+            }
+        } catch (error) {
+            console.error('Failed to get entry data for date editing:', error);
+            return;
+        }
+    } else if (fieldType === 'client_code') {
+        // Extract text content excluding the SVG
+        const textNode = Array.from(field.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
+        currentValue = textNode ? textNode.textContent.trim() : field.textContent.trim();
+    } else if (fieldType === 'matter_number') {
+        // Extract text content excluding the SVG
+        const textNode = Array.from(field.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
+        currentValue = textNode ? textNode.textContent.trim() : field.textContent.trim();
+    }
+    
+    // Mark as editing
+    field.classList.add('editing');
+    
+    // Create input element
+    let inputElement;
+    if (fieldType === 'text') {
+        inputElement = document.createElement('textarea');
+        inputElement.className = 'inline-textarea';
+        inputElement.value = currentValue;
+    } else {
+        inputElement = document.createElement('input');
+        inputElement.className = 'inline-input';
+        
+        if (fieldType === 'hours' || fieldType === 'total_hours') {
+            inputElement.type = 'number';
+            inputElement.step = '0.1';
+            inputElement.min = '0';
+        } else if (fieldType === 'created_at') {
+            inputElement.type = 'datetime-local';
+        } else {
+            inputElement.type = 'text';
+        }
+        
+        inputElement.value = currentValue;
+    }
+    
+    // Create action buttons
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'inline-actions';
+    
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'inline-save-btn';
+    saveBtn.textContent = 'Save';
+    saveBtn.onclick = (e) => {
+        e.stopPropagation();
+        saveInlineEdit(field, inputElement, entryId, fieldType, narrativeIndex);
+    };
+    
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'inline-cancel-btn';
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.onclick = (e) => {
+        e.stopPropagation();
+        cancelInlineEdit(field);
+    };
+    
+    actionsDiv.appendChild(saveBtn);
+    actionsDiv.appendChild(cancelBtn);
+    
+    // Replace content
+    field.innerHTML = '';
+    field.appendChild(inputElement);
+    field.appendChild(actionsDiv);
+    
+    // Focus input
+    inputElement.focus();
+    if (inputElement.select) inputElement.select();
+    
+    // Handle escape key
+    inputElement.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            e.stopPropagation();
+            cancelInlineEdit(field);
+        } else if (e.key === 'Enter' && !e.shiftKey && inputElement.type !== 'textarea') {
+            e.preventDefault();
+            e.stopPropagation();
+            saveInlineEdit(field, inputElement, entryId, fieldType, narrativeIndex);
+        }
+    });
+}
+
+async function saveInlineEdit(field, inputElement, entryId, fieldType, narrativeIndex) {
+    const newValue = inputElement.value.trim();
+    
+    try {
+        // Get current entry data
+        const entry = await dbOperations.getEntry(parseInt(entryId));
+        if (!entry) {
+            throw new Error('Entry not found');
+        }
+        
+        // Check if the value actually changed
+        let currentValue = '';
+        if (fieldType === 'total_hours') {
+            currentValue = entry.total_hours?.toString() || '0';
+        } else if (fieldType === 'created_at') {
+            const date = new Date(entry.created_at);
+            currentValue = date.toISOString().slice(0, 16);
+        } else if (narrativeIndex !== undefined && entry.narratives && entry.narratives[narrativeIndex]) {
+            const narrative = entry.narratives[narrativeIndex];
+            if (fieldType === 'hours') {
+                currentValue = narrative.hours?.toString() || '0';
+            } else if (fieldType === 'text') {
+                currentValue = narrative.text || '';
+            } else if (fieldType === 'client_code') {
+                currentValue = narrative.client_code || entry.client_code || '';
+            } else if (fieldType === 'matter_number') {
+                currentValue = narrative.matter_number || entry.matter_number || '';
+            }
+        }
+        
+        // If no change, just cancel editing without showing error
+        if (newValue === currentValue) {
+            updateFieldDisplay(field, fieldType, newValue);
+            field.classList.remove('editing');
+            return;
+        }
+        
+        // Prepare updates object
+        let updates = {};
+        
+        if (fieldType === 'total_hours') {
+            updates.total_hours = parseFloat(newValue) || 0;
+        } else if (fieldType === 'created_at') {
+            updates.created_at = new Date(newValue).toISOString();
+        } else if (narrativeIndex !== undefined) {
+            // For narrative fields, we need to update the entire narratives array
+            if (!entry.narratives) entry.narratives = [];
+            if (!entry.narratives[narrativeIndex]) entry.narratives[narrativeIndex] = {};
+            
+            if (fieldType === 'hours') {
+                entry.narratives[narrativeIndex].hours = parseFloat(newValue) || 0;
+            } else if (fieldType === 'text') {
+                entry.narratives[narrativeIndex].text = newValue;
+            } else if (fieldType === 'client_code') {
+                entry.narratives[narrativeIndex].client_code = newValue;
+            } else if (fieldType === 'matter_number') {
+                entry.narratives[narrativeIndex].matter_number = newValue;
+            }
+            
+            updates.narratives = entry.narratives;
+        }
+        
+        // Save to database
+        await dbOperations.updateEntry(parseInt(entryId), updates);
+        
+        // Update display
+        updateFieldDisplay(field, fieldType, newValue);
+        
+        // Remove editing state
+        field.classList.remove('editing');
+        
+        // Sync with server
+        try {
+            if (window.syncManager && typeof syncManager.syncWithServer === 'function') {
+                syncManager.syncWithServer();
+            }
+        } catch (syncError) {
+            console.warn('Sync failed, but changes were saved locally:', syncError);
+        }
+        
+    } catch (error) {
+        console.error('Failed to save inline edit:', error);
+        cancelInlineEdit(field);
+        // Show specific error message
+        if (error.message === 'Entry not found') {
+            alert('Entry not found. The entry may have been deleted. Please refresh the page.');
+        } else {
+            alert(`Failed to save changes: ${error.message}. Please try again.`);
+        }
+    }
+}
+
+function cancelInlineEdit(field) {
+    field.classList.remove('editing');
+    // Trigger a reload of the dashboard to restore original content
+    loadDashboard();
+}
+
+function updateFieldDisplay(field, fieldType, newValue) {
+    // Restore the original structure with the new value
+    if (fieldType === 'created_at') {
+        // Format the date for display
+        const date = new Date(newValue);
+        const dateStr = date.toLocaleDateString();
+        const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        field.innerHTML = `
+            ${dateStr} ${timeStr}
+            <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+            </svg>
+        `;
+    } else if (fieldType === 'hours') {
+        field.innerHTML = `
+            ${newValue} hours
+            <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+            </svg>
+        `;
+    } else if (fieldType === 'total_hours') {
+        field.innerHTML = `
+            ${newValue} hours
+            <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+            </svg>
+        `;
+    } else if (fieldType === 'text') {
+        field.innerHTML = `
+            ${newValue}
+            <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+            </svg>
+        `;
+    } else if (fieldType === 'client_code') {
+        field.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
+                <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/>
+            </svg>
+            ${newValue}
+            <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+            </svg>
+        `;
+    } else if (fieldType === 'matter_number') {
+        field.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
+                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+            </svg>
+            ${newValue}
+            <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+            </svg>
+        `;
+    }
+    
+    // Re-setup inline editing for this field
+    setupInlineEditingForField(field);
+}
+
+function setupInlineEditingForField(field) {
+    field.addEventListener('click', (e) => {
+        e.stopPropagation();
+        startInlineEdit(field);
+    });
 }
 
 // Condensed table view rendering
 function renderCondensedView(entries, container) {
+    // Add time filter bar above table
+    const timeFilterBar = document.createElement('div');
+    timeFilterBar.className = 'time-filter-bar';
+    timeFilterBar.innerHTML = `
+        <div class="time-filter-container">
+            <span class="time-filter-label">Time Period:</span>
+            <div class="time-filter-buttons">
+                <button class="time-filter-btn" data-filter="today">Today</button>
+                <button class="time-filter-btn" data-filter="week">This Week</button>
+                <button class="time-filter-btn" data-filter="month">This Month</button>
+                <button class="time-filter-btn active" data-filter="all">All</button>
+            </div>
+        </div>
+    `;
+    
+    // Add time filter event listeners
+    timeFilterBar.querySelectorAll('.time-filter-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            // Remove active class from all buttons
+            timeFilterBar.querySelectorAll('.time-filter-btn').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            
+            // Update filter and reload
+            quickTimeFilter = e.target.dataset.filter;
+            loadDashboard();
+        });
+    });
+    
+    const tableWrapper = document.createElement('div');
+    tableWrapper.className = 'condensed-table-wrapper';
+    
     const table = document.createElement('table');
+    table.className = 'condensed-table';
     table.innerHTML = `
         <thead>
             <tr>
+                <th>Date</th>
                 <th>Client</th>
                 <th>Matter</th>
-                <th>Date</th>
-                <th>Duration</th>
+                <th>Time</th>
                 <th>Description</th>
+                <th class="actions-column">Actions</th>
                 <th>Status</th>
-                <th></th>
             </tr>
         </thead>
         <tbody></tbody>
@@ -767,21 +1336,64 @@ function renderCondensedView(entries, container) {
     
     const tbody = table.querySelector('tbody');
     
+    // Create flat list of all narratives with their entries
+    const flatRows = [];
     entries.forEach(entry => {
-        // Create rows for each narrative within the entry
         if (entry.narratives && entry.narratives.length > 0) {
-            entry.narratives.forEach(narrative => {
-                const row = createCondensedRow(entry, narrative);
-                tbody.appendChild(row);
+            entry.narratives.forEach((narrative, index) => {
+                flatRows.push({
+                    entry: entry,
+                    narrative: narrative,
+                    narrativeIndex: index
+                });
             });
         } else {
             // Fallback for entries without narratives
-            const row = createCondensedRow(entry, null);
-            tbody.appendChild(row);
+            flatRows.push({
+                entry: entry,
+                narrative: null,
+                narrativeIndex: null
+            });
         }
     });
     
-    container.appendChild(table);
+    // Sort by date (newest first)
+    flatRows.sort((a, b) => new Date(b.entry.created_at) - new Date(a.entry.created_at));
+    
+    // Group by day for separators
+    let lastDate = null;
+    const today = new Date();
+    const todayStr = today.toLocaleDateString('en-US', { 
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    
+    flatRows.forEach(row => {
+        const entryDate = new Date(row.entry.created_at);
+        const dateStr = entryDate.toLocaleDateString('en-US', { 
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        
+        // Add day separator if date changed and it's not today
+        if (lastDate !== dateStr && dateStr !== todayStr) {
+            const separator = createDaySeparator(dateStr);
+            tbody.appendChild(separator);
+            lastDate = dateStr;
+        }
+        
+        // Create and add the row
+        const tableRow = createCondensedRow(row.entry, row.narrative, row.narrativeIndex);
+        tbody.appendChild(tableRow);
+    });
+    
+    container.appendChild(timeFilterBar);
+    tableWrapper.appendChild(table);
+    container.appendChild(tableWrapper);
 }
 
 // Legacy table view rendering
@@ -811,9 +1423,14 @@ function renderTableView(entries, container) {
     container.appendChild(table);
 }
 
-// Create condensed table row for each narrative
-function createCondensedRow(entry, narrative) {
+// Create a single row for condensed view
+function createCondensedRow(entry, narrative, narrativeIndex) {
     const row = document.createElement('tr');
+    row.className = 'condensed-row';
+    row.dataset.entryId = entry.id;
+    if (narrativeIndex !== null) {
+        row.dataset.narrativeIndex = narrativeIndex;
+    }
     
     const date = new Date(entry.created_at);
     const dateStr = date.toLocaleDateString('en-US', { 
@@ -821,31 +1438,106 @@ function createCondensedRow(entry, narrative) {
         day: '2-digit', 
         year: '2-digit' 
     });
+    const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     
     // Use narrative data if available, otherwise entry data
-    const clientCode = (narrative?.client_code || entry.client_code || 'No Client');
-    const matterNumber = (narrative?.matter_number || entry.matter_number || '-');
-    const hours = narrative ? narrative.hours : entry.total_hours || 0;
+    const clientCode = narrative?.client_code || entry.client_code || 'No Client';
+    const matterNumber = narrative?.matter_number || entry.matter_number || '';
+    const hours = narrative ? narrative.hours : (entry.total_hours || 0);
     const description = narrative ? narrative.text : (entry.original_text || 'No description');
     const status = entry.status || 'draft';
     
+    // Truncate description for display
+    const maxDescLength = 150;
+    const displayDesc = description.length > maxDescLength ? 
+        description.substring(0, maxDescLength) + '...' : description;
+    
     row.innerHTML = `
-        <td class="condensed-client">${clientCode}</td>
-        <td class="condensed-matter">${matterNumber}</td>
-        <td class="condensed-date">${dateStr}</td>
-        <td class="condensed-duration">${hours}h</td>
-        <td class="condensed-description" title="${description}">${description}</td>
-        <td class="condensed-status">
-            <span class="entry-status status-${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>
+        <td class="condensed-date">
+            <div class="date-time">
+                <div>${dateStr}</div>
+                <div class="time-subtext">${timeStr}</div>
+            </div>
+        </td>
+        <td class="condensed-client">
+            <span class="editable-field client-field" 
+                  data-field="client_code" 
+                  data-entry-id="${entry.id}"
+                  ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}>
+                ${clientCode}
+            </span>
+        </td>
+        <td class="condensed-matter">
+            <span class="editable-field matter-field" 
+                  data-field="matter_number" 
+                  data-entry-id="${entry.id}"
+                  ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}>
+                ${matterNumber || '-'}
+            </span>
+        </td>
+        <td class="condensed-time">
+            <span class="editable-field hours-field" 
+                  data-field="${narrative ? 'hours' : 'total_hours'}" 
+                  data-entry-id="${entry.id}"
+                  ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}>
+                ${hours}h
+            </span>
+        </td>
+        <td class="condensed-description">
+            <div class="description-content ${description.length > maxDescLength ? 'has-more' : ''}">
+                <span class="editable-field description-text" 
+                      data-field="text" 
+                      data-entry-id="${entry.id}"
+                      ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}
+                      title="${description}">
+                    ${displayDesc}
+                </span>
+                ${description.length > maxDescLength ? `
+                    <button class="show-more-btn" onclick="toggleDescription(this)">more</button>
+                ` : ''}
+            </div>
         </td>
         <td class="condensed-actions">
             <div class="table-actions">
-                <button class="table-action-btn edit-btn" onclick="openEditModal(${entry.id})">Edit</button>
-                <button class="table-action-btn delete-btn" onclick="deleteEntry(${entry.id})">Delete</button>
+                <button class="table-action-btn edit-btn" onclick="openEditModal(${entry.id})" title="Edit">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                        <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+                    </svg>
+                </button>
+                <button class="table-action-btn duplicate-btn" onclick="duplicateEntry(${entry.id})" title="Duplicate">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                        <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"/>
+                    </svg>
+                </button>
+                <button class="table-action-btn delete-btn" onclick="deleteEntry(${entry.id})" title="Delete">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                        <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
+                    </svg>
+                </button>
             </div>
+        </td>
+        <td class="condensed-status">
+            ${createStatusDropdown(entry.id, status)}
         </td>
     `;
     
+    // Setup inline editing
+    setupInlineEditing(row);
+    
+    return row;
+}
+
+// Create day separator row
+function createDaySeparator(dateStr) {
+    const row = document.createElement('tr');
+    row.className = 'day-separator';
+    row.innerHTML = `
+        <td colspan="7">
+            <div class="day-separator-content">
+                <span class="day-separator-text">${dateStr}</span>
+            </div>
+        </td>
+    `;
     return row;
 }
 
@@ -1136,6 +1828,134 @@ async function deleteEntry(id) {
     }
 }
 
+async function duplicateEntry(id) {
+    try {
+        const originalEntry = await dbOperations.getEntry(parseInt(id));
+        if (!originalEntry) {
+            throw new Error('Entry not found');
+        }
+        
+        // Create a new entry with the same data but new timestamp
+        const duplicatedEntry = {
+            ...originalEntry,
+            id: undefined, // Let the database generate a new ID
+            created_at: new Date().toISOString(),
+            status: 'draft' // Reset status to draft for duplicated entries
+        };
+        
+        // Remove the id field completely
+        delete duplicatedEntry.id;
+        
+        await dbOperations.saveEntry(duplicatedEntry);
+        loadDashboard();
+        showNotification('Entry duplicated successfully', 'success');
+    } catch (err) {
+        console.error('Error duplicating entry:', err);
+        showNotification('Failed to duplicate entry', 'error');
+    }
+}
+
+// Bulk Selection Functions
+function toggleBulkSelection() {
+    bulkSelectionMode = !bulkSelectionMode;
+    const container = document.getElementById('entries-list');
+    const bulkSelectBtn = document.getElementById('bulk-select-btn');
+    const btnText = bulkSelectBtn.querySelector('.btn-text');
+    
+    if (bulkSelectionMode) {
+        container.classList.add('bulk-selection-mode');
+        btnText.textContent = 'Cancel';
+    } else {
+        container.classList.remove('bulk-selection-mode');
+        btnText.textContent = 'Select';
+        selectedEntries.clear();
+        updateBulkActionsDisplay();
+        
+        // Clear all checkboxes
+        document.querySelectorAll('.bulk-checkbox').forEach(cb => {
+            cb.checked = false;
+        });
+    }
+}
+
+function updateBulkSelection() {
+    const entryId = parseInt(this.dataset.entryId);
+    
+    if (this.checked) {
+        selectedEntries.add(entryId);
+    } else {
+        selectedEntries.delete(entryId);
+    }
+    
+    updateBulkActionsDisplay();
+}
+
+function updateBulkActionsDisplay() {
+    const bulkActions = document.getElementById('bulk-actions');
+    const bulkCount = document.getElementById('bulk-count');
+    
+    if (selectedEntries.size > 0) {
+        bulkActions.classList.add('active');
+        bulkCount.textContent = `${selectedEntries.size} selected`;
+    } else {
+        bulkActions.classList.remove('active');
+    }
+}
+
+function cancelBulkSelection() {
+    toggleBulkSelection();
+}
+
+async function bulkDeleteEntries() {
+    if (selectedEntries.size === 0) return;
+    
+    const count = selectedEntries.size;
+    if (!confirm(`Are you sure you want to delete ${count} entries?`)) return;
+    
+    try {
+        const promises = Array.from(selectedEntries).map(id => dbOperations.deleteEntry(parseInt(id)));
+        await Promise.all(promises);
+        
+        selectedEntries.clear();
+        updateBulkActionsDisplay();
+        loadDashboard();
+        showNotification(`${count} entries deleted successfully`, 'success');
+    } catch (err) {
+        console.error('Error deleting entries:', err);
+        showNotification('Failed to delete some entries', 'error');
+    }
+}
+
+async function bulkDuplicateEntries() {
+    if (selectedEntries.size === 0) return;
+    
+    try {
+        const promises = Array.from(selectedEntries).map(async (id) => {
+            const originalEntry = await dbOperations.getEntry(parseInt(id));
+            if (originalEntry) {
+                const duplicatedEntry = {
+                    ...originalEntry,
+                    created_at: new Date().toISOString(),
+                    status: 'draft'
+                };
+                delete duplicatedEntry.id;
+                return dbOperations.saveEntry(duplicatedEntry);
+            }
+        });
+        
+        await Promise.all(promises);
+        
+        const count = selectedEntries.size;
+        selectedEntries.clear();
+        updateBulkActionsDisplay();
+        loadDashboard();
+        showNotification(`${count} entries duplicated successfully`, 'success');
+    } catch (err) {
+        console.error('Error duplicating entries:', err);
+        showNotification('Failed to duplicate some entries', 'error');
+    }
+}
+
 // Utility functions
 function debounce(func, wait) {
     let timeout;
@@ -1227,17 +2047,6 @@ function closeEditModal() {
 }
 
 function populateEditModal(entry) {
-    // Set status
-    document.getElementById('edit-entry-status').value = entry.status || 'draft';
-    
-    // Set date
-    const date = new Date(entry.created_at);
-    const localDateTime = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
-        .toISOString().slice(0, 16);
-    document.getElementById('edit-entry-date').value = localDateTime;
-    
-    // Load presets
-    loadPresets();
     
     // Populate narratives
     const container = document.getElementById('edit-narratives-container');
@@ -1248,33 +2057,93 @@ function populateEditModal(entry) {
         narrativeItem.className = 'edit-narrative-item';
         narrativeItem.innerHTML = `
             <div class="edit-narrative-header">
-                <span>Activity ${index + 1}</span>
-                <span class="narrative-hours-display">${narrative.hours} hours</span>
+                <span class="activity-title">Activity ${index + 1}</span>
+                <span class="activity-hours">${narrative.hours} hours</span>
             </div>
             <div class="edit-form-grid">
-                <div class="edit-form-group">
+                <div class="edit-form-group compact">
                     <label>Hours</label>
                     <input type="number" step="0.1" min="0" class="narrative-hours-input" value="${narrative.hours}" data-index="${index}">
                 </div>
-                <div class="edit-form-group">
-                    <label>Task Code</label>
-                    <input type="text" class="narrative-task-input" value="${narrative.task_code || ''}" data-index="${index}">
-                </div>
-                <div class="edit-form-group">
+                <div class="edit-form-group compact">
                     <label>Client Code</label>
-                    <input type="text" class="narrative-client-input" value="${narrative.client_code || entry.client_code || ''}" data-index="${index}">
+                    <input type="text" class="narrative-client-input" value="${narrative.client_code || entry.client_code || ''}" data-index="${index}" placeholder="e.g., ABC123">
                 </div>
-                <div class="edit-form-group">
+                <div class="edit-form-group compact">
                     <label>Matter Number</label>
-                    <input type="text" class="narrative-matter-input" value="${narrative.matter_number || entry.matter_number || ''}" data-index="${index}">
+                    <input type="text" class="narrative-matter-input" value="${narrative.matter_number || entry.matter_number || ''}" data-index="${index}" placeholder="e.g., 2024-001">
                 </div>
-                <div class="edit-form-group full-width">
+                <div class="edit-form-group compact">
+                    <label>Status</label>
+                    <select class="narrative-status-input" data-index="${index}">
+                        <option value="draft" ${(narrative.status || entry.status || 'draft') === 'draft' ? 'selected' : ''}>Draft</option>
+                        <option value="ready" ${(narrative.status || entry.status || 'draft') === 'ready' ? 'selected' : ''}>Ready</option>
+                        <option value="billed" ${(narrative.status || entry.status || 'draft') === 'billed' ? 'selected' : ''}>Billed</option>
+                    </select>
+                </div>
+            </div>
+            <div class="edit-form-grid narrative-row">
+                <div class="edit-form-group">
                     <label>Narrative Text</label>
-                    <textarea rows="3" class="narrative-text-input" data-index="${index}">${narrative.text}</textarea>
+                    <textarea rows="2" class="narrative-text-input auto-resize" data-index="${index}" placeholder="Describe the billable activity...">${narrative.text}</textarea>
+                </div>
+                <button type="button" class="details-toggle subtle" data-index="${index}">
+                    ⋯
+                </button>
+            </div>
+            <div class="details-section" data-index="${index}">
+                <div class="edit-form-grid details-grid">
+                    <div class="edit-form-group">
+                        <label>Task Code</label>
+                        <input type="text" class="narrative-task-input" value="${narrative.task_code || ''}" data-index="${index}" placeholder="e.g., RESEARCH">
+                    </div>
                 </div>
             </div>
         `;
         container.appendChild(narrativeItem);
+    });
+    
+    // Add event listeners for details toggles
+    document.querySelectorAll('.details-toggle').forEach(toggle => {
+        toggle.addEventListener('click', function() {
+            const index = this.dataset.index;
+            const detailsSection = document.querySelector(`.details-section[data-index="${index}"]`);
+            const isExpanded = detailsSection.classList.contains('expanded');
+            
+            if (isExpanded) {
+                detailsSection.classList.remove('expanded');
+                this.textContent = 'Details';
+                this.classList.remove('active');
+            } else {
+                detailsSection.classList.add('expanded');
+                this.textContent = 'Hide';
+                this.classList.add('active');
+            }
+        });
+    });
+    
+    // Add auto-resize functionality for textareas
+    document.querySelectorAll('.auto-resize').forEach(textarea => {
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+        
+        // Trigger resize on load
+        textarea.style.height = 'auto';
+        textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+    });
+    
+    // Update hours display when hours input changes
+    document.querySelectorAll('.narrative-hours-input').forEach(input => {
+        input.addEventListener('input', function() {
+            const index = this.dataset.index;
+            const hoursDisplay = document.querySelector(`.edit-narrative-item:nth-child(${parseInt(index) + 1}) .activity-hours`);
+            if (hoursDisplay) {
+                const hours = parseFloat(this.value) || 0;
+                hoursDisplay.textContent = `${hours} hour${hours !== 1 ? 's' : ''}`;
+            }
+        });
     });
 }
 
@@ -1285,8 +2154,6 @@ async function saveEditChanges() {
         // Collect the updated data
         const updatedEntry = {
             ...currentEditingEntry,
-            status: document.getElementById('edit-entry-status').value,
-            created_at: new Date(document.getElementById('edit-entry-date').value).toISOString(),
             narratives: []
         };
         
@@ -1298,13 +2165,25 @@ async function saveEditChanges() {
                 task_code: item.querySelector('.narrative-task-input').value,
                 client_code: item.querySelector('.narrative-client-input').value,
                 matter_number: item.querySelector('.narrative-matter-input').value,
-                text: item.querySelector('.narrative-text-input').value
+                text: item.querySelector('.narrative-text-input').value,
+                status: item.querySelector('.narrative-status-input').value
             };
             updatedEntry.narratives.push(narrative);
         });
         
         // Recalculate total hours
         updatedEntry.total_hours = updatedEntry.narratives.reduce((sum, n) => sum + n.hours, 0);
+        
+        // Determine entry-level status based on individual narrative statuses
+        // Use the least advanced status (draft < ready < billed)
+        const statuses = updatedEntry.narratives.map(n => n.status);
+        if (statuses.includes('draft')) {
+            updatedEntry.status = 'draft';
+        } else if (statuses.includes('ready')) {
+            updatedEntry.status = 'ready';
+        } else {
+            updatedEntry.status = 'billed';
+        }
         
         // Save to database
         await dbOperations.updateEntry(updatedEntry.id, updatedEntry);
@@ -1321,6 +2200,40 @@ async function saveEditChanges() {
     }
 }
 
+// Status change function for card view
+async function changeEntryStatus(entryId, newStatus) {
+    try {
+        const entry = await dbOperations.getEntry(entryId);
+        if (!entry) {
+            showNotification('Entry not found', 'error');
+            return;
+        }
+        
+        // Update entry status
+        entry.status = newStatus;
+        
+        // Update all narratives to match the entry status
+        if (entry.narratives && entry.narratives.length > 0) {
+            entry.narratives.forEach(narrative => {
+                narrative.status = newStatus;
+            });
+        }
+        
+        // Save to database
+        await dbOperations.updateEntry(entryId, entry);
+        
+        // Refresh dashboard to reflect changes
+        loadDashboard();
+        
+        showNotification(`Entry status changed to ${newStatus}`, 'success');
+        
+    } catch (error) {
+        console.error('Error changing entry status:', error);
+        showNotification('Failed to change status', 'error');
+    }
+}
+
+
 // Make functions available globally
 window.editEntry = editEntry;
 window.deleteEntry = deleteEntry;
@@ -1328,3 +2241,284 @@ window.openEditModal = openEditModal;
 window.closeEditModal = closeEditModal;
 window.saveEditChanges = saveEditChanges;
 window.addNewPreset = addNewPreset;
+window.duplicateEntry = duplicateEntry;
+window.toggleDescription = toggleDescription;
+window.changeEntryStatus = changeEntryStatus;
+
+// Bulk assignment functions
+function showBulkAssignmentControls() {
+    const controls = document.getElementById('bulk-assignment-controls');
+    if (controls) {
+        controls.classList.remove('hidden');
+    }
+}
+
+function hideBulkAssignmentControls() {
+    const controls = document.getElementById('bulk-assignment-controls');
+    if (controls) {
+        controls.classList.add('hidden');
+    }
+}
+
+async function bulkAssignClient() {
+    const clientInput = document.getElementById('bulk-client-input');
+    const clientCode = clientInput.value.trim();
+    
+    if (!clientCode) {
+        showNotification('Please enter a client code', 'error');
+        return;
+    }
+    
+    // Show confirmation dialog
+    const confirmed = await showBulkAssignmentDialog('client', clientCode);
+    if (!confirmed) return;
+    
+    try {
+        // Get all visible entries
+        const visibleEntries = getVisibleEntries();
+        
+        if (visibleEntries.length === 0) {
+            showNotification('No entries found to update', 'error');
+            return;
+        }
+        
+        // Update each entry
+        for (const entry of visibleEntries) {
+            entry.client_code = clientCode;
+            
+            // Also update narratives
+            if (entry.narratives && entry.narratives.length > 0) {
+                entry.narratives.forEach(narrative => {
+                    narrative.client_code = clientCode;
+                });
+            }
+            
+            await dbOperations.updateEntry(entry.id, entry);
+        }
+        
+        // Clear input and refresh dashboard
+        clientInput.value = '';
+        loadDashboard();
+        
+        showNotification(`Client code "${clientCode}" applied to ${visibleEntries.length} entries`, 'success');
+        
+    } catch (error) {
+        console.error('Error applying bulk client assignment:', error);
+        showNotification('Failed to apply client code', 'error');
+    }
+}
+
+async function bulkAssignMatter() {
+    const matterInput = document.getElementById('bulk-matter-input');
+    const matterNumber = matterInput.value.trim();
+    
+    if (!matterNumber) {
+        showNotification('Please enter a matter number', 'error');
+        return;
+    }
+    
+    // Show confirmation dialog
+    const confirmed = await showBulkAssignmentDialog('matter', matterNumber);
+    if (!confirmed) return;
+    
+    try {
+        // Get all visible entries
+        const visibleEntries = getVisibleEntries();
+        
+        if (visibleEntries.length === 0) {
+            showNotification('No entries found to update', 'error');
+            return;
+        }
+        
+        // Update each entry
+        for (const entry of visibleEntries) {
+            entry.matter_number = matterNumber;
+            
+            // Also update narratives
+            if (entry.narratives && entry.narratives.length > 0) {
+                entry.narratives.forEach(narrative => {
+                    narrative.matter_number = matterNumber;
+                });
+            }
+            
+            await dbOperations.updateEntry(entry.id, entry);
+        }
+        
+        // Clear input and refresh dashboard
+        matterInput.value = '';
+        loadDashboard();
+        
+        showNotification(`Matter number "${matterNumber}" applied to ${visibleEntries.length} entries`, 'success');
+        
+    } catch (error) {
+        console.error('Error applying bulk matter assignment:', error);
+        showNotification('Failed to apply matter number', 'error');
+    }
+}
+
+function getVisibleEntries() {
+    // Get all entry cards currently visible in the DOM
+    const entryCards = document.querySelectorAll('.entry-card[data-entry-id]');
+    const entries = [];
+    
+    entryCards.forEach(card => {
+        const entryId = parseInt(card.dataset.entryId);
+        // Find the entry data from the current loaded entries
+        const entry = window.currentEntries?.find(e => e.id === entryId);
+        if (entry) {
+            entries.push(entry);
+        }
+    });
+    
+    return entries;
+}
+
+// Confirmation dialog for bulk assignments
+function showBulkAssignmentDialog(type, value) {
+    return new Promise((resolve) => {
+        // Create modal HTML
+        const modal = document.createElement('div');
+        modal.className = 'bulk-assignment-modal';
+        modal.innerHTML = `
+            <div class="bulk-assignment-dialog">
+                <div class="bulk-assignment-dialog-header">
+                    <h3>Confirm Bulk Assignment</h3>
+                </div>
+                <div class="bulk-assignment-dialog-content">
+                    <p>Are you sure you want to apply <strong>${type} code "${value}"</strong> to all visible entries?</p>
+                    <p class="warning-text">This action will update all entries currently displayed in the card view and cannot be undone.</p>
+                </div>
+                <div class="bulk-assignment-dialog-actions">
+                    <button class="bulk-cancel-btn" onclick="closeBulkDialog(false)">Cancel</button>
+                    <button class="bulk-confirm-btn" onclick="closeBulkDialog(true)">Apply to All</button>
+                </div>
+            </div>
+        `;
+        
+        // Add to page
+        document.body.appendChild(modal);
+        
+        // Store resolve function globally so buttons can access it
+        window.bulkDialogResolve = resolve;
+        
+        // Add styles if not already added
+        if (!document.getElementById('bulk-modal-styles')) {
+            const styles = document.createElement('style');
+            styles.id = 'bulk-modal-styles';
+            styles.textContent = `
+                .bulk-assignment-modal {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.5);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 10000;
+                }
+                
+                .bulk-assignment-dialog {
+                    background: var(--surface);
+                    border-radius: 0.5rem;
+                    padding: 1.5rem;
+                    max-width: 500px;
+                    width: 90%;
+                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+                }
+                
+                .bulk-assignment-dialog-header h3 {
+                    margin: 0 0 1rem 0;
+                    color: var(--text-primary);
+                    font-size: 1.25rem;
+                }
+                
+                .bulk-assignment-dialog-content p {
+                    margin: 0 0 1rem 0;
+                    color: var(--text-primary);
+                    line-height: 1.5;
+                }
+                
+                .warning-text {
+                    color: var(--warning-color);
+                    font-size: 0.875rem;
+                }
+                
+                .bulk-assignment-dialog-actions {
+                    display: flex;
+                    gap: 0.75rem;
+                    justify-content: flex-end;
+                    margin-top: 1.5rem;
+                }
+                
+                .bulk-cancel-btn, .bulk-confirm-btn {
+                    padding: 0.5rem 1rem;
+                    border: none;
+                    border-radius: 0.375rem;
+                    font-size: 0.875rem;
+                    font-weight: 500;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                }
+                
+                .bulk-cancel-btn {
+                    background: var(--background);
+                    color: var(--text-secondary);
+                    border: 1px solid var(--border);
+                }
+                
+                .bulk-cancel-btn:hover {
+                    background: var(--surface);
+                    color: var(--text-primary);
+                }
+                
+                .bulk-confirm-btn {
+                    background: var(--primary-color);
+                    color: white;
+                }
+                
+                .bulk-confirm-btn:hover {
+                    background: #1d4ed8;
+                }
+            `;
+            document.head.appendChild(styles);
+        }
+    });
+}
+
+function closeBulkDialog(confirmed) {
+    // Remove modal
+    const modal = document.querySelector('.bulk-assignment-modal');
+    if (modal) {
+        modal.remove();
+    }
+    
+    // Resolve promise
+    if (window.bulkDialogResolve) {
+        window.bulkDialogResolve(confirmed);
+        delete window.bulkDialogResolve;
+    }
+}
+
+window.bulkAssignClient = bulkAssignClient;
+window.bulkAssignMatter = bulkAssignMatter;
+window.closeBulkDialog = closeBulkDialog;
+
+// Helper function for description expansion
+function toggleDescription(btn) {
+    const descriptionContent = btn.closest('.description-content');
+    const descriptionText = descriptionContent.querySelector('.description-text');
+    const fullText = descriptionText.getAttribute('title');
+    
+    if (btn.textContent === 'more') {
+        descriptionText.textContent = fullText;
+        btn.textContent = 'less';
+        descriptionContent.classList.add('expanded');
+    } else {
+        const maxLength = 150;
+        descriptionText.textContent = fullText.substring(0, maxLength) + '...';
+        btn.textContent = 'more';
+        descriptionContent.classList.remove('expanded');
+    }
+}

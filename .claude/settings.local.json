@@ -10,7 +10,13 @@
       "Bash(ls:*)",
       "Bash(python run:*)",
       "Bash(python3 -m pip install:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(find:*)",
+      "Bash(sqlite3:*)",
+      "Bash(python3:*)",
+      "Bash(node:*)",
+      "Bash(sed:*)"
     ],
     "deny": []
   }
