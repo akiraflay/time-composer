@@ -506,15 +506,17 @@ class AIAssistant {
         const hours = timeMatch ? parseFloat(timeMatch[1]) : 0.5;
         
         return {
-            entries: [{
+            entry: {
                 id: Date.now(),
-                narrative: {
+                narratives: [{
                     text: text.trim(),
                     hours: hours,
                     task_code: 'L310'
-                }
-            }],
-            total_entries: 1,
+                }],
+                total_hours: hours,
+                created_at: new Date().toISOString()
+            },
+            total_narratives: 1,
             total_hours: hours,
             cleaned_text: text,
             original_text: text
@@ -556,30 +558,33 @@ class AIAssistant {
         this.clearThinking();
         
         // Add analysis message
-        const summary = `I've identified ${response.total_entries} billable ${response.total_entries === 1 ? 'activity' : 'activities'} totaling ${response.total_hours} hours:`;
+        const narrativeCount = response.entry.narratives.length;
+        const summary = `I've identified ${narrativeCount} billable ${narrativeCount === 1 ? 'activity' : 'activities'} totaling ${response.total_hours} hours:`;
         this.addAssistantMessage(summary);
         
-        // Add each time entry as a separate message
-        response.entries.forEach((entry, index) => {
-            const entryHtml = `
-                <div class="ai-response">
-                    <div class="response-header">
-                        <span>Entry ${index + 1}</span>
-                        <div class="confidence-indicator">
-                            <span>Confidence:</span>
-                            <div class="confidence-bar">
-                                <div class="confidence-fill" style="width: ${Math.random() * 30 + 70}%"></div>
-                            </div>
+        // Add each narrative as part of a single entry message
+        const entryHtml = `
+            <div class="ai-response">
+                <div class="response-header">
+                    <span>Recording Session</span>
+                    <div class="confidence-indicator">
+                        <span>Confidence:</span>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="width: ${Math.random() * 30 + 70}%"></div>
                         </div>
                     </div>
-                    <div class="entry-content">
-                        <strong>${entry.narrative.hours} hours</strong><br>
-                        ${entry.narrative.text}
-                    </div>
                 </div>
-            `;
-            this.addAssistantMessage(entryHtml, true);
-        });
+                <div class="entry-content">
+                    ${response.entry.narratives.map(narrative => `
+                        <div class="narrative-item">
+                            <strong>${narrative.hours} hours</strong><br>
+                            ${narrative.text}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        this.addAssistantMessage(entryHtml, true);
         
         // Add client/matter input if needed
         const clientMatterHtml = `
@@ -1255,21 +1260,19 @@ class AIAssistant {
             const clientCode = document.getElementById('ai-client-code')?.value || '';
             const matterCode = document.getElementById('ai-matter-code')?.value || '';
             
-            // Save entries (assuming we have response data stored)
-            if (this.lastResponse && this.lastResponse.entries) {
-                for (const entry of this.lastResponse.entries) {
-                    await dbOperations.saveEntry({
-                        id: Date.now() + Math.random(), // Generate unique ID
-                        original_text: this.lastResponse.original_text || this.finalTranscript,
-                        cleaned_text: this.lastResponse.cleaned_text || this.finalTranscript,
-                        narratives: [entry.narrative],
-                        total_hours: entry.narrative.hours,
-                        status: 'ready',
-                        created_at: new Date().toISOString(),
-                        client_code: clientCode,
-                        matter_number: matterCode
-                    });
-                }
+            // Save the single entry with all narratives (assuming we have response data stored)
+            if (this.lastResponse && this.lastResponse.entry) {
+                await dbOperations.saveEntry({
+                    id: Date.now() + Math.random(), // Generate unique ID
+                    original_text: this.lastResponse.original_text || this.finalTranscript,
+                    cleaned_text: this.lastResponse.cleaned_text || this.finalTranscript,
+                    narratives: this.lastResponse.entry.narratives,
+                    total_hours: this.lastResponse.entry.total_hours,
+                    status: 'ready',
+                    created_at: new Date().toISOString(),
+                    client_code: clientCode,
+                    matter_number: matterCode
+                });
             }
             
             this.clearThinking();

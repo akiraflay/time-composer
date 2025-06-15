@@ -82,29 +82,19 @@ def enhance():
         # Process through agents
         result = pipeline.process(text)
         
-        # Create separate database entries for each narrative
-        created_entries = []
-        
-        for narrative in result['narratives']:
-            entry = TimeEntry(
-                original_text=text,
-                cleaned_text=result['cleaned'],
-                narratives=[narrative],  # Single narrative per entry
-                total_hours=narrative['hours']
-            )
-            db.session.add(entry)
-            db.session.flush()  # Get ID without committing
-            created_entries.append({
-                'id': entry.id,
-                'narrative': narrative,
-                'hours': narrative['hours']
-            })
-        
+        # Create a single entry with all narratives from this session
+        entry = TimeEntry(
+            original_text=text,
+            cleaned_text=result['cleaned'],
+            narratives=result['narratives'],  # All narratives in one entry
+            total_hours=result['total_hours']
+        )
+        db.session.add(entry)
         db.session.commit()
         
         return jsonify({
-            'entries': created_entries,
-            'total_entries': len(created_entries),
+            'entry': entry.to_dict(),
+            'total_narratives': len(result['narratives']),
             'total_hours': result['total_hours'],
             'original_text': text,
             'cleaned_text': result['cleaned']
