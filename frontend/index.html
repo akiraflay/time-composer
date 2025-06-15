@@ -27,10 +27,10 @@
                     <input type="text" id="search" placeholder="Search entries..." class="search-input">
                     
                     <button id="view-toggle" class="control-btn icon-btn" title="Toggle between list and card view">
-                        <svg id="list-view-icon" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                        <svg id="list-view-icon" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
                             <path d="M3,5H21V7H3V5M3,13V11H21V13H3M3,19V17H21V19H3Z"/>
                         </svg>
-                        <svg id="card-view-icon" viewBox="0 0 24 24" fill="currentColor" width="18" height="18" style="display: none;">
+                        <svg id="card-view-icon" viewBox="0 0 24 24" fill="currentColor" width="24" height="24" style="display: none;">
                             <path d="M3,11H11V3H3M3,21H11V13H3M13,21H21V13H13M13,3V11H21V3"/>
                         </svg>
                     </button>
@@ -106,27 +106,6 @@
                     </div>
                 </div>
                 
-                <!-- Bulk Assignment Controls (Card View Only) -->
-                <div id="bulk-assignment-controls" class="bulk-assignment-controls hidden">
-                    <div class="bulk-assignment-section">
-                        <div class="bulk-assignment-header">
-                            <h3>Bulk Assignment</h3>
-                            <p>Apply client and matter codes to all visible entries</p>
-                        </div>
-                        <div class="bulk-assignment-fields">
-                            <div class="bulk-field-group">
-                                <label for="bulk-client-input">Client Code:</label>
-                                <input type="text" id="bulk-client-input" placeholder="Enter client code" class="bulk-assignment-input">
-                                <button id="bulk-apply-client" class="bulk-apply-btn">Apply to All</button>
-                            </div>
-                            <div class="bulk-field-group">
-                                <label for="bulk-matter-input">Matter Number:</label>
-                                <input type="text" id="bulk-matter-input" placeholder="Enter matter number" class="bulk-assignment-input">
-                                <button id="bulk-apply-matter" class="bulk-apply-btn">Apply to All</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
                 
                 <div id="entries-list" class="entries-container">
                     <!-- Entries will be populated here -->
@@ -334,6 +313,46 @@
                 <div class="edit-modal-actions">
                     <button class="secondary-btn" id="cancel-edit">Cancel</button>
                     <button class="primary-btn" id="save-edit">Save Changes</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Apply to All Modal -->
+        <div id="apply-to-all-modal" class="edit-modal">
+            <div class="edit-modal-content">
+                <div class="edit-modal-header">
+                    <h2>Bulk Assignment</h2>
+                    <button class="close-btn" id="close-apply-to-all-modal">&times;</button>
+                </div>
+                
+                <div class="apply-to-all-content">
+                    <p>Apply client and matter codes to all narratives in this time entry</p>
+                    
+                    <div class="bulk-assignment-fields">
+                        <div class="bulk-field-group">
+                            <label for="apply-client-code">Client Code:</label>
+                            <input type="text" id="apply-client-code" placeholder="Enter client code" class="bulk-assignment-input">
+                            <button id="apply-client-only" class="bulk-apply-btn">Apply Client Only</button>
+                        </div>
+                        <div class="bulk-field-group">
+                            <label for="apply-matter-number">Matter Number:</label>
+                            <input type="text" id="apply-matter-number" placeholder="Enter matter number" class="bulk-assignment-input">
+                            <button id="apply-matter-only" class="bulk-apply-btn">Apply Matter Only</button>
+                        </div>
+                    </div>
+                    
+                    <div class="apply-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="overwrite-existing" checked>
+                            <span class="checkmark"></span>
+                            Overwrite existing values
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="edit-modal-actions">
+                    <button class="secondary-btn" id="cancel-apply-to-all">Cancel</button>
+                    <button class="primary-btn" id="confirm-apply-to-all">Apply Both</button>
                 </div>
             </div>
         </div>

@@ -16,11 +16,51 @@ let datePickerVisible = false;
 let bulkSelectionMode = false;
 let selectedEntries = new Set();
 
-// Helper function to create status dropdown
-function createStatusDropdown(entryId, currentStatus) {
+// Helper function to create status toggle buttons
+function createStatusDropdown(entryId, currentStatus, entry = null) {
+    // Determine effective status based on narratives if entry is provided
+    let effectiveStatus = currentStatus;
+    let isMixed = false;
+    
+    if (entry && entry.narratives && entry.narratives.length > 0) {
+        const narrativeStatuses = entry.narratives.map(n => n.status || 'draft');
+        const allReady = narrativeStatuses.every(status => status === 'ready');
+        const allDraft = narrativeStatuses.every(status => status === 'draft');
+        
+        if (allReady) {
+            effectiveStatus = 'ready';
+        } else if (allDraft) {
+            effectiveStatus = 'draft';
+        } else {
+            // Mixed statuses - show as draft with indicator
+            effectiveStatus = 'draft';
+            isMixed = true;
+        }
+    }
+    
     return `
-        <div class="status-dropdown">
-            <select class="status-select" onchange="changeEntryStatus(${entryId}, this.value)">
+        <div class="status-toggle-group ${isMixed ? 'mixed-status' : ''}">
+            <button class="status-toggle-btn ${effectiveStatus === 'draft' ? 'active' : ''}" 
+                    onclick="changeEntryStatus(${entryId}, 'draft')" 
+                    data-status="draft"
+                    title="${isMixed ? 'Some narratives ready, some draft. Click to set all to draft.' : 'Set all narratives to draft'}">
+                Draft
+            </button>
+            <button class="status-toggle-btn ${effectiveStatus === 'ready' ? 'active' : ''}" 
+                    onclick="changeEntryStatus(${entryId}, 'ready')" 
+                    data-status="ready"
+                    title="${isMixed ? 'Some narratives ready, some draft. Click to set all to ready.' : 'Set all narratives to ready'}">
+                Ready
+            </button>
+        </div>
+    `;
+}
+
+// Helper function to create narrative status dropdown
+function createNarrativeStatusDropdown(entryId, narrativeIndex, currentStatus) {
+    return `
+        <div class="narrative-status-dropdown">
+            <select class="narrative-status-select" onchange="changeNarrativeStatus(${entryId}, ${narrativeIndex}, this.value)">
                 <option value="draft" ${currentStatus === 'draft' ? 'selected' : ''}>Draft</option>
                 <option value="ready" ${currentStatus === 'ready' ? 'selected' : ''}>Ready</option>
                 <option value="exported" ${currentStatus === 'exported' || currentStatus === 'billed' ? 'selected' : ''}>Exported</option>
@@ -295,6 +335,40 @@ function setupEventListeners() {
     editModal?.addEventListener('click', (e) => {
         if (e.target === editModal) {
             closeEditModal();
+        }
+    });
+    
+    // Apply to All modal event listeners
+    const applyToAllModal = document.getElementById('apply-to-all-modal');
+    const closeApplyToAllBtn = document.getElementById('close-apply-to-all-modal');
+    const cancelApplyToAllBtn = document.getElementById('cancel-apply-to-all');
+    const confirmApplyToAllBtn = document.getElementById('confirm-apply-to-all');
+    const applyClientOnlyBtn = document.getElementById('apply-client-only');
+    const applyMatterOnlyBtn = document.getElementById('apply-matter-only');
+    
+    if (closeApplyToAllBtn) {
+        closeApplyToAllBtn.addEventListener('click', closeApplyToAllModal);
+    }
+    
+    if (cancelApplyToAllBtn) {
+        cancelApplyToAllBtn.addEventListener('click', closeApplyToAllModal);
+    }
+    
+    if (confirmApplyToAllBtn) {
+        confirmApplyToAllBtn.addEventListener('click', applyToAllNarratives);
+    }
+    
+    if (applyClientOnlyBtn) {
+        applyClientOnlyBtn.addEventListener('click', () => applyToAllNarratives('client'));
+    }
+    
+    if (applyMatterOnlyBtn) {
+        applyMatterOnlyBtn.addEventListener('click', () => applyToAllNarratives('matter'));
+    }
+    
+    applyToAllModal?.addEventListener('click', (e) => {
+        if (e.target === applyToAllModal) {
+            closeApplyToAllModal();
         }
     });
     
@@ -861,7 +935,7 @@ function createEntryCard(entry) {
     const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     
     const narrativesHtml = (entry.narratives || []).map((n, index) => `
-        <div class="narrative-item" data-narrative-index="${index}">
+        <div class="narrative-item ${n.status === 'ready' ? 'narrative-ready' : 'narrative-draft'}" data-narrative-index="${index}">
             <div class="narrative-header">
                 <span class="editable-field editable-hours" data-field="hours" data-entry-id="${entry.id}" data-narrative-index="${index}">
                     ${n.hours} hours
@@ -869,6 +943,17 @@ function createEntryCard(entry) {
                         <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
                     </svg>
                 </span>
+                <div class="narrative-status-icon" 
+                     data-entry-id="${entry.id}" 
+                     data-narrative-index="${index}" 
+                     data-status="${n.status || 'draft'}"
+                     onclick="toggleNarrativeStatus(${entry.id}, ${index})"
+                     title="${n.status === 'ready' ? 'Mark as Draft' : 'Mark as Ready'}">
+                    ${n.status === 'ready' ? 
+                        '<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/></svg>' : 
+                        '<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/></svg>'
+                    }
+                </div>
             </div>
             <div class="narrative-text editable-field editable-narrative" data-field="text" data-entry-id="${entry.id}" data-narrative-index="${index}">
                 ${n.text}
@@ -886,17 +971,15 @@ function createEntryCard(entry) {
                         <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
                     </svg>
                 </div>
-                ${n.matter_number || entry.matter_number ? `
-                    <div class="narrative-matter editable-field editable-matter" data-field="matter_number" data-entry-id="${entry.id}" data-narrative-index="${index}">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
-                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-                        </svg>
-                        ${n.matter_number || entry.matter_number}
-                        <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
-                        </svg>
-                    </div>
-                ` : ''}
+                <div class="narrative-matter editable-field editable-matter" data-field="matter_number" data-entry-id="${entry.id}" data-narrative-index="${index}">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
+                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                    </svg>
+                    ${n.matter_number || entry.matter_number || 'No Matter'}
+                    <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+                    </svg>
+                </div>
             </div>
         </div>
     `).join('');
@@ -914,7 +997,7 @@ function createEntryCard(entry) {
     if (viewMode === 'ultra-compact') {
         // Ultra-compact layout: single line with essential info
         const firstNarrative = (entry.narratives && entry.narratives.length > 0) ? entry.narratives[0].text : 'No description';
-        const truncatedText = firstNarrative.length > 80 ? firstNarrative.substring(0, 80) + '...' : firstNarrative;
+        const truncatedText = firstNarrative.length > 200 ? firstNarrative.substring(0, 200) + '...' : firstNarrative;
         
         card.innerHTML = `
             <div class="entry-header">
@@ -936,15 +1019,16 @@ function createEntryCard(entry) {
                     </span>
                     <span class="entry-description">${truncatedText}</span>
                 </div>
-                ${createStatusDropdown(entry.id, entry.status || 'draft')}
+                ${createStatusDropdown(entry.id, entry.status || 'draft', entry)}
             </div>
             <div class="narrative-item expanded-content hidden">
                 ${narrativesHtml}
             </div>
             <div class="entry-actions">
                 <button class="edit-btn" onclick="openEditModal(${entry.id})">Edit</button>
-                <button class="duplicate-btn" onclick="duplicateEntry(${entry.id})">Duplicate</button>
                 <button class="delete-btn" onclick="deleteEntry(${entry.id})">Delete</button>
+                <button class="duplicate-btn" onclick="duplicateEntry(${entry.id})">Duplicate</button>
+                <button class="apply-to-all-btn" onclick="openApplyToAllModal(${entry.id})">Apply to All</button>
             </div>
         `;
     } else {
@@ -965,12 +1049,6 @@ function createEntryCard(entry) {
                     </span>
                     <span class="entry-meta-item">
                         <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                            <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/>
-                        </svg>
-                        ${entry.client_code || 'No Client'}
-                    </span>
-                    <span class="entry-meta-item">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                             <path d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"/>
                         </svg>
                         <span class="editable-field editable-total-hours" data-field="total_hours" data-entry-id="${entry.id}">
@@ -981,13 +1059,14 @@ function createEntryCard(entry) {
                         </span>
                     </span>
                 </div>
-                ${createStatusDropdown(entry.id, entry.status || 'draft')}
+                ${createStatusDropdown(entry.id, entry.status || 'draft', entry)}
             </div>
             ${narrativesHtml}
             <div class="entry-actions">
                 <button class="edit-btn" onclick="openEditModal(${entry.id})">Edit</button>
-                <button class="duplicate-btn" onclick="duplicateEntry(${entry.id})">Duplicate</button>
                 <button class="delete-btn" onclick="deleteEntry(${entry.id})">Delete</button>
+                <button class="duplicate-btn" onclick="duplicateEntry(${entry.id})">Duplicate</button>
+                <button class="apply-to-all-btn" onclick="openApplyToAllModal(${entry.id})">Apply to All</button>
             </div>
         `;
     }
@@ -1517,7 +1596,7 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
             </div>
         </td>
         <td class="condensed-status">
-            ${createStatusDropdown(entry.id, status)}
+            ${createStatusDropdown(entry.id, status, entry)}
         </td>
     `;
     
@@ -2147,6 +2226,111 @@ function populateEditModal(entry) {
     });
 }
 
+// Apply to All Modal Functions
+let currentApplyToAllEntry = null;
+
+function openApplyToAllModal(entryId) {
+    const entry = entries.find(e => e.id === entryId);
+    if (!entry) {
+        console.error('Entry not found:', entryId);
+        return;
+    }
+    
+    currentApplyToAllEntry = entry;
+    
+    // Pre-populate with existing values if they exist
+    const clientInput = document.getElementById('apply-client-code');
+    const matterInput = document.getElementById('apply-matter-number');
+    
+    clientInput.value = entry.client_code || '';
+    matterInput.value = entry.matter_number || '';
+    
+    // Show modal
+    const modal = document.getElementById('apply-to-all-modal');
+    modal.classList.add('active');
+}
+
+function closeApplyToAllModal() {
+    const modal = document.getElementById('apply-to-all-modal');
+    modal.classList.remove('active');
+    currentApplyToAllEntry = null;
+}
+
+async function applyToAllNarratives(mode = 'both') {
+    if (!currentApplyToAllEntry) return;
+    
+    const clientCode = document.getElementById('apply-client-code').value.trim();
+    const matterNumber = document.getElementById('apply-matter-number').value.trim();
+    const overwriteExisting = document.getElementById('overwrite-existing').checked;
+    
+    // Validate based on mode
+    if (mode === 'client' && !clientCode) {
+        alert('Please enter a client code.');
+        return;
+    }
+    if (mode === 'matter' && !matterNumber) {
+        alert('Please enter a matter number.');
+        return;
+    }
+    if (mode === 'both' && !clientCode && !matterNumber) {
+        alert('Please enter at least a client code or matter number.');
+        return;
+    }
+    
+    try {
+        // Update the entry
+        const updatedEntry = { ...currentApplyToAllEntry };
+        
+        // Update entry-level fields based on mode
+        if ((mode === 'client' || mode === 'both') && clientCode) {
+            updatedEntry.client_code = clientCode;
+        }
+        if ((mode === 'matter' || mode === 'both') && matterNumber) {
+            updatedEntry.matter_number = matterNumber;
+        }
+        
+        // Update all narratives based on mode
+        if (updatedEntry.narratives) {
+            updatedEntry.narratives = updatedEntry.narratives.map(narrative => {
+                const updatedNarrative = { ...narrative };
+                
+                if ((mode === 'client' || mode === 'both') && clientCode && (overwriteExisting || !narrative.client_code)) {
+                    updatedNarrative.client_code = clientCode;
+                }
+                
+                if ((mode === 'matter' || mode === 'both') && matterNumber && (overwriteExisting || !narrative.matter_number)) {
+                    updatedNarrative.matter_number = matterNumber;
+                }
+                
+                return updatedNarrative;
+            });
+        }
+        
+        // Save to database
+        await saveEntry(updatedEntry);
+        
+        // Update the in-memory entries array
+        const entryIndex = entries.findIndex(e => e.id === updatedEntry.id);
+        if (entryIndex !== -1) {
+            entries[entryIndex] = updatedEntry;
+        }
+        
+        // Close modal and refresh display
+        closeApplyToAllModal();
+        await loadDashboard();
+        
+        // Show success message based on mode
+        let message = 'Successfully applied to all narratives';
+        if (mode === 'client') message = 'Successfully applied client code to all narratives';
+        if (mode === 'matter') message = 'Successfully applied matter number to all narratives';
+        showStatusMessage(message, 'success');
+        
+    } catch (error) {
+        console.error('Error applying to all narratives:', error);
+        showStatusMessage('Error applying changes', 'error');
+    }
+}
+
 async function saveEditChanges() {
     if (!currentEditingEntry) return;
     
@@ -2233,6 +2417,74 @@ async function changeEntryStatus(entryId, newStatus) {
     }
 }
 
+async function changeNarrativeStatus(entryId, narrativeIndex, newStatus) {
+    try {
+        const entry = await dbOperations.getEntry(entryId);
+        if (!entry) {
+            showNotification('Entry not found', 'error');
+            return;
+        }
+        
+        // Update specific narrative status
+        if (entry.narratives && entry.narratives[narrativeIndex]) {
+            entry.narratives[narrativeIndex].status = newStatus;
+            
+            // Save to database
+            await dbOperations.updateEntry(entryId, entry);
+            
+            // Update in-memory entries array
+            const entryIndex = entries.findIndex(e => e.id === entryId);
+            if (entryIndex !== -1) {
+                entries[entryIndex] = entry;
+            }
+            
+            // Refresh dashboard to reflect changes
+            loadDashboard();
+            
+            showNotification(`Narrative status changed to ${newStatus}`, 'success');
+        } else {
+            showNotification('Narrative not found', 'error');
+        }
+        
+    } catch (error) {
+        console.error('Error changing narrative status:', error);
+        showNotification('Failed to change narrative status', 'error');
+    }
+}
+
+async function toggleNarrativeStatus(entryId, narrativeIndex) {
+    try {
+        const entry = await dbOperations.getEntry(entryId);
+        if (!entry || !entry.narratives || !entry.narratives[narrativeIndex]) {
+            showNotification('Narrative not found', 'error');
+            return;
+        }
+        
+        const currentStatus = entry.narratives[narrativeIndex].status || 'draft';
+        const newStatus = currentStatus === 'ready' ? 'draft' : 'ready';
+        
+        // Update specific narrative status
+        entry.narratives[narrativeIndex].status = newStatus;
+        
+        // Save to database
+        await dbOperations.updateEntry(entryId, entry);
+        
+        // Update in-memory entries array
+        const entryIndex = entries.findIndex(e => e.id === entryId);
+        if (entryIndex !== -1) {
+            entries[entryIndex] = entry;
+        }
+        
+        // Refresh dashboard to reflect changes
+        loadDashboard();
+        
+        showNotification(`Narrative marked as ${newStatus}`, 'success');
+        
+    } catch (error) {
+        console.error('Error toggling narrative status:', error);
+        showNotification('Failed to toggle narrative status', 'error');
+    }
+}
 
 // Make functions available globally
 window.editEntry = editEntry;
@@ -2240,6 +2492,7 @@ window.deleteEntry = deleteEntry;
 window.openEditModal = openEditModal;
 window.closeEditModal = closeEditModal;
 window.saveEditChanges = saveEditChanges;
+window.toggleNarrativeStatus = toggleNarrativeStatus;
 window.addNewPreset = addNewPreset;
 window.duplicateEntry = duplicateEntry;
 window.toggleDescription = toggleDescription;
