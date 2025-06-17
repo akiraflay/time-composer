@@ -92,7 +92,7 @@ Pipeline orchestrated by `AgentPipeline` class in `shared/agents/pipeline.py`.
 ## Development Notes
 
 - **Database**: Uses SQLAlchemy with JSON fields for complex data (narratives, task_codes, tags)
-- **CORS**: Configured for local development (frontend on :8080, backend on :5000)
+- **CORS**: Configured for local development (frontend on :8080, backend on :5001)
 - **Offline-first**: Frontend uses IndexedDB for local storage with sync capabilities
 - **CLI Entry Point**: `time-composer` command defined in setup.py
 - **Agent Base Class**: All agents inherit from `shared/agents/base.py`

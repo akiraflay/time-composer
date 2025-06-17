@@ -108,11 +108,21 @@ function setupEventListeners() {
         });
     });
     
-    // App title navigation
+    // App title navigation - always go to dashboard in card view
     const appTitle = document.getElementById('app-title');
     if (appTitle) {
         appTitle.addEventListener('click', (e) => {
             e.preventDefault();
+            // Set to card view (expanded mode)
+            viewMode = 'expanded';
+            // Update the view toggle button to show correct state
+            const listIcon = document.getElementById('list-view-icon');
+            const cardIcon = document.getElementById('card-view-icon');
+            if (listIcon && cardIcon) {
+                listIcon.style.display = 'block';
+                cardIcon.style.display = 'none';
+            }
+            // Switch to dashboard
             switchView('dashboard');
         });
     }
@@ -347,9 +357,9 @@ function setupEventListeners() {
     const applyToAllModal = document.getElementById('apply-to-all-modal');
     const closeApplyToAllBtn = document.getElementById('close-apply-to-all-modal');
     const cancelApplyToAllBtn = document.getElementById('cancel-apply-to-all');
-    const confirmApplyToAllBtn = document.getElementById('confirm-apply-to-all');
-    const applyClientOnlyBtn = document.getElementById('apply-client-only');
-    const applyMatterOnlyBtn = document.getElementById('apply-matter-only');
+    const applyToAllBtn = document.getElementById('apply-to-all-btn');
+    const clientCodeInput = document.getElementById('apply-client-code');
+    const matterNumberInput = document.getElementById('apply-matter-number');
     
     if (closeApplyToAllBtn) {
         closeApplyToAllBtn.addEventListener('click', closeApplyToAllModal);
@@ -359,16 +369,17 @@ function setupEventListeners() {
         cancelApplyToAllBtn.addEventListener('click', closeApplyToAllModal);
     }
     
-    if (confirmApplyToAllBtn) {
-        confirmApplyToAllBtn.addEventListener('click', applyToAllNarratives);
+    if (applyToAllBtn) {
+        applyToAllBtn.addEventListener('click', applyToAllNarratives);
     }
     
-    if (applyClientOnlyBtn) {
-        applyClientOnlyBtn.addEventListener('click', () => applyToAllNarratives('client'));
+    // Add input listeners to show preview
+    if (clientCodeInput) {
+        clientCodeInput.addEventListener('input', updateApplyPreview);
     }
     
-    if (applyMatterOnlyBtn) {
-        applyMatterOnlyBtn.addEventListener('click', () => applyToAllNarratives('matter'));
+    if (matterNumberInput) {
+        matterNumberInput.addEventListener('input', updateApplyPreview);
     }
     
     applyToAllModal?.addEventListener('click', (e) => {
@@ -2243,7 +2254,7 @@ function populateEditModal(entry) {
 let currentApplyToAllEntry = null;
 
 function openApplyToAllModal(entryId) {
-    const entry = entries.find(e => e.id === entryId);
+    const entry = currentEntries.find(e => e.id === entryId);
     if (!entry) {
         console.error('Entry not found:', entryId);
         return;
@@ -2260,6 +2271,9 @@ function openApplyToAllModal(entryId) {
         matterInput.value = entry.matter_number || '';
     }
     
+    // Update preview
+    updateApplyPreview();
+    
     // Show modal
     const modal = document.getElementById('apply-to-all-modal');
     if (modal) {
@@ -2271,51 +2285,84 @@ function closeApplyToAllModal() {
     const modal = document.getElementById('apply-to-all-modal');
     modal.classList.remove('active');
     currentApplyToAllEntry = null;
+    
+    // Clear inputs
+    document.getElementById('apply-client-code').value = '';
+    document.getElementById('apply-matter-number').value = '';
+    
+    // Hide preview
+    const preview = document.getElementById('apply-preview');
+    if (preview) {
+        preview.classList.add('hidden');
+    }
 }
 
-async function applyToAllNarratives(mode = 'both') {
+function updateApplyPreview() {
+    const clientCode = document.getElementById('apply-client-code').value.trim();
+    const matterNumber = document.getElementById('apply-matter-number').value.trim();
+    const preview = document.getElementById('apply-preview');
+    const previewText = preview?.querySelector('.preview-text');
+    
+    if (!preview || !previewText) return;
+    
+    if (!clientCode && !matterNumber) {
+        preview.classList.add('hidden');
+        return;
+    }
+    
+    let message = 'Will apply: ';
+    const items = [];
+    
+    if (clientCode) items.push(`Client "${clientCode}"`);
+    if (matterNumber) items.push(`Matter "${matterNumber}"`);
+    
+    message += items.join(' and ');
+    
+    if (currentApplyToAllEntry && currentApplyToAllEntry.narratives) {
+        message += ` to ${currentApplyToAllEntry.narratives.length} narrative${currentApplyToAllEntry.narratives.length > 1 ? 's' : ''}`;
+    }
+    
+    previewText.textContent = message;
+    preview.classList.remove('hidden');
+}
+
+async function applyToAllNarratives() {
     if (!currentApplyToAllEntry) return;
     
     const clientCode = document.getElementById('apply-client-code').value.trim();
     const matterNumber = document.getElementById('apply-matter-number').value.trim();
-    const overwriteExisting = document.getElementById('overwrite-existing').checked;
+    const applyMode = document.querySelector('input[name="apply-mode"]:checked')?.value || 'overwrite';
+    const overwriteExisting = applyMode === 'overwrite';
     
-    // Validate based on mode
-    if (mode === 'client' && !clientCode) {
-        alert('Please enter a client code.');
-        return;
-    }
-    if (mode === 'matter' && !matterNumber) {
-        alert('Please enter a matter number.');
-        return;
-    }
-    if (mode === 'both' && !clientCode && !matterNumber) {
+    
+    // Validate - at least one field must be filled
+    if (!clientCode && !matterNumber) {
         alert('Please enter at least a client code or matter number.');
         return;
     }
     
     try {
-        // Update the entry
-        const updatedEntry = { ...currentApplyToAllEntry };
+        // Create a deep copy of the entry to avoid reference issues
+        const updatedEntry = JSON.parse(JSON.stringify(currentApplyToAllEntry));
         
-        // Update entry-level fields based on mode
-        if ((mode === 'client' || mode === 'both') && clientCode) {
+        // Update entry-level fields if they have values
+        if (clientCode) {
             updatedEntry.client_code = clientCode;
         }
-        if ((mode === 'matter' || mode === 'both') && matterNumber) {
+        if (matterNumber) {
             updatedEntry.matter_number = matterNumber;
         }
         
-        // Update all narratives based on mode
-        if (updatedEntry.narratives) {
-            updatedEntry.narratives = updatedEntry.narratives.map(narrative => {
+        // Update all narratives based on what fields have values
+        if (updatedEntry.narratives && Array.isArray(updatedEntry.narratives)) {
+            updatedEntry.narratives = updatedEntry.narratives.map((narrative, index) => {
                 const updatedNarrative = { ...narrative };
                 
-                if ((mode === 'client' || mode === 'both') && clientCode && (overwriteExisting || !narrative.client_code)) {
+                if (clientCode && (overwriteExisting || !narrative.client_code)) {
                     updatedNarrative.client_code = clientCode;
                 }
                 
-                if ((mode === 'matter' || mode === 'both') && matterNumber && (overwriteExisting || !narrative.matter_number)) {
+                if (matterNumber && (overwriteExisting || !narrative.matter_number)) {
                     updatedNarrative.matter_number = matterNumber;
                 }
                 
@@ -2324,27 +2371,31 @@ async function applyToAllNarratives(mode = 'both') {
         }
         
         // Save to database
-        await saveEntry(updatedEntry);
+        const response = await api.updateEntry(updatedEntry.id, updatedEntry);
         
-        // Update the in-memory entries array
-        const entryIndex = entries.findIndex(e => e.id === updatedEntry.id);
+        // Update IndexedDB with the response from backend
+        if (response) {
+            // Mark as synced since it just came from the backend
+            response.sync_status = 'synced';
+            await dbOperations.saveEntry(response);
+        }
+        
+        // Update the in-memory entries array with the actual response
+        const entryIndex = currentEntries.findIndex(e => e.id === updatedEntry.id);
         if (entryIndex !== -1) {
-            entries[entryIndex] = updatedEntry;
+            currentEntries[entryIndex] = response || updatedEntry;
         }
         
         // Close modal and refresh display
         closeApplyToAllModal();
         await loadDashboard();
         
-        // Show success message based on mode
-        let message = 'Successfully applied to all narratives';
-        if (mode === 'client') message = 'Successfully applied client code to all narratives';
-        if (mode === 'matter') message = 'Successfully applied matter number to all narratives';
-        showStatusMessage(message, 'success');
+        // Success - changes are applied
         
     } catch (error) {
         console.error('Error applying to all narratives:', error);
-        showStatusMessage('Error applying changes', 'error');
+        console.error('Error details:', error.message);
+        alert(`Error applying changes: ${error.message}. Please check the console for details.`);
     }
 }
 

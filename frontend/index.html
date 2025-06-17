@@ -304,40 +304,45 @@
 
         <!-- Apply to All Modal -->
         <div id="apply-to-all-modal" class="edit-modal">
-            <div class="edit-modal-content">
+            <div class="edit-modal-content compact">
                 <div class="edit-modal-header">
-                    <h2>Bulk Assignment</h2>
+                    <h2>Apply to All Narratives</h2>
                     <button class="close-btn" id="close-apply-to-all-modal">&times;</button>
                 </div>
                 
                 <div class="apply-to-all-content">
-                    <p>Apply client and matter codes to all narratives in this time entry</p>
+                    <p class="modal-description">Enter values to apply to all narratives in this time entry. Only filled fields will be applied.</p>
                     
-                    <div class="bulk-assignment-fields">
-                        <div class="bulk-field-group">
-                            <label for="apply-client-code">Client Code:</label>
-                            <input type="text" id="apply-client-code" placeholder="Enter client code" class="bulk-assignment-input">
-                            <button id="apply-client-only" class="bulk-apply-btn">Apply Client Only</button>
+                    <div class="apply-fields-grid">
+                        <div class="apply-field">
+                            <label for="apply-client-code">Client Code</label>
+                            <input type="text" id="apply-client-code" placeholder="e.g., ACME-001" class="apply-input">
                         </div>
-                        <div class="bulk-field-group">
-                            <label for="apply-matter-number">Matter Number:</label>
-                            <input type="text" id="apply-matter-number" placeholder="Enter matter number" class="bulk-assignment-input">
-                            <button id="apply-matter-only" class="bulk-apply-btn">Apply Matter Only</button>
+                        <div class="apply-field">
+                            <label for="apply-matter-number">Matter Number</label>
+                            <input type="text" id="apply-matter-number" placeholder="e.g., 2024-1234" class="apply-input">
                         </div>
                     </div>
                     
-                    <div class="apply-options">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="overwrite-existing" checked>
-                            <span class="checkmark"></span>
-                            Overwrite existing values
+                    <div class="apply-mode">
+                        <label class="mode-option">
+                            <input type="radio" name="apply-mode" value="fill-empty" id="mode-fill-empty">
+                            <span>Only fill empty fields</span>
                         </label>
+                        <label class="mode-option">
+                            <input type="radio" name="apply-mode" value="overwrite" id="mode-overwrite" checked>
+                            <span>Overwrite existing values</span>
+                        </label>
+                    </div>
+                    
+                    <div id="apply-preview" class="apply-preview hidden">
+                        <span class="preview-text"></span>
                     </div>
                 </div>
                 
                 <div class="edit-modal-actions">
                     <button class="secondary-btn" id="cancel-apply-to-all">Cancel</button>
-                    <button class="primary-btn" id="confirm-apply-to-all">Apply Both</button>
+                    <button class="primary-btn" id="apply-to-all-btn">Apply Changes</button>
                 </div>
             </div>
         </div>

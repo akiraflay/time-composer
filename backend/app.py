@@ -171,6 +171,10 @@ def update_entry(entry_id):
             entry.task_codes = data['task_codes']
         if 'tags' in data:
             entry.tags = data['tags']
+        if 'original_text' in data:
+            entry.original_text = data['original_text']
+        if 'cleaned_text' in data:
+            entry.cleaned_text = data['cleaned_text']
         
         entry.updated_at = datetime.utcnow()
         
