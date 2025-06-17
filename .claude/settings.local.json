@@ -16,7 +16,10 @@
       "Bash(sqlite3:*)",
       "Bash(python3:*)",
       "Bash(node:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(rm:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": []
   }

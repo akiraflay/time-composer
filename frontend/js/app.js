@@ -16,41 +16,46 @@ let datePickerVisible = false;
 let bulkSelectionMode = false;
 let selectedEntries = new Set();
 
-// Helper function to create status toggle buttons
+// Helper function to determine entry status based on narratives
+function determineEntryStatus(entry) {
+    if (entry.narratives && entry.narratives.length > 0) {
+        const narrativeStatuses = entry.narratives.map(n => n.status || 'draft');
+        const allReady = narrativeStatuses.every(status => status === 'ready');
+        return allReady ? 'ready' : 'draft';
+    }
+    return entry.status || 'draft';
+}
+
+// Helper function to create status toggle button
 function createStatusDropdown(entryId, currentStatus, entry = null) {
-    // Determine effective status based on narratives if entry is provided
+    // Determine effective status using the helper function
     let effectiveStatus = currentStatus;
     let isMixed = false;
     
-    if (entry && entry.narratives && entry.narratives.length > 0) {
-        const narrativeStatuses = entry.narratives.map(n => n.status || 'draft');
-        const allReady = narrativeStatuses.every(status => status === 'ready');
-        const allDraft = narrativeStatuses.every(status => status === 'draft');
+    if (entry) {
+        effectiveStatus = determineEntryStatus(entry);
         
-        if (allReady) {
-            effectiveStatus = 'ready';
-        } else if (allDraft) {
-            effectiveStatus = 'draft';
-        } else {
-            // Mixed statuses - show as draft with indicator
-            effectiveStatus = 'draft';
-            isMixed = true;
+        // Check for mixed status (only relevant if there are multiple narratives)
+        if (entry.narratives && entry.narratives.length > 1) {
+            const narrativeStatuses = entry.narratives.map(n => n.status || 'draft');
+            const allSame = narrativeStatuses.every(status => status === narrativeStatuses[0]);
+            isMixed = !allSame;
         }
     }
     
+    const newStatus = effectiveStatus === 'ready' ? 'draft' : 'ready';
+    const displayText = effectiveStatus === 'ready' ? 'READY' : 'DRAFT';
+    const tooltipText = isMixed ? 
+        `Mixed status. Click to set all to ${newStatus}` : 
+        `Click to set all to ${newStatus}`;
+    
     return `
-        <div class="status-toggle-group ${isMixed ? 'mixed-status' : ''}">
-            <button class="status-toggle-btn ${effectiveStatus === 'draft' ? 'active' : ''}" 
-                    onclick="changeEntryStatus(${entryId}, 'draft')" 
-                    data-status="draft"
-                    title="${isMixed ? 'Some narratives ready, some draft. Click to set all to draft.' : 'Set all narratives to draft'}">
-                Draft
-            </button>
-            <button class="status-toggle-btn ${effectiveStatus === 'ready' ? 'active' : ''}" 
-                    onclick="changeEntryStatus(${entryId}, 'ready')" 
-                    data-status="ready"
-                    title="${isMixed ? 'Some narratives ready, some draft. Click to set all to ready.' : 'Set all narratives to ready'}">
-                Ready
+        <div class="status-single-toggle ${isMixed ? 'mixed-status' : ''}" data-entry-id="${entryId}">
+            <button class="status-toggle-single ${effectiveStatus}" 
+                    onclick="safeToggleEntryStatus(${entryId})" 
+                    data-current-status="${effectiveStatus}"
+                    title="${tooltipText}">
+                ${displayText}
             </button>
         </div>
     `;
@@ -943,17 +948,19 @@ function createEntryCard(entry) {
                         <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
                     </svg>
                 </span>
-                <div class="narrative-status-icon" 
-                     data-entry-id="${entry.id}" 
-                     data-narrative-index="${index}" 
-                     data-status="${n.status || 'draft'}"
-                     onclick="toggleNarrativeStatus(${entry.id}, ${index})"
-                     title="${n.status === 'ready' ? 'Mark as Draft' : 'Mark as Ready'}">
-                    ${n.status === 'ready' ? 
-                        '<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/></svg>' : 
-                        '<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/></svg>'
-                    }
-                </div>
+                ${(entry.narratives && entry.narratives.length > 1) ? `
+                    <div class="narrative-status-icon" 
+                         data-entry-id="${entry.id}" 
+                         data-narrative-index="${index}" 
+                         data-status="${n.status || 'draft'}"
+                         onclick="safeToggleNarrativeStatus(${entry.id}, ${index})"
+                         title="${n.status === 'ready' ? 'Mark as Draft' : 'Mark as Ready'}">
+                        ${n.status === 'ready' ? 
+                            '<svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/></svg>' : 
+                            '<svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" fill="none"/></svg>'
+                        }
+                    </div>
+                ` : ''}
             </div>
             <div class="narrative-text editable-field editable-narrative" data-field="text" data-entry-id="${entry.id}" data-narrative-index="${index}">
                 ${n.text}
@@ -1028,7 +1035,10 @@ function createEntryCard(entry) {
                 <button class="edit-btn" onclick="openEditModal(${entry.id})">Edit</button>
                 <button class="delete-btn" onclick="deleteEntry(${entry.id})">Delete</button>
                 <button class="duplicate-btn" onclick="duplicateEntry(${entry.id})">Duplicate</button>
-                <button class="apply-to-all-btn" onclick="openApplyToAllModal(${entry.id})">Apply to All</button>
+                ${(entry.narratives && entry.narratives.length > 1) ? 
+                    `<button class="apply-to-all-btn" onclick="openApplyToAllModal(${entry.id})">Apply to All</button>` : 
+                    ''
+                }
             </div>
         `;
     } else {
@@ -1066,7 +1076,10 @@ function createEntryCard(entry) {
                 <button class="edit-btn" onclick="openEditModal(${entry.id})">Edit</button>
                 <button class="delete-btn" onclick="deleteEntry(${entry.id})">Delete</button>
                 <button class="duplicate-btn" onclick="duplicateEntry(${entry.id})">Duplicate</button>
-                <button class="apply-to-all-btn" onclick="openApplyToAllModal(${entry.id})">Apply to All</button>
+                ${(entry.narratives && entry.narratives.length > 1) ? 
+                    `<button class="apply-to-all-btn" onclick="openApplyToAllModal(${entry.id})">Apply to All</button>` : 
+                    ''
+                }
             </div>
         `;
     }
@@ -2242,12 +2255,16 @@ function openApplyToAllModal(entryId) {
     const clientInput = document.getElementById('apply-client-code');
     const matterInput = document.getElementById('apply-matter-number');
     
-    clientInput.value = entry.client_code || '';
-    matterInput.value = entry.matter_number || '';
+    if (clientInput && matterInput) {
+        clientInput.value = entry.client_code || '';
+        matterInput.value = entry.matter_number || '';
+    }
     
     // Show modal
     const modal = document.getElementById('apply-to-all-modal');
-    modal.classList.add('active');
+    if (modal) {
+        modal.classList.add('active');
+    }
 }
 
 function closeApplyToAllModal() {
@@ -2463,26 +2480,216 @@ async function toggleNarrativeStatus(entryId, narrativeIndex) {
         const currentStatus = entry.narratives[narrativeIndex].status || 'draft';
         const newStatus = currentStatus === 'ready' ? 'draft' : 'ready';
         
+        // Show loading state on the specific status icon
+        const statusIcon = document.querySelector(`[data-entry-id="${entryId}"][data-narrative-index="${narrativeIndex}"].narrative-status-icon`);
+        if (statusIcon) {
+            statusIcon.style.opacity = '0.5';
+            statusIcon.style.pointerEvents = 'none';
+        }
+        
         // Update specific narrative status
         entry.narratives[narrativeIndex].status = newStatus;
         
         // Save to database
-        await dbOperations.updateEntry(entryId, entry);
+        await dbOperations.updateEntry(entryId, {
+            narratives: entry.narratives
+        });
         
         // Update in-memory entries array
-        const entryIndex = entries.findIndex(e => e.id === entryId);
+        const entryIndex = currentEntries.findIndex(e => e.id === entryId);
         if (entryIndex !== -1) {
-            entries[entryIndex] = entry;
+            currentEntries[entryIndex] = entry;
         }
         
-        // Refresh dashboard to reflect changes
-        loadDashboard();
+        // Update the DOM directly instead of full reload
+        updateNarrativeStatusInDOM(entryId, narrativeIndex, newStatus);
+        updateEntryStatusInDOM(entryId, entry);
         
         showNotification(`Narrative marked as ${newStatus}`, 'success');
         
     } catch (error) {
         console.error('Error toggling narrative status:', error);
         showNotification('Failed to toggle narrative status', 'error');
+        
+        // Reset the UI on error
+        const statusIcon = document.querySelector(`[data-entry-id="${entryId}"][data-narrative-index="${narrativeIndex}"].narrative-status-icon`);
+        if (statusIcon) {
+            statusIcon.style.opacity = '1';
+            statusIcon.style.pointerEvents = 'auto';
+        }
+    }
+}
+
+async function toggleEntryStatus(entryId) {
+    try {
+        const entry = await dbOperations.getEntry(entryId);
+        if (!entry) {
+            showNotification('Entry not found', 'error');
+            return;
+        }
+        
+        // Show loading state on entry status dropdown
+        const statusDropdown = document.querySelector(`[data-entry-id="${entryId}"].entry-status-dropdown`);
+        if (statusDropdown) {
+            statusDropdown.style.opacity = '0.5';
+            statusDropdown.style.pointerEvents = 'none';
+        }
+        
+        // Determine current effective status (simplified logic)
+        const currentStatus = determineEntryStatus(entry);
+        const newStatus = currentStatus === 'ready' ? 'draft' : 'ready';
+        
+        // Update entry status
+        entry.status = newStatus;
+        
+        // Update all narratives to match the entry status
+        if (entry.narratives && entry.narratives.length > 0) {
+            entry.narratives.forEach(narrative => {
+                narrative.status = newStatus;
+            });
+        }
+        
+        // Save to database
+        await dbOperations.updateEntry(entryId, {
+            status: entry.status,
+            narratives: entry.narratives
+        });
+        
+        // Update in-memory entries array
+        const entryIndex = currentEntries.findIndex(e => e.id === entryId);
+        if (entryIndex !== -1) {
+            currentEntries[entryIndex] = entry;
+        }
+        
+        // Update DOM directly instead of full reload
+        updateEntryStatusInDOM(entryId, entry);
+        updateAllNarrativeStatusesInDOM(entryId, entry.narratives, newStatus);
+        
+        showNotification(`All narratives set to ${newStatus}`, 'success');
+        
+    } catch (error) {
+        console.error('Error toggling entry status:', error);
+        showNotification('Failed to toggle entry status', 'error');
+        
+        // Reset the UI on error
+        const statusDropdown = document.querySelector(`[data-entry-id="${entryId}"].entry-status-dropdown`);
+        if (statusDropdown) {
+            statusDropdown.style.opacity = '1';
+            statusDropdown.style.pointerEvents = 'auto';
+        }
+    }
+}
+
+// Safe wrapper functions with additional error handling
+async function safeToggleEntryStatus(entryId) {
+    // Prevent double-clicks
+    const statusToggle = document.querySelector(`[data-entry-id="${entryId}"] .status-toggle-single`);
+    if (statusToggle && statusToggle.disabled) {
+        return;
+    }
+    
+    // Disable button during operation
+    if (statusToggle) {
+        statusToggle.disabled = true;
+        statusToggle.style.opacity = '0.6';
+    }
+    
+    try {
+        await toggleEntryStatus(entryId);
+    } catch (error) {
+        console.error('Error in safeToggleEntryStatus:', error);
+        showNotification('Failed to update entry status', 'error');
+    } finally {
+        // Re-enable button
+        if (statusToggle) {
+            statusToggle.disabled = false;
+            statusToggle.style.opacity = '1';
+        }
+    }
+}
+
+async function safeToggleNarrativeStatus(entryId, narrativeIndex) {
+    // Prevent double-clicks
+    const statusIcon = document.querySelector(`[data-entry-id="${entryId}"][data-narrative-index="${narrativeIndex}"].narrative-status-icon`);
+    if (statusIcon && statusIcon.dataset.processing === 'true') {
+        return;
+    }
+    
+    // Mark as processing
+    if (statusIcon) {
+        statusIcon.dataset.processing = 'true';
+    }
+    
+    try {
+        await toggleNarrativeStatus(entryId, narrativeIndex);
+    } catch (error) {
+        console.error('Error in safeToggleNarrativeStatus:', error);
+        showNotification('Failed to update narrative status', 'error');
+    } finally {
+        // Remove processing flag
+        if (statusIcon) {
+            delete statusIcon.dataset.processing;
+        }
+    }
+}
+
+// Helper functions for status determination and DOM updates
+function updateAllNarrativeStatusesInDOM(entryId, narratives, newStatus) {
+    if (!narratives) return;
+    
+    narratives.forEach((narrative, index) => {
+        updateNarrativeStatusInDOM(entryId, index, newStatus);
+    });
+}
+function updateNarrativeStatusInDOM(entryId, narrativeIndex, newStatus) {
+    // Update the narrative status icon
+    const statusIcon = document.querySelector(`[data-entry-id="${entryId}"][data-narrative-index="${narrativeIndex}"].narrative-status-icon`);
+    if (statusIcon) {
+        // Reset loading state
+        statusIcon.style.opacity = '1';
+        statusIcon.style.pointerEvents = 'auto';
+        
+        // Update icon attributes
+        statusIcon.setAttribute('data-status', newStatus);
+        statusIcon.setAttribute('title', newStatus === 'ready' ? 'Mark as Draft' : 'Mark as Ready');
+        
+        // Update icon content
+        const iconContent = newStatus === 'ready' ? 
+            '<svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/></svg>' : 
+            '<svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" fill="none"/></svg>';
+        statusIcon.innerHTML = iconContent;
+    }
+    
+    // Update the narrative item class
+    const narrativeItem = document.querySelector(`[data-entry-id="${entryId}"] .narrative-item[data-narrative-index="${narrativeIndex}"]`);
+    if (narrativeItem) {
+        narrativeItem.className = narrativeItem.className.replace(/narrative-(ready|draft)/, `narrative-${newStatus}`);
+    }
+}
+
+function updateEntryStatusInDOM(entryId, entry) {
+    // Determine the overall entry status using the helper function
+    const entryStatus = determineEntryStatus(entry);
+    
+    // Update the entry-level status dropdown
+    const statusDropdown = document.querySelector(`[data-entry-id="${entryId}"].entry-status-dropdown`);
+    if (statusDropdown) {
+        // Reset loading state
+        statusDropdown.style.opacity = '1';
+        statusDropdown.style.pointerEvents = 'auto';
+        
+        const statusButton = statusDropdown.querySelector('.status-dropdown-btn');
+        if (statusButton) {
+            // Update button text and class
+            statusButton.textContent = entryStatus.charAt(0).toUpperCase() + entryStatus.slice(1);
+            statusButton.className = statusButton.className.replace(/status-(ready|draft|exported)/, `status-${entryStatus}`);
+        }
+        
+        // Update dropdown items
+        const dropdownItems = statusDropdown.querySelectorAll('.status-dropdown-item');
+        dropdownItems.forEach(item => {
+            item.classList.toggle('active', item.getAttribute('data-status') === entryStatus);
+        });
     }
 }
 
@@ -2493,6 +2700,10 @@ window.openEditModal = openEditModal;
 window.closeEditModal = closeEditModal;
 window.saveEditChanges = saveEditChanges;
 window.toggleNarrativeStatus = toggleNarrativeStatus;
+window.toggleEntryStatus = toggleEntryStatus;
+window.safeToggleNarrativeStatus = safeToggleNarrativeStatus;
+window.safeToggleEntryStatus = safeToggleEntryStatus;
+window.openApplyToAllModal = openApplyToAllModal;
 window.addNewPreset = addNewPreset;
 window.duplicateEntry = duplicateEntry;
 window.toggleDescription = toggleDescription;

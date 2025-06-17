@@ -148,6 +148,27 @@ main {
     position: relative;
 }
 
+/* Icon control buttons - better visibility */
+.control-btn.icon-btn {
+    background: var(--surface);
+    border: 1px solid #cbd5e1;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    color: #475569;
+}
+
+.control-btn.icon-btn:hover {
+    border-color: var(--primary-color);
+    background: #f0f9ff;
+    color: var(--primary-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.control-btn.icon-btn:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
 /* Text-based control buttons */
 .control-btn.text-btn {
     width: auto;

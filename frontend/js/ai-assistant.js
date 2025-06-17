@@ -134,7 +134,7 @@ class AIAssistant {
         this.currentMode = 'voice';
         this.hideAllInterfaces();
         document.getElementById('voice-interface').classList.remove('hidden');
-        this.updateStatus('Voice mode active - Click the orb to start recording');
+        this.updateStatus('Voice mode active');
         
         // Add message to conversation
         this.addUserMessage('I\'ll tell you about my work using voice');
@@ -160,7 +160,7 @@ class AIAssistant {
                     <button class="mode-option ${this.transcriptionMode === 'browser' ? 'active' : ''}" 
                             onclick="window.aiAssistant.setTranscriptionModeUI('browser')">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                            <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"/>
+                            <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4Z"/>
                         </svg>
                         Browser Only
                         <span class="mode-desc">Fast, works offline</span>
@@ -168,7 +168,7 @@ class AIAssistant {
                     <button class="mode-option ${this.transcriptionMode === 'dual' ? 'active' : ''}" 
                             onclick="window.aiAssistant.setTranscriptionModeUI('dual')">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                            <path d="M11,18H13V16H11V18M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,6A4,4 0 0,0 8,10H10A2,2 0 0,1 12,8A2,2 0 0,1 14,10C14,12 11,11.75 11,15H13C13,12.75 16,12.5 16,10A4,4 0 0,0 12,6Z"/>
+                            <path d="M8,2A6,6 0 0,0 2,8A6,6 0 0,0 8,14A6,6 0 0,0 14,8A6,6 0 0,0 8,2M8,4A4,4 0 0,1 12,8A4,4 0 0,1 8,12A4,4 0 0,1 4,8A4,4 0 0,1 8,4M16,10A6,6 0 0,0 10,16A6,6 0 0,0 16,22A6,6 0 0,0 22,16A6,6 0 0,0 16,10M16,12A4,4 0 0,1 20,16A4,4 0 0,1 16,20A4,4 0 0,1 12,16A4,4 0 0,1 16,12Z"/>
                         </svg>
                         Dual Mode
                         <span class="mode-desc">Browser + Whisper AI</span>
@@ -194,18 +194,35 @@ class AIAssistant {
     }
 
     switchToTextMode() {
+        console.log('Switching to text mode...');
         this.currentMode = 'text';
         this.hideAllInterfaces();
-        document.getElementById('text-interface').classList.remove('hidden');
-        this.updateStatus('Text mode active - Describe your billable work');
+        
+        const textInterface = document.getElementById('text-interface');
+        if (textInterface) {
+            textInterface.classList.remove('hidden');
+            console.log('Text interface hidden class removed, should be visible');
+            console.log('Text interface classes:', textInterface.className);
+            console.log('Text interface display style:', window.getComputedStyle(textInterface).display);
+        } else {
+            console.error('Text interface element not found!');
+        }
+        
+        this.updateStatus('Text mode active');
         
         // Add message to conversation
         this.addUserMessage('I\'ll type my work details');
-        this.addAssistantMessage('Great! Please describe your billable work in detail in the text area below.');
+        this.addAssistantMessage('Great! Type your work details below.');
         
         // Focus on text input
         setTimeout(() => {
-            document.getElementById('text-input')?.focus();
+            const textInput = document.getElementById('text-input');
+            if (textInput) {
+                textInput.focus();
+                console.log('Text input focused');
+            } else {
+                console.error('Text input element not found!');
+            }
         }, 100);
     }
 
@@ -440,7 +457,6 @@ class AIAssistant {
                 
                 // Show what we heard
                 this.addAssistantThinking('I heard you say: "' + this.finalTranscript.trim() + '"');
-                this.addAssistantThinking('Let me process this and extract the billable activities...');
             } else {
                 // Get final Whisper transcription
                 const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
@@ -627,6 +643,7 @@ class AIAssistant {
     }
 
     async processTextInput() {
+        console.log('Processing text input...');
         const textInput = document.getElementById('text-input');
         const text = textInput.value.trim();
         
@@ -637,6 +654,7 @@ class AIAssistant {
         
         this.addUserMessage(`Here's what I worked on: "${text}"`);
         this.currentMode = 'processing';
+        console.log('Hiding interfaces for processing mode...');
         this.hideAllInterfaces();
         
         this.addAssistantThinking('Analyzing your work description...');
@@ -657,9 +675,17 @@ class AIAssistant {
 
     // UI Helper Methods
     hideAllInterfaces() {
-        document.getElementById('voice-interface').classList.add('hidden');
-        document.getElementById('text-interface').classList.add('hidden');
-        document.getElementById('input-area').classList.add('hidden');
+        console.log('Hiding all interfaces...');
+        const voiceInterface = document.getElementById('voice-interface');
+        const textInterface = document.getElementById('text-interface');
+        const inputArea = document.getElementById('input-area');
+        
+        if (voiceInterface) voiceInterface.classList.add('hidden');
+        if (textInterface) {
+            textInterface.classList.add('hidden');
+            console.log('Text interface hidden');
+        }
+        if (inputArea) inputArea.classList.add('hidden');
     }
 
     resetInterface() {
@@ -1173,7 +1199,7 @@ class AIAssistant {
             messageDiv.innerHTML = `
                 <div class="message-avatar">
                     <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12,2L13.09,8.26L22,9L13.09,9.74L12,16L10.91,9.74L2,9L10.91,8.26L12,2Z"/>
+                        <path d="M12 6L13.5 10.5L18 12L13.5 13.5L12 18L10.5 13.5L6 12L10.5 10.5L12 6Z"/>
                     </svg>
                 </div>
                 <div class="message-content">
@@ -1530,7 +1556,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.aiAssistant = aiAssistant;
     
     // Log transcription mode info
-    console.log('Time Composer AI Assistant initialized');
+    console.log('Time Composer Assistant initialized');
     console.log('Current transcription mode:', aiAssistant.transcriptionMode);
     console.log('To switch modes, use: window.aiAssistant.setTranscriptionMode("dual" | "browser" | "whisper")');
     
