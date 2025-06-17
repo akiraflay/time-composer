@@ -1294,7 +1294,7 @@ class AIAssistant {
                     cleaned_text: this.lastResponse.cleaned_text || this.finalTranscript,
                     narratives: this.lastResponse.entry.narratives,
                     total_hours: this.lastResponse.entry.total_hours,
-                    status: 'ready',
+                    status: 'draft',
                     created_at: new Date().toISOString(),
                     client_code: clientCode,
                     matter_number: matterCode
@@ -1312,7 +1312,7 @@ class AIAssistant {
                 if (typeof loadDashboard === 'function') {
                     loadDashboard();
                 }
-            }, 2000);
+            }, 750);
             
         } catch (error) {
             console.error('Error saving entries:', error);

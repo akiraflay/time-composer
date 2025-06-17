@@ -130,6 +130,60 @@ const api = {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+    },
+    
+    async transcribeAudio(formData) {
+        try {
+            const response = await fetch(`${API_BASE}/transcribe`, {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Transcription API error:', response.status, errorText);
+                throw new Error(`Transcription failed: ${response.status}`);
+            }
+            
+            return response.json();
+        } catch (error) {
+            console.error('API transcribe audio error:', error);
+            
+            if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                throw new Error('Backend server is not running. Please start the server with "python run.py"');
+            }
+            
+            throw error;
+        }
+    },
+    
+    async enhanceNarrativeContext(entryId, narrativeIndex, data) {
+        try {
+            const response = await fetch(`${API_BASE}/entries/${entryId}/enhance-context`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    narrative_index: narrativeIndex,
+                    ...data
+                })
+            });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Context enhancement API error:', response.status, errorText);
+                throw new Error(`Context enhancement failed: ${response.status}`);
+            }
+            
+            return response.json();
+        } catch (error) {
+            console.error('API enhance context error:', error);
+            
+            if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                throw new Error('Backend server is not running. Please start the server with "python run.py"');
+            }
+            
+            throw error;
+        }
     }
 };
 

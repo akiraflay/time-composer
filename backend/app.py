@@ -7,6 +7,7 @@ import os
 import tempfile
 import csv
 import io
+import traceback
 
 # Add shared modules to path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
@@ -199,6 +200,95 @@ def delete_entry(entry_id):
         app.logger.error(f"Error deleting entry: {str(e)}")
         db.session.rollback()
         return jsonify({'error': 'Failed to delete entry'}), 500
+
+@app.route('/api/entries/<int:entry_id>/enhance-context', methods=['POST'])
+def enhance_context(entry_id):
+    """Enhance a specific narrative with additional context"""
+    try:
+        entry = TimeEntry.query.get_or_404(entry_id)
+        data = request.get_json()
+        
+        app.logger.info(f"Enhance context request for entry {entry_id}: {data}")
+        
+        narrative_index = data.get('narrative_index')
+        original_narrative = data.get('original_narrative')
+        additional_context = data.get('additional_context')
+        
+        if narrative_index is None or not additional_context:
+            return jsonify({'error': 'Missing narrative index or context'}), 400
+        
+        # Ensure narrative_index is an integer
+        narrative_index = int(narrative_index)
+        
+        # Log entry structure for debugging
+        app.logger.info(f"Entry narratives: {entry.narratives}")
+        app.logger.info(f"Narrative index: {narrative_index}, Type: {type(narrative_index)}")
+        
+        if not entry.narratives or narrative_index >= len(entry.narratives):
+            return jsonify({'error': f'Invalid narrative index: {narrative_index}, entry has {len(entry.narratives) if entry.narratives else 0} narratives'}), 400
+        
+        # Import context enhancer
+        from shared.agents.context_enhancer import ContextEnhancerAgent
+        
+        # Format the input for the agent
+        input_text = f"""Original Narrative:
+{original_narrative}
+
+Additional Context:
+{additional_context}"""
+        
+        # Process enhancement
+        enhancer = ContextEnhancerAgent()
+        result = enhancer.process(input_text)
+        
+        # Log the enhancement for debugging
+        app.logger.info(f"Context Enhancement Debug:")
+        app.logger.info(f"  Original: {original_narrative}")
+        app.logger.info(f"  Context: {additional_context}")
+        app.logger.info(f"  Enhanced: {result.get('enhanced_narrative', 'NO RESULT')}")
+        
+        # Create a new list to ensure proper updating
+        updated_narratives = list(entry.narratives)
+        
+        # Update the specific narrative
+        enhanced_text = result.get('enhanced_narrative', original_narrative)
+        updated_narratives[narrative_index]['text'] = enhanced_text
+        
+        # Add metadata to track enhancement
+        if 'metadata' not in updated_narratives[narrative_index]:
+            updated_narratives[narrative_index]['metadata'] = {}
+        
+        updated_narratives[narrative_index]['metadata']['enhanced'] = True
+        updated_narratives[narrative_index]['metadata']['original_text'] = original_narrative
+        updated_narratives[narrative_index]['metadata']['enhancement_context'] = additional_context
+        updated_narratives[narrative_index]['metadata']['enhanced_at'] = datetime.utcnow().isoformat()
+        
+        # Assign back to entry
+        entry.narratives = updated_narratives
+        
+        # Mark entry as updated
+        entry.updated_at = datetime.utcnow()
+        
+        # Force SQLAlchemy to recognize the change
+        from sqlalchemy.orm.attributes import flag_modified
+        flag_modified(entry, 'narratives')
+        
+        # Save changes
+        db.session.commit()
+        
+        app.logger.info(f"Successfully enhanced narrative {narrative_index} for entry {entry_id}")
+        
+        return jsonify({
+            'success': True,
+            'entry': entry.to_dict(),
+            'enhanced_narrative': result['enhanced_narrative']
+        })
+    
+    except Exception as e:
+        app.logger.error(f"Error enhancing context: {str(e)}")
+        app.logger.error(f"Traceback: {traceback.format_exc()}")
+        db.session.rollback()
+        return jsonify({'error': f'Failed to enhance context: {str(e)}'}), 500
 
 @app.route('/api/export', methods=['POST'])
 def export_entries():

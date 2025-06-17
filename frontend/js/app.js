@@ -20,8 +20,9 @@ let selectedEntries = new Set();
 function determineEntryStatus(entry) {
     if (entry.narratives && entry.narratives.length > 0) {
         const narrativeStatuses = entry.narratives.map(n => n.status || 'draft');
-        const allReady = narrativeStatuses.every(status => status === 'ready');
-        return allReady ? 'ready' : 'draft';
+        // If any narrative is exported, the entry is exported
+        const hasExported = narrativeStatuses.some(status => status === 'exported');
+        return hasExported ? 'exported' : 'draft';
     }
     return entry.status || 'draft';
 }
@@ -30,49 +31,28 @@ function determineEntryStatus(entry) {
 function createStatusDropdown(entryId, currentStatus, entry = null) {
     // Determine effective status using the helper function
     let effectiveStatus = currentStatus;
-    let isMixed = false;
     
     if (entry) {
         effectiveStatus = determineEntryStatus(entry);
-        
-        // Check for mixed status (only relevant if there are multiple narratives)
-        if (entry.narratives && entry.narratives.length > 1) {
-            const narrativeStatuses = entry.narratives.map(n => n.status || 'draft');
-            const allSame = narrativeStatuses.every(status => status === narrativeStatuses[0]);
-            isMixed = !allSame;
-        }
     }
     
-    const newStatus = effectiveStatus === 'ready' ? 'draft' : 'ready';
-    const displayText = effectiveStatus === 'ready' ? 'READY' : 'DRAFT';
-    const tooltipText = isMixed ? 
-        `Mixed status. Click to set all to ${newStatus}` : 
-        `Click to set all to ${newStatus}`;
+    // Convert 'ready' to 'draft' for display (simplifying to only draft/exported)
+    if (effectiveStatus === 'ready') {
+        effectiveStatus = 'draft';
+    }
+    
+    const displayText = effectiveStatus === 'exported' ? 'EXPORTED' : 'DRAFT';
     
     return `
-        <div class="status-single-toggle ${isMixed ? 'mixed-status' : ''}" data-entry-id="${entryId}">
-            <button class="status-toggle-single ${effectiveStatus}" 
-                    onclick="safeToggleEntryStatus(${entryId})" 
-                    data-current-status="${effectiveStatus}"
-                    title="${tooltipText}">
+        <div class="status-display" data-entry-id="${entryId}">
+            <span class="status-badge ${effectiveStatus}">
                 ${displayText}
-            </button>
+            </span>
         </div>
     `;
 }
 
-// Helper function to create narrative status dropdown
-function createNarrativeStatusDropdown(entryId, narrativeIndex, currentStatus) {
-    return `
-        <div class="narrative-status-dropdown">
-            <select class="narrative-status-select" onchange="changeNarrativeStatus(${entryId}, ${narrativeIndex}, this.value)">
-                <option value="draft" ${currentStatus === 'draft' ? 'selected' : ''}>Draft</option>
-                <option value="ready" ${currentStatus === 'ready' ? 'selected' : ''}>Ready</option>
-                <option value="exported" ${currentStatus === 'exported' || currentStatus === 'billed' ? 'selected' : ''}>Exported</option>
-            </select>
-        </div>
-    `;
-}
+// Removed narrative status dropdown - status is now automatic
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
@@ -93,6 +73,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Set up event listeners
     setupEventListeners();
     
+    // Make closeContextRecorder available globally for onclick handlers
+    window.closeContextRecorder = closeContextRecorder;
     
     // Load initial view
     loadDashboard();
@@ -950,8 +932,15 @@ function createEntryCard(entry) {
     const dateStr = date.toLocaleDateString();
     const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     
-    const narrativesHtml = (entry.narratives || []).map((n, index) => `
-        <div class="narrative-item ${n.status === 'ready' ? 'narrative-ready' : 'narrative-draft'}" data-narrative-index="${index}">
+    const narrativesHtml = (entry.narratives || []).map((n, index) => {
+        const isEnhanced = n.metadata && n.metadata.enhanced;
+        return `
+        <div class="narrative-item ${n.status === 'exported' ? 'narrative-exported' : 'narrative-draft'} ${isEnhanced ? 'enhanced' : ''}" data-narrative-index="${index}">
+            <button class="context-mic-btn" onclick="openContextRecordingModal(${entry.id}, ${index})" title="Add context to this narrative">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                    <path d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"/>
+                </svg>
+            </button>
             <div class="narrative-header">
                 <span class="editable-field editable-hours" data-field="hours" data-entry-id="${entry.id}" data-narrative-index="${index}">
                     ${n.hours} hours
@@ -959,19 +948,6 @@ function createEntryCard(entry) {
                         <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
                     </svg>
                 </span>
-                ${(entry.narratives && entry.narratives.length > 1) ? `
-                    <div class="narrative-status-icon" 
-                         data-entry-id="${entry.id}" 
-                         data-narrative-index="${index}" 
-                         data-status="${n.status || 'draft'}"
-                         onclick="safeToggleNarrativeStatus(${entry.id}, ${index})"
-                         title="${n.status === 'ready' ? 'Mark as Draft' : 'Mark as Ready'}">
-                        ${n.status === 'ready' ? 
-                            '<svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/></svg>' : 
-                            '<svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" fill="none"/></svg>'
-                        }
-                    </div>
-                ` : ''}
             </div>
             <div class="narrative-text editable-field editable-narrative" data-field="text" data-entry-id="${entry.id}" data-narrative-index="${index}">
                 ${n.text}
@@ -1000,7 +976,7 @@ function createEntryCard(entry) {
                 </div>
             </div>
         </div>
-    `).join('');
+    `;}).join('');
     
     // Add click handler for compact and ultra-compact mode expansion
     if (viewMode === 'compact' || viewMode === 'ultra-compact') {
@@ -1072,11 +1048,8 @@ function createEntryCard(entry) {
                         <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                             <path d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"/>
                         </svg>
-                        <span class="editable-field editable-total-hours" data-field="total_hours" data-entry-id="${entry.id}">
+                        <span class="total-hours-display">
                             ${totalHours} hours
-                            <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
-                            </svg>
                         </span>
                     </span>
                 </div>
@@ -1125,7 +1098,8 @@ async function startInlineEdit(field) {
     if (fieldType === 'hours') {
         currentValue = field.textContent.replace(' hours', '').trim();
     } else if (fieldType === 'total_hours') {
-        currentValue = field.textContent.replace(' hours', '').trim();
+        // Total hours should not be editable - it's calculated from narratives
+        return;
     } else if (fieldType === 'text') {
         currentValue = field.textContent.trim();
     } else if (fieldType === 'created_at') {
@@ -1800,8 +1774,31 @@ async function exportEntries() {
         
         await api.exportEntries(entryIds);
         
+        // Update status of exported entries to 'exported'
+        for (const entry of entries) {
+            // Update all narratives to exported status
+            if (entry.narratives) {
+                entry.narratives.forEach(narrative => {
+                    narrative.status = 'exported';
+                });
+            }
+            
+            // Update the entry with exported status
+            await dbOperations.updateEntry(entry.id, {
+                status: 'exported',
+                narratives: entry.narratives
+            });
+        }
+        
         hideLoading();
         showNotification('Export completed successfully', 'success');
+        
+        // Refresh the current view to show updated statuses
+        if (currentView === 'dashboard') {
+            await loadDashboard();
+        } else if (currentView === 'export') {
+            updateExportPreview();
+        }
         
     } catch (err) {
         console.error('Export failed:', err);
@@ -1857,7 +1854,7 @@ async function saveEntries() {
                 matter_number: entryMetadata[0]?.matterNumber || '',
                 narratives: result.narratives,
                 total_hours: result.total_hours,
-                status: 'ready'
+                status: 'draft'
             });
         } else {
             // Get recent entries that were created during recording
@@ -1869,7 +1866,7 @@ async function saveEntries() {
                 await dbOperations.updateEntry(recentEntries[i].id, {
                     client_code: entryMetadata[i].clientCode || '',
                     matter_number: entryMetadata[i].matterNumber || '',
-                    status: 'ready'
+                    status: 'draft'
                 });
             }
         }
@@ -2180,8 +2177,7 @@ function populateEditModal(entry) {
                     <label>Status</label>
                     <select class="narrative-status-input" data-index="${index}">
                         <option value="draft" ${(narrative.status || entry.status || 'draft') === 'draft' ? 'selected' : ''}>Draft</option>
-                        <option value="ready" ${(narrative.status || entry.status || 'draft') === 'ready' ? 'selected' : ''}>Ready</option>
-                        <option value="billed" ${(narrative.status || entry.status || 'draft') === 'billed' ? 'selected' : ''}>Billed</option>
+                        <option value="exported" ${(narrative.status || entry.status || 'draft') === 'exported' || (narrative.status || entry.status || 'draft') === 'billed' ? 'selected' : ''}>Exported</option>
                     </select>
                 </div>
             </div>
@@ -2427,14 +2423,12 @@ async function saveEditChanges() {
         updatedEntry.total_hours = updatedEntry.narratives.reduce((sum, n) => sum + n.hours, 0);
         
         // Determine entry-level status based on individual narrative statuses
-        // Use the least advanced status (draft < ready < billed)
+        // Use the least advanced status (draft < exported)
         const statuses = updatedEntry.narratives.map(n => n.status);
         if (statuses.includes('draft')) {
             updatedEntry.status = 'draft';
-        } else if (statuses.includes('ready')) {
-            updatedEntry.status = 'ready';
         } else {
-            updatedEntry.status = 'billed';
+            updatedEntry.status = 'exported';
         }
         
         // Save to database
@@ -2572,6 +2566,9 @@ async function toggleNarrativeStatus(entryId, narrativeIndex) {
 }
 
 async function toggleEntryStatus(entryId) {
+    // Status toggling is disabled - status is now automatic
+    return;
+    
     try {
         const entry = await dbOperations.getEntry(entryId);
         if (!entry) {
@@ -2631,6 +2628,355 @@ async function toggleEntryStatus(entryId) {
     }
 }
 
+// Context Recording Functions
+let contextRecorder = null;
+let currentContextEntry = null;
+let currentContextNarrativeIndex = null;
+
+function openContextRecordingModal(entryId, narrativeIndex) {
+    // Find the entry
+    const entry = currentEntries.find(e => e.id === entryId);
+    if (!entry || !entry.narratives || !entry.narratives[narrativeIndex]) {
+        console.error('Entry or narrative not found:', { entryId, narrativeIndex, entry });
+        showNotification('Narrative not found', 'error');
+        return;
+    }
+    
+    currentContextEntry = entry;
+    currentContextNarrativeIndex = narrativeIndex;
+    
+    // Display the narrative preview
+    const narrativePreview = document.getElementById('inline-narrative-preview');
+    if (narrativePreview) {
+        narrativePreview.textContent = entry.narratives[narrativeIndex].text;
+    }
+    
+    // Initialize context recorder if needed
+    if (!contextRecorder) {
+        contextRecorder = new ContextRecorder();
+    }
+    
+    // Show the inline recorder with animation
+    const recorder = document.getElementById('context-recorder-inline');
+    if (recorder) {
+        recorder.classList.add('active');
+        // Force reflow for animation
+        recorder.offsetHeight;
+    }
+}
+
+function closeContextRecorder() {
+    const recorder = document.getElementById('context-recorder-inline');
+    if (recorder) {
+        recorder.classList.remove('active');
+    }
+    
+    // Stop recording if active
+    if (contextRecorder && contextRecorder.isRecording) {
+        contextRecorder.stopRecording();
+    }
+    
+    // Reset state after animation
+    setTimeout(() => {
+        currentContextEntry = null;
+        currentContextNarrativeIndex = null;
+        // Clear transcription
+        const transcription = document.getElementById('context-transcription');
+        if (transcription) {
+            transcription.classList.add('hidden');
+            document.getElementById('context-live-text').textContent = '';
+        }
+    }, 300);
+}
+
+// Context Recorder Class
+class ContextRecorder {
+    constructor() {
+        this.isRecording = false;
+        this.mediaRecorder = null;
+        this.audioChunks = [];
+        this.recognition = null;
+        this.finalTranscript = '';
+        this.startTime = null;
+        this.timerInterval = null;
+        
+        this.initializeSpeechRecognition();
+        this.bindEvents();
+    }
+    
+    initializeSpeechRecognition() {
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            this.recognition = new SpeechRecognition();
+            
+            this.recognition.continuous = true;
+            this.recognition.interimResults = true;
+            this.recognition.lang = 'en-US';
+            
+            this.recognition.onresult = (event) => {
+                let interimTranscript = '';
+                let finalTranscript = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript + ' ';
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+                
+                this.finalTranscript += finalTranscript;
+                this.updateTranscriptionDisplay(this.finalTranscript + interimTranscript);
+            };
+            
+            this.recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                if (event.error === 'no-speech' && this.isRecording) {
+                    // Restart recognition
+                    this.recognition.stop();
+                    setTimeout(() => {
+                        if (this.isRecording) {
+                            this.recognition.start();
+                        }
+                    }, 100);
+                }
+            };
+        }
+    }
+    
+    bindEvents() {
+        const recordBtn = document.getElementById('context-record-btn');
+        if (recordBtn) {
+            recordBtn.addEventListener('click', () => this.toggleRecording());
+        }
+    }
+    
+    async toggleRecording() {
+        if (this.isRecording) {
+            await this.stopRecording();
+        } else {
+            await this.startRecording();
+        }
+    }
+    
+    async startRecording() {
+        try {
+            // Get microphone permission
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            
+            // Initialize MediaRecorder
+            this.mediaRecorder = new MediaRecorder(stream);
+            this.audioChunks = [];
+            
+            this.mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    this.audioChunks.push(event.data);
+                }
+            };
+            
+            this.mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+                await this.processRecording(audioBlob);
+            };
+            
+            // Start recording
+            this.mediaRecorder.start();
+            this.isRecording = true;
+            this.startTime = Date.now();
+            this.finalTranscript = '';
+            
+            // Start speech recognition
+            if (this.recognition) {
+                this.recognition.start();
+            }
+            
+            // Update UI
+            this.updateRecordingUI(true);
+            this.startTimer();
+            
+            // Show transcription area
+            const transcriptionArea = document.getElementById('context-transcription');
+            if (transcriptionArea) {
+                transcriptionArea.classList.remove('hidden');
+            }
+            
+        } catch (error) {
+            console.error('Error starting recording:', error);
+            showNotification('Failed to start recording', 'error');
+        }
+    }
+    
+    async stopRecording() {
+        if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+            this.mediaRecorder.stop();
+            this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        }
+        
+        if (this.recognition) {
+            this.recognition.stop();
+        }
+        
+        this.isRecording = false;
+        this.updateRecordingUI(false);
+        this.stopTimer();
+    }
+    
+    async processRecording(audioBlob) {
+        try {
+            // Update status
+            this.updateStatus('Processing your recording...');
+            
+            // If we have browser transcript, use it directly
+            if (this.finalTranscript.trim()) {
+                await this.enhanceNarrative(this.finalTranscript);
+            } else {
+                // Fall back to Whisper transcription
+                const transcription = await this.transcribeWithWhisper(audioBlob);
+                if (transcription) {
+                    await this.enhanceNarrative(transcription);
+                }
+            }
+            
+        } catch (error) {
+            console.error('Error processing recording:', error);
+            showNotification('Failed to process recording', 'error');
+            this.updateStatus('Failed to process recording');
+        }
+    }
+    
+    async transcribeWithWhisper(audioBlob) {
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'recording.webm');
+        
+        const response = await api.transcribeAudio(formData);
+        return response.text;
+    }
+    
+    async enhanceNarrative(contextText) {
+        if (!currentContextEntry || currentContextNarrativeIndex === null) {
+            showNotification('No narrative selected', 'error');
+            return;
+        }
+        
+        try {
+            this.updateStatus('Enhancing narrative with your context...');
+            
+            const originalNarrative = currentContextEntry.narratives[currentContextNarrativeIndex];
+            
+            // Log the data being sent for debugging
+            console.log('Enhancing narrative:', {
+                entryId: currentContextEntry.id,
+                narrativeIndex: currentContextNarrativeIndex,
+                originalText: originalNarrative.text,
+                contextText: contextText
+            });
+            
+            // Call backend to enhance the narrative
+            const response = await api.enhanceNarrativeContext(
+                currentContextEntry.id,
+                currentContextNarrativeIndex,
+                {
+                    original_narrative: originalNarrative.text,
+                    additional_context: contextText
+                }
+            );
+            
+            // Update local entry with enhanced narrative
+            if (response && response.entry) {
+                // Log the response for debugging
+                console.log('Enhancement response:', response);
+                console.log('Enhanced narrative:', response.enhanced_narrative);
+                console.log('Updated entry:', response.entry);
+                
+                await dbOperations.saveEntry(response.entry);
+                
+                // Update in-memory entries
+                const entryIndex = currentEntries.findIndex(e => e.id === currentContextEntry.id);
+                if (entryIndex !== -1) {
+                    currentEntries[entryIndex] = response.entry;
+                }
+                
+                // Close recorder and refresh
+                closeContextRecorder();
+                await loadDashboard();
+                showNotification('Narrative enhanced successfully', 'success');
+            } else {
+                console.error('No response or entry in enhancement response:', response);
+                showNotification('Failed to enhance narrative - no response', 'error');
+            }
+            
+        } catch (error) {
+            console.error('Error enhancing narrative - Full error:', error);
+            console.error('Error response:', error.response);
+            
+            // Show more specific error message
+            let errorMessage = 'Failed to enhance narrative';
+            if (error.response && error.response.data && error.response.data.error) {
+                errorMessage = error.response.data.error;
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+            
+            showNotification(errorMessage, 'error');
+            this.updateStatus('Failed to enhance narrative');
+        }
+    }
+    
+    updateRecordingUI(isRecording) {
+        const recordBtn = document.getElementById('context-record-btn');
+        const btnText = recordBtn?.querySelector('.btn-text');
+        
+        if (isRecording) {
+            recordBtn?.classList.add('recording');
+            if (btnText) btnText.textContent = 'Stop Recording';
+            this.updateStatus('Recording... Speak your additional context');
+        } else {
+            recordBtn?.classList.remove('recording');
+            if (btnText) btnText.textContent = 'Start Recording';
+            this.updateStatus('Ready to record');
+        }
+    }
+    
+    updateStatus(message) {
+        const statusText = document.getElementById('context-status-text');
+        if (statusText) {
+            statusText.textContent = message;
+        }
+    }
+    
+    updateTranscriptionDisplay(text) {
+        const liveText = document.getElementById('context-live-text');
+        if (liveText) {
+            liveText.textContent = text;
+        }
+    }
+    
+    startTimer() {
+        const timerElement = document.getElementById('context-timer');
+        if (!timerElement) return;
+        
+        this.timerInterval = setInterval(() => {
+            const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }, 1000);
+    }
+    
+    stopTimer() {
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
+        
+        const timerElement = document.getElementById('context-timer');
+        if (timerElement) {
+            timerElement.textContent = '';
+        }
+    }
+}
+
 // Safe wrapper functions with additional error handling
 async function safeToggleEntryStatus(entryId) {
     // Prevent double-clicks
@@ -2660,6 +3006,9 @@ async function safeToggleEntryStatus(entryId) {
 }
 
 async function safeToggleNarrativeStatus(entryId, narrativeIndex) {
+    // Status toggling is disabled - status is now automatic
+    return;
+    
     // Prevent double-clicks
     const statusIcon = document.querySelector(`[data-entry-id="${entryId}"][data-narrative-index="${narrativeIndex}"].narrative-status-icon`);
     if (statusIcon && statusIcon.dataset.processing === 'true') {
