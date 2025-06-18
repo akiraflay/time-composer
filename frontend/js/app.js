@@ -78,6 +78,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Load initial view
     loadDashboard();
+    
+    // Handle window resize for responsive table
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            // Only reload if in condensed (list) view
+            if (viewMode === 'condensed' && currentView === 'dashboard') {
+                loadDashboard();
+            }
+        }, 250);
+    });
 });
 
 // Event listeners - Streamlined
@@ -1399,13 +1411,13 @@ function renderCondensedView(entries, container) {
     table.innerHTML = `
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Client</th>
-                <th>Matter</th>
-                <th>Time</th>
-                <th>Description</th>
-                <th class="actions-column">Actions</th>
-                <th>Status</th>
+                <th class="condensed-date">Date</th>
+                <th class="condensed-client">Client</th>
+                <th class="condensed-matter">Matter</th>
+                <th class="condensed-time">Time</th>
+                <th class="condensed-description">Description</th>
+                <th class="condensed-actions actions-column">Actions</th>
+                <th class="condensed-status">Status</th>
             </tr>
         </thead>
         <tbody></tbody>
@@ -1510,11 +1522,17 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
     }
     
     const date = new Date(entry.created_at);
-    const dateStr = date.toLocaleDateString('en-US', { 
-        month: '2-digit', 
-        day: '2-digit', 
-        year: '2-digit' 
-    });
+    const isMobile = window.innerWidth <= 768;
+    const dateStr = isMobile 
+        ? date.toLocaleDateString('en-US', { 
+            month: 'numeric', 
+            day: 'numeric' 
+          })
+        : date.toLocaleDateString('en-US', { 
+            month: '2-digit', 
+            day: '2-digit', 
+            year: '2-digit' 
+          });
     const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     
     // Use narrative data if available, otherwise entry data
@@ -1525,14 +1543,15 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
     const status = entry.status || 'draft';
     
     // Truncate description for display
-    const maxDescLength = 150;
+    const maxDescLength = isMobile ? 100 : 150;
     const displayDesc = description.length > maxDescLength ? 
         description.substring(0, maxDescLength) + '...' : description;
     
+    // Same structure for mobile and desktop, just smaller on mobile
     row.innerHTML = `
         <td class="condensed-date">
             <div class="date-time">
-                <div>${dateStr}</div>
+                <span class="date-main">${dateStr}</span>
                 <div class="time-subtext">${timeStr}</div>
             </div>
         </td>
@@ -1557,7 +1576,7 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
                   data-field="${narrative ? 'hours' : 'total_hours'}" 
                   data-entry-id="${entry.id}"
                   ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}>
-                ${hours}h
+                ${hours}
             </span>
         </td>
         <td class="condensed-description">
@@ -1569,7 +1588,7 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
                       title="${description}">
                     ${displayDesc}
                 </span>
-                ${description.length > maxDescLength ? `
+                ${!isMobile && description.length > maxDescLength ? `
                     <button class="show-more-btn" onclick="toggleDescription(this)">more</button>
                 ` : ''}
             </div>
@@ -1592,14 +1611,58 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
                     </svg>
                 </button>
             </div>
+            <div class="mobile-action-menu">
+                <button onclick="toggleMobileMenu(this, ${entry.id})" title="Actions">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12,16A2,2 0 0,1 14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18A2,2 0 0,1 12,16M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M12,4A2,2 0 0,1 14,6A2,2 0 0,1 12,8A2,2 0 0,1 10,6A2,2 0 0,1 12,4Z"/>
+                    </svg>
+                </button>
+            </div>
         </td>
         <td class="condensed-status">
             ${createStatusDropdown(entry.id, status, entry)}
         </td>
     `;
     
-    // Setup inline editing
-    setupInlineEditing(row);
+    // Setup inline editing (desktop only)
+    if (!isMobile) {
+        setupInlineEditing(row);
+    }
+    
+    return row;
+}
+
+// Create mobile expanded row
+function createMobileExpandedRow(entry, narrative, narrativeIndex) {
+    const row = document.createElement('tr');
+    row.className = 'mobile-expanded-row';
+    
+    const clientCode = narrative?.client_code || entry.client_code || 'No Client';
+    const matterNumber = narrative?.matter_number || entry.matter_number || '';
+    const status = entry.status || 'draft';
+    
+    row.innerHTML = `
+        <td colspan="7">
+            <div class="mobile-details">
+                <div class="mobile-detail">
+                    <span class="mobile-detail-label">CLIENT</span>
+                    <span class="mobile-detail-value">${clientCode}</span>
+                </div>
+                <div class="mobile-detail">
+                    <span class="mobile-detail-label">MATTER</span>
+                    <span class="mobile-detail-value">${matterNumber || '-'}</span>
+                </div>
+                <div class="mobile-detail">
+                    <span class="mobile-detail-label">STATUS</span>
+                    <span class="mobile-detail-value">${status.toUpperCase()}</span>
+                </div>
+                <div class="mobile-detail">
+                    <span class="mobile-detail-label">FULL DESCRIPTION</span>
+                    <span class="mobile-detail-value">${narrative ? narrative.text : (entry.original_text || 'No description')}</span>
+                </div>
+            </div>
+        </td>
+    `;
     
     return row;
 }
@@ -3385,4 +3448,86 @@ function toggleDescription(btn) {
         btn.textContent = 'more';
         descriptionContent.classList.remove('expanded');
     }
+}
+
+// Mobile-specific functions
+function toggleMobileDescription(btn, entryId, narrativeIndex) {
+    const row = btn.closest('tr');
+    const descriptionDiv = row.querySelector('.description-text');
+    
+    // Get the full entry data
+    const entry = currentEntries.find(e => e.id === entryId);
+    if (!entry) return;
+    
+    const narrative = narrativeIndex !== null && entry.narratives ? 
+        entry.narratives[narrativeIndex] : null;
+    const fullText = narrative ? narrative.text : (entry.original_text || 'No description');
+    
+    if (btn.textContent === 'show more') {
+        descriptionDiv.textContent = fullText;
+        btn.textContent = 'show less';
+    } else {
+        const maxLength = 100;
+        descriptionDiv.textContent = fullText.substring(0, maxLength) + '...';
+        btn.textContent = 'show more';
+    }
+}
+
+function toggleMobileMenu(btn, entryId) {
+    // Close any other open menus
+    document.querySelectorAll('.mobile-dropdown-menu').forEach(menu => {
+        if (menu.dataset.entryId !== entryId.toString()) {
+            menu.remove();
+        }
+    });
+    
+    // Check if menu already exists
+    const existingMenu = document.querySelector(`.mobile-dropdown-menu[data-entry-id="${entryId}"]`);
+    if (existingMenu) {
+        existingMenu.remove();
+        return;
+    }
+    
+    // Create dropdown menu
+    const menu = document.createElement('div');
+    menu.className = 'mobile-dropdown-menu';
+    menu.dataset.entryId = entryId;
+    menu.innerHTML = `
+        <button class="mobile-dropdown-item" onclick="openEditModal(${entryId}); this.parentElement.remove();">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+            </svg>
+            Edit
+        </button>
+        <button class="mobile-dropdown-item" onclick="duplicateEntry(${entryId}); this.parentElement.remove();">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"/>
+            </svg>
+            Duplicate
+        </button>
+        <button class="mobile-dropdown-item delete" onclick="deleteEntry(${entryId}); this.parentElement.remove();">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
+            </svg>
+            Delete
+        </button>
+    `;
+    
+    // Position the menu
+    const btnRect = btn.getBoundingClientRect();
+    menu.style.position = 'absolute';
+    menu.style.top = btnRect.bottom + 'px';
+    menu.style.right = (window.innerWidth - btnRect.right) + 'px';
+    
+    document.body.appendChild(menu);
+    
+    // Close menu when clicking outside
+    setTimeout(() => {
+        document.addEventListener('click', function closeMenu(e) {
+            if (!menu.contains(e.target) && e.target !== btn) {
+                menu.remove();
+                document.removeEventListener('click', closeMenu);
+            }
+        });
+    }, 0);
 }
