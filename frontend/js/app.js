@@ -1408,16 +1408,21 @@ function renderCondensedView(entries, container) {
     
     const table = document.createElement('table');
     table.className = 'condensed-table';
+    
+    // Check if mobile screen to adjust headers
+    const isMobile = window.innerWidth <= 768;
+    const clientHeader = isMobile ? 'C/M' : 'Client';
+    
     table.innerHTML = `
         <thead>
             <tr>
                 <th class="condensed-date">Date</th>
-                <th class="condensed-client">Client</th>
-                <th class="condensed-matter">Matter</th>
+                <th class="condensed-client">${clientHeader}</th>
+                ${!isMobile ? '<th class="condensed-matter">Matter</th>' : ''}
                 <th class="condensed-time">Time</th>
                 <th class="condensed-description">Description</th>
                 <th class="condensed-actions actions-column">Actions</th>
-                <th class="condensed-status">Status</th>
+                ${!isMobile ? '<th class="condensed-status">Status</th>' : ''}
             </tr>
         </thead>
         <tbody></tbody>
@@ -1556,21 +1561,40 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
             </div>
         </td>
         <td class="condensed-client">
-            <span class="editable-field client-field" 
-                  data-field="client_code" 
-                  data-entry-id="${entry.id}"
-                  ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}>
-                ${clientCode}
-            </span>
+            ${isMobile ? `
+                <div class="client-matter">
+                    <span class="editable-field client-field client-main" 
+                          data-field="client_code" 
+                          data-entry-id="${entry.id}"
+                          ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}>
+                        ${clientCode}
+                    </span>
+                    <div class="matter-subtext">
+                        <span class="editable-field matter-field" 
+                              data-field="matter_number" 
+                              data-entry-id="${entry.id}"
+                              ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}>
+                            ${matterNumber || '-'}
+                        </span>
+                    </div>
+                </div>
+            ` : `
+                <span class="editable-field client-field" 
+                      data-field="client_code" 
+                      data-entry-id="${entry.id}"
+                      ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}>
+                    ${clientCode}
+                </span>
+            `}
         </td>
-        <td class="condensed-matter">
+        ${!isMobile ? `<td class="condensed-matter">
             <span class="editable-field matter-field" 
                   data-field="matter_number" 
                   data-entry-id="${entry.id}"
                   ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}>
                 ${matterNumber || '-'}
             </span>
-        </td>
+        </td>` : ''}
         <td class="condensed-time">
             <span class="editable-field hours-field" 
                   data-field="${narrative ? 'hours' : 'total_hours'}" 
@@ -1619,15 +1643,13 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
                 </button>
             </div>
         </td>
-        <td class="condensed-status">
+        ${!isMobile ? `<td class="condensed-status">
             ${createStatusDropdown(entry.id, status, entry)}
-        </td>
+        </td>` : ''}
     `;
     
-    // Setup inline editing (desktop only)
-    if (!isMobile) {
-        setupInlineEditing(row);
-    }
+    // Setup inline editing
+    setupInlineEditing(row);
     
     return row;
 }
