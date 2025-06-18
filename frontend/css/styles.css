@@ -3859,11 +3859,11 @@ main {
 /* CSS-only responsive client/matter handling */
 @media (max-width: 768px) {
     .condensed-table th.condensed-client {
-        font-size: 0.7rem;
+        font-size: 0.65rem;
     }
     
     .condensed-table th.condensed-client::after {
-        content: "/M";
+        content: " / Matter";
     }
     
     .condensed-table th.condensed-matter {
@@ -5584,8 +5584,16 @@ main {
     }
     
     /* Maintain header alignments on mobile */
+    .condensed-table th.condensed-client {
+        text-align: left;
+        padding-left: 0.0625rem;
+        padding-right: 0.03125rem;
+    }
+    
     .condensed-table th.condensed-time {
         text-align: right;
+        padding-left: 0.03125rem;
+        padding-right: 0.0625rem;
     }
     
     .condensed-table th.condensed-actions,
@@ -5604,6 +5612,8 @@ main {
     .condensed-table td.condensed-client {
         padding-top: 0.0625rem;
         padding-bottom: 0.0625rem;
+        padding-left: 0.0625rem;
+        padding-right: 0.03125rem;
     }
     
     /* Compact table rows */
@@ -5627,6 +5637,7 @@ main {
     .condensed-table td.condensed-date {
         width: 2.5rem;
         white-space: nowrap;
+        padding-right: 0.125rem;
     }
     
     .condensed-table td.condensed-date .date-time {
@@ -5650,7 +5661,7 @@ main {
     .condensed-table td.condensed-client .client-matter {
         display: flex;
         flex-direction: column;
-        gap: 1px;
+        gap: 0;
         align-items: flex-start;
     }
     
@@ -5674,18 +5685,22 @@ main {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        padding-left: 0.0625rem;
+        padding-right: 0.03125rem;
     }
     
     .condensed-table td.condensed-client .client-field {
         font-size: 0.875rem;
     }
     
-    /* Hours column - compact */
+    /* Hours column - compact and closer to client/matter */
     .condensed-table td.condensed-time {
         width: 2rem;
         text-align: right;
         font-weight: 600;
         color: var(--primary-color);
+        padding-left: 0.03125rem;
+        padding-right: 0.0625rem;
     }
     
     .condensed-table td.condensed-time .hours-field {
@@ -5698,6 +5713,7 @@ main {
         min-width: 0;
         background: transparent;
         overflow: visible;
+        padding-left: 0.0625rem;
     }
     
     .condensed-table td.condensed-description .description-content {
