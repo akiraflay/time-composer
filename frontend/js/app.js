@@ -81,12 +81,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Handle window resize for responsive table
     let resizeTimeout;
+    let previousWidth = window.innerWidth;
+    
     window.addEventListener('resize', () => {
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
-            // Only reload if in condensed (list) view
-            if (viewMode === 'condensed' && currentView === 'dashboard') {
+            const currentWidth = window.innerWidth;
+            const wasMobile = previousWidth <= 768;
+            const isMobile = currentWidth <= 768;
+            
+            // Only reload if crossing the mobile breakpoint and in list view
+            if (viewMode === 'condensed' && currentView === 'dashboard' && wasMobile !== isMobile) {
+                previousWidth = currentWidth;
                 loadDashboard();
+            } else {
+                previousWidth = currentWidth;
             }
         }, 250);
     });
@@ -1409,20 +1418,17 @@ function renderCondensedView(entries, container) {
     const table = document.createElement('table');
     table.className = 'condensed-table';
     
-    // Check if mobile screen to adjust headers
-    const isMobile = window.innerWidth <= 768;
-    const clientHeader = isMobile ? 'C/M' : 'Client';
-    
+    // Table structure is now handled by CSS for better performance
     table.innerHTML = `
         <thead>
             <tr>
                 <th class="condensed-date">Date</th>
-                <th class="condensed-client">${clientHeader}</th>
-                ${!isMobile ? '<th class="condensed-matter">Matter</th>' : ''}
+                <th class="condensed-client">Client</th>
+                <th class="condensed-matter">Matter</th>
                 <th class="condensed-time">Time</th>
                 <th class="condensed-description">Description</th>
                 <th class="condensed-actions actions-column">Actions</th>
-                ${!isMobile ? '<th class="condensed-status">Status</th>' : ''}
+                <th class="condensed-status">Status</th>
             </tr>
         </thead>
         <tbody></tbody>
@@ -1527,17 +1533,11 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
     }
     
     const date = new Date(entry.created_at);
-    const isMobile = window.innerWidth <= 768;
-    const dateStr = isMobile 
-        ? date.toLocaleDateString('en-US', { 
-            month: 'numeric', 
-            day: 'numeric' 
-          })
-        : date.toLocaleDateString('en-US', { 
-            month: '2-digit', 
-            day: '2-digit', 
-            year: '2-digit' 
-          });
+    const dateStr = date.toLocaleDateString('en-US', { 
+        month: '2-digit', 
+        day: '2-digit', 
+        year: '2-digit' 
+    });
     const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     
     // Use narrative data if available, otherwise entry data
@@ -1548,7 +1548,7 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
     const status = entry.status || 'draft';
     
     // Truncate description for display
-    const maxDescLength = isMobile ? 100 : 150;
+    const maxDescLength = 150;
     const displayDesc = description.length > maxDescLength ? 
         description.substring(0, maxDescLength) + '...' : description;
     
@@ -1561,40 +1561,31 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
             </div>
         </td>
         <td class="condensed-client">
-            ${isMobile ? `
-                <div class="client-matter">
-                    <span class="editable-field client-field client-main" 
-                          data-field="client_code" 
-                          data-entry-id="${entry.id}"
-                          ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}>
-                        ${clientCode}
-                    </span>
-                    <div class="matter-subtext">
-                        <span class="editable-field matter-field" 
-                              data-field="matter_number" 
-                              data-entry-id="${entry.id}"
-                              ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}>
-                            ${matterNumber || '-'}
-                        </span>
-                    </div>
-                </div>
-            ` : `
-                <span class="editable-field client-field" 
+            <div class="client-matter">
+                <span class="editable-field client-field client-main" 
                       data-field="client_code" 
                       data-entry-id="${entry.id}"
                       ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}>
                     ${clientCode}
                 </span>
-            `}
+                <div class="matter-subtext">
+                    <span class="editable-field matter-field" 
+                          data-field="matter_number" 
+                          data-entry-id="${entry.id}"
+                          ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}>
+                        ${matterNumber || '-'}
+                    </span>
+                </div>
+            </div>
         </td>
-        ${!isMobile ? `<td class="condensed-matter">
+        <td class="condensed-matter">
             <span class="editable-field matter-field" 
                   data-field="matter_number" 
                   data-entry-id="${entry.id}"
                   ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}>
                 ${matterNumber || '-'}
             </span>
-        </td>` : ''}
+        </td>
         <td class="condensed-time">
             <span class="editable-field hours-field" 
                   data-field="${narrative ? 'hours' : 'total_hours'}" 
@@ -1612,13 +1603,19 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
                       title="${description}">
                     ${displayDesc}
                 </span>
-                ${!isMobile && description.length > maxDescLength ? `
+                ${description.length > maxDescLength ? `
                     <button class="show-more-btn" onclick="toggleDescription(this)">more</button>
                 ` : ''}
             </div>
         </td>
         <td class="condensed-actions">
             <div class="table-actions">
+                ${narrativeIndex !== null ? `
+                <button class="table-action-btn context-btn" onclick="openContextRecordingModal(${entry.id}, ${narrativeIndex})" title="Add context to this narrative">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                        <path d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"/>
+                    </svg>
+                </button>` : ''}
                 <button class="table-action-btn edit-btn" onclick="openEditModal(${entry.id})" title="Edit">
                     <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                         <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
@@ -1643,9 +1640,9 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
                 </button>
             </div>
         </td>
-        ${!isMobile ? `<td class="condensed-status">
+        <td class="condensed-status">
             ${createStatusDropdown(entry.id, status, entry)}
-        </td>` : ''}
+        </td>
     `;
     
     // Setup inline editing
@@ -2747,6 +2744,13 @@ function openContextRecordingModal(entryId, narrativeIndex) {
         recorder.classList.add('active');
         // Force reflow for animation
         recorder.offsetHeight;
+        
+        // Auto-start recording after a brief delay to ensure modal is fully loaded
+        setTimeout(async () => {
+            if (contextRecorder && !contextRecorder.isRecording) {
+                await contextRecorder.startRecording();
+            }
+        }, 300);
     }
 }
 

@@ -1664,10 +1664,10 @@ main {
 }
 
 .context-mic-btn:hover {
-    background: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
-    box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+    background: var(--surface);
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     transform: scale(1.1);
 }
 
@@ -3509,6 +3509,7 @@ main {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.875rem;
+    contain: layout style;
 }
 
 .condensed-table thead {
@@ -3581,7 +3582,8 @@ main {
 }
 
 .condensed-table tbody tr {
-    transition: background-color 0.2s;
+    transition: background-color 0.1s ease-out;
+    will-change: background-color;
 }
 
 .condensed-table tbody tr:nth-child(even) {
@@ -3718,6 +3720,8 @@ main {
     width: 150px;
     text-align: left;
     white-space: nowrap;
+    transition: none;
+    will-change: width;
 }
 
 .client-field {
@@ -3729,6 +3733,7 @@ main {
     width: 120px;
     text-align: left;
     white-space: nowrap;
+    transition: none;
 }
 
 .matter-field {
@@ -3736,22 +3741,74 @@ main {
     color: var(--text-secondary);
 }
 
+/* CSS-only responsive client/matter handling */
+@media (max-width: 768px) {
+    .condensed-table th.condensed-client::after {
+        content: "/M";
+    }
+    
+    .condensed-table th.condensed-matter {
+        display: none;
+    }
+    
+    .condensed-table td.condensed-matter {
+        display: none;
+    }
+    
+    .condensed-table td.condensed-client {
+        width: auto;
+        max-width: 4rem;
+    }
+    
+    /* Hide matter subtext on desktop since we have a separate column */
+    .condensed-table td.condensed-client .matter-subtext {
+        display: block;
+    }
+    
+    /* Hide status column on mobile */
+    .condensed-table th.condensed-status,
+    .condensed-table td.condensed-status {
+        display: none;
+    }
+    
+    /* Hide show more button on mobile */
+    .show-more-btn {
+        display: none;
+    }
+}
+
+/* Hide matter subtext on desktop since we have a separate column */
+@media (min-width: 769px) {
+    .condensed-table td.condensed-client .matter-subtext {
+        display: none;
+    }
+}
+
 /* Day separators */
 .day-separator {
     background: var(--background);
 }
 
-.day-separator-content {
-    padding: 0.75rem 1rem;
+.day-separator td {
+    padding: 0.25rem 0;
     text-align: center;
-    border-top: 2px solid var(--border);
     border-bottom: 1px solid var(--border);
 }
 
+.day-separator-content {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    text-align: center;
+    background: var(--background);
+    border-radius: 0.75rem;
+}
+
 .day-separator-text {
+    font-size: 0.625rem;
     font-weight: 600;
-    color: var(--text-primary);
-    font-size: 0.875rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 /* Time Column */
@@ -3845,6 +3902,12 @@ main {
 
 .table-action-btn.delete-btn:hover {
     color: var(--error-color);
+}
+
+.table-action-btn.context-btn:hover {
+    background: var(--background);
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
 }
 
 /* Status Column */
@@ -3943,6 +4006,12 @@ main {
     background: var(--error-color);
     color: white;
     border-color: var(--error-color);
+}
+
+.condensed-actions .context-btn:hover {
+    background: var(--background);
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
 }
 
 /* Status styling in condensed view */
@@ -4668,8 +4737,8 @@ main {
 }
 
 .recording-bar.active {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    border-color: var(--text-secondary);
+    box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.1);
 }
 
 .recording-status-section {
