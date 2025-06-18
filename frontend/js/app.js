@@ -1601,11 +1601,32 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
                       data-entry-id="${entry.id}"
                       ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}
                       title="${description}">
-                    ${displayDesc}
+                    ${description}
                 </span>
-                ${description.length > maxDescLength ? `
-                    <button class="show-more-btn" onclick="toggleDescription(this)">more</button>
-                ` : ''}
+            </div>
+            <!-- Actions for mobile view -->
+            <div class="description-actions">
+                ${narrativeIndex !== null ? `
+                <button class="table-action-btn context-btn" onclick="openContextRecordingModal(${entry.id}, ${narrativeIndex})" title="Add context">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                        <path d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"/>
+                    </svg>
+                </button>` : ''}
+                <button class="table-action-btn edit-btn" onclick="openEditModal(${entry.id})" title="Edit">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                        <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+                    </svg>
+                </button>
+                <button class="table-action-btn duplicate-btn" onclick="duplicateEntry(${entry.id})" title="Duplicate">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                        <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"/>
+                    </svg>
+                </button>
+                <button class="table-action-btn delete-btn" onclick="deleteEntry(${entry.id})" title="Delete">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                        <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
+                    </svg>
+                </button>
             </div>
         </td>
         <td class="condensed-actions">
