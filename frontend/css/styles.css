@@ -3623,6 +3623,14 @@ main {
     position: relative;
 }
 
+/* On mobile, reduce description padding for higher density */
+@media (max-width: 768px) {
+    .condensed-table td.condensed-description {
+        padding-top: 0.25rem;
+        padding-bottom: 0.25rem;
+    }
+}
+
 .condensed-table tbody tr {
     transition: background-color 0.1s ease-out;
     will-change: background-color;
@@ -3736,7 +3744,7 @@ main {
     .description-actions {
         display: flex;
         gap: 0.25rem;
-        margin-top: 0.5rem;
+        margin-top: 0.25rem;
         justify-content: flex-end;
     }
     
@@ -3752,17 +3760,20 @@ main {
         display: flex;
         background: var(--surface);
         border: 1px solid var(--border);
-        border-radius: 0.375rem;
-        padding: 0.5rem;
+        border-radius: 0.25rem;
+        padding: 0.25rem;
         color: var(--text-secondary);
         transition: all 0.2s;
+        min-width: 32px;
+        min-height: 32px;
+        align-items: center;
+        justify-content: center;
     }
     
     .description-actions .context-btn:hover {
         background: var(--background);
         color: var(--primary-color);
         border-color: var(--primary-color);
-        transform: scale(1.05);
     }
 }
 
@@ -5564,7 +5575,7 @@ main {
     
     .condensed-table th {
         font-size: 0.75rem;
-        padding: 0.125rem 0.5rem;
+        padding: 0.125rem 0.25rem;
         text-transform: uppercase;
         letter-spacing: 0.025em;
         font-weight: 600;
@@ -5583,10 +5594,16 @@ main {
     }
     
     
-    /* Ensure consistent padding between headers and cells */
+    /* Ensure consistent padding between headers and cells - mobile override */
     .condensed-table th,
     .condensed-table td {
-        padding: 0.125rem 0.5rem;
+        padding: 0.125rem 0.25rem;
+    }
+    
+    /* Reduce vertical padding for client/matter cells */
+    .condensed-table td.condensed-client {
+        padding-top: 0.0625rem;
+        padding-bottom: 0.0625rem;
     }
     
     /* Compact table rows */
@@ -5600,7 +5617,7 @@ main {
     }
     
     .condensed-table td {
-        padding: 0.125rem 0.5rem;
+        padding: 0.125rem 0.25rem;
         font-size: 0.875rem;
         vertical-align: middle;
         line-height: 1.1;
@@ -5608,7 +5625,7 @@ main {
     
     /* Date column - very compact */
     .condensed-table td.condensed-date {
-        width: 3rem;
+        width: 2.5rem;
         white-space: nowrap;
     }
     
@@ -5619,44 +5636,41 @@ main {
     }
     
     .condensed-table td.condensed-date .date-main {
-        font-size: 0.875rem;
+        font-size: 0.8125rem;
         font-weight: 500;
         color: var(--text-primary);
     }
     
     .condensed-table td.condensed-date .time-subtext {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         color: var(--text-secondary);
     }
     
-    /* Client-matter inline styles for mobile */
+    /* Client-matter stacked styles for mobile */
     .condensed-table td.condensed-client .client-matter {
         display: flex;
-        flex-direction: row;
-        gap: 0.5rem;
-        align-items: center;
+        flex-direction: column;
+        gap: 1px;
+        align-items: flex-start;
     }
     
     .condensed-table td.condensed-client .client-main {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         font-weight: 600;
         color: var(--text-primary);
+        line-height: 1.1;
     }
     
     .condensed-table td.condensed-client .matter-subtext {
-        font-size: 0.75rem;
+        font-size: 0.65rem;
         color: var(--text-secondary);
-    }
-    
-    .condensed-table td.condensed-client .matter-subtext::before {
-        content: "•";
-        margin-right: 0.5rem;
-        color: var(--text-secondary);
+        line-height: 1;
+        margin-top: 0;
     }
     
     /* Client column - truncate if needed */
     .condensed-table td.condensed-client {
-        max-width: 4rem;
+        max-width: 3rem;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -5668,32 +5682,44 @@ main {
     
     /* Hours column - compact */
     .condensed-table td.condensed-time {
-        width: 2.5rem;
+        width: 2rem;
         text-align: right;
         font-weight: 600;
         color: var(--primary-color);
     }
     
     .condensed-table td.condensed-time .hours-field {
-        font-size: 0.875rem;
+        font-size: 0.8125rem;
     }
     
-    /* Description - two lines with ellipsis on mobile */
+    /* Description - three lines with ellipsis on mobile, maximized width */
     .condensed-table td.condensed-description {
-        max-width: 40vw;
+        width: auto;
+        min-width: 0;
+        background: transparent;
+        overflow: visible;
+    }
+    
+    .condensed-table td.condensed-description .description-content {
+        background: transparent;
+        overflow: visible;
     }
     
     .condensed-table td.condensed-description .description-text {
-        font-size: 0.875rem;
+        font-size: 0.8125rem;
         line-height: 1.2;
         color: var(--text-primary);
         display: -webkit-box;
-        -webkit-line-clamp: 2;
+        -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
         overflow: hidden;
         text-overflow: ellipsis;
-        white-space: normal; /* Override the nowrap setting to allow 2 lines */
+        white-space: normal;
+        background: transparent;
+        word-break: break-word;
     }
+    
+    /* No hover expansion on mobile - keep descriptions stable */
     
     /* Actions - accommodate all action buttons on mobile */
     .condensed-table td.condensed-actions {
