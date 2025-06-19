@@ -21,7 +21,8 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(awk:*)",
-      "Bash(kill:*)"
+      "Bash(kill:*)",
+      "mcp__puppeteer__puppeteer_navigate"
     ],
     "deny": []
   }

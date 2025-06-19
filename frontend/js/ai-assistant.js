@@ -517,23 +517,50 @@ class AIAssistant {
     
     // Create a mock response when API is unavailable
     createMockResponse(text) {
-        // Simple time extraction regex
-        const timeMatch = text.match(/(\d+\.?\d*)\s*(hours?|hrs?|minutes?|mins?)/i);
-        const hours = timeMatch ? parseFloat(timeMatch[1]) : 0.5;
+        // Simple time extraction regex - look for multiple time mentions
+        const timeMatches = text.matchAll(/(\d+\.?\d*)\s*(hours?|hrs?|minutes?|mins?)/gi);
+        const times = Array.from(timeMatches);
+        
+        // Try to split text into multiple activities if we find multiple time references
+        let narratives = [];
+        
+        if (times.length > 1) {
+            // Split by common separators
+            const parts = text.split(/[,;]|and then|after that|also/i);
+            parts.forEach((part, index) => {
+                const partTimeMatch = part.match(/(\d+\.?\d*)\s*(hours?|hrs?|minutes?|mins?)/i);
+                const hours = partTimeMatch ? parseFloat(partTimeMatch[1]) : 0.5;
+                const cleanText = part.replace(/(\d+\.?\d*)\s*(hours?|hrs?|minutes?|mins?)/i, '').trim();
+                
+                if (cleanText) {
+                    narratives.push({
+                        text: cleanText,
+                        hours: hours,
+                        task_code: 'L310'
+                    });
+                }
+            });
+        } else {
+            // Single activity
+            const hours = times[0] ? parseFloat(times[0][1]) : 0.5;
+            narratives.push({
+                text: text.trim(),
+                hours: hours,
+                task_code: 'L310'
+            });
+        }
+        
+        const totalHours = narratives.reduce((sum, n) => sum + n.hours, 0);
         
         return {
             entry: {
                 id: Date.now(),
-                narratives: [{
-                    text: text.trim(),
-                    hours: hours,
-                    task_code: 'L310'
-                }],
-                total_hours: hours,
+                narratives: narratives,
+                total_hours: totalHours,
                 created_at: new Date().toISOString()
             },
-            total_narratives: 1,
-            total_hours: hours,
+            total_narratives: narratives.length,
+            total_hours: totalHours,
             cleaned_text: text,
             original_text: text
         };
@@ -573,71 +600,81 @@ class AIAssistant {
         this.lastResponse = response; // Store for saving later
         this.clearThinking();
         
+        // Initialize assignment mode - default to individual for better UX
+        this.assignmentMode = 'individual'; // 'bulk' or 'individual'
+        
         // Add analysis message
         const narrativeCount = response.entry.narratives.length;
         const summary = `I've identified ${narrativeCount} billable ${narrativeCount === 1 ? 'activity' : 'activities'} totaling ${response.total_hours} hours:`;
         this.addAssistantMessage(summary);
         
-        // Add each narrative as part of a single entry message
+        // Add each narrative as part of a single entry message - ultra-compact design with integrated actions
         const entryHtml = `
-            <div class="ai-response">
-                <div class="response-header">
-                    <span>Recording Session</span>
-                    <div class="confidence-indicator">
+            <div class="ai-response ultra-compact-review">
+                <div class="response-header-compact">
+                    <span>Time Entries</span>
+                    <div class="confidence-indicator-compact">
                         <span>Confidence:</span>
                         <div class="confidence-bar">
                             <div class="confidence-fill" style="width: ${Math.random() * 30 + 70}%"></div>
                         </div>
                     </div>
                 </div>
-                <div class="entry-content">
-                    ${response.entry.narratives.map(narrative => `
-                        <div class="narrative-item">
-                            <strong>${narrative.hours} hours</strong><br>
-                            ${narrative.text}
+                <div class="entry-content scrollable-entries-compact" id="ai-entry-content">
+                    ${response.entry.narratives.map((narrative, index) => `
+                        <div class="narrative-item ultra-compact-narrative" data-narrative-index="${index}">
+                            <div class="narrative-main-row">
+                                <span class="narrative-hours-inline">${narrative.hours} hours</span>
+                                <span class="narrative-text-inline">${narrative.text}</span>
+                                <span class="narrative-index-inline">#${index + 1}</span>
+                            </div>
+                            <div class="narrative-inputs-row" id="narrative-fields-${index}">
+                                <input type="text" 
+                                       id="narrative-client-${index}" 
+                                       placeholder="Client Code" 
+                                       class="ultra-compact-input"
+                                       value="${narrative.client_code || ''}">
+                                <input type="text" 
+                                       id="narrative-matter-${index}" 
+                                       placeholder="Matter #" 
+                                       class="ultra-compact-input"
+                                       value="${narrative.matter_number || ''}">
+                                ${narrativeCount > 1 && index === 0 ? `
+                                    <button class="inline-apply-all-btn" 
+                                            onclick="window.aiAssistant.showBulkApply()"
+                                            title="Apply to all entries">
+                                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                                            <path d="M19,3H14.82C14.4,1.84 13.3,1 12,1C10.7,1 9.6,1.84 9.18,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M12,3A1,1 0 0,1 13,4A1,1 0 0,1 12,5A1,1 0 0,1 11,4A1,1 0 0,1 12,3M7,7H17V5H19V19H5V5H7V7Z"/>
+                                        </svg>
+                                    </button>
+                                ` : ''}
+                            </div>
                         </div>
                     `).join('')}
+                </div>
+                <div class="integrated-actions">
+                    <button class="action-btn primary-action" onclick="window.aiAssistant.confirmEntries()">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                            <path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z"/>
+                        </svg>
+                        Save entries
+                    </button>
+                    <button class="action-btn secondary-action" onclick="window.aiAssistant.requestModifications()">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                            <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+                        </svg>
+                        Edit
+                    </button>
+                    <button class="action-btn secondary-action" onclick="window.aiAssistant.startOver()">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                            <path d="M12,5V1L7,6L12,11V7A6,6 0 0,1 18,13A6,6 0 0,1 12,19A6,6 0 0,1 6,13H4A8,8 0 0,0 12,21A8,8 0 0,0 20,13A8,8 0 0,0 12,5Z"/>
+                        </svg>
+                        Restart
+                    </button>
                 </div>
             </div>
         `;
         this.addAssistantMessage(entryHtml, true);
-        
-        // Add client/matter input if needed
-        const clientMatterHtml = `
-            <div class="client-matter-input">
-                <p style="margin-bottom: 0.75rem; font-weight: 500;">Need to add client or matter codes?</p>
-                <div style="display: flex; gap: 0.75rem; margin-bottom: 1rem;">
-                    <input type="text" id="ai-client-code" placeholder="Client Code" style="padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; flex: 1;">
-                    <input type="text" id="ai-matter-code" placeholder="Matter Number" style="padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; flex: 1;">
-                </div>
-            </div>
-        `;
-        this.addAssistantMessage(clientMatterHtml, true);
-        
-        // Add confirmation actions
-        const actionsHtml = `
-            <div class="suggested-actions">
-                <button class="suggestion-btn" onclick="window.aiAssistant.confirmEntries()">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                        <path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z"/>
-                    </svg>
-                    Looks good, save these
-                </button>
-                <button class="suggestion-btn" onclick="window.aiAssistant.requestModifications()">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                        <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
-                    </svg>
-                    Make some changes
-                </button>
-                <button class="suggestion-btn" onclick="window.aiAssistant.startOver()">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                        <path d="M12,5V1L7,6L12,11V7A6,6 0 0,1 18,13A6,6 0 0,1 12,19A6,6 0 0,1 6,13H4A8,8 0 0,0 12,21A8,8 0 0,0 20,13A8,8 0 0,0 12,5Z"/>
-                    </svg>
-                    Start over
-                </button>
-            </div>
-        `;
-        this.addAssistantMessage(actionsHtml, true);
         
         this.updateStatus('Review and confirm your time entries');
     }
@@ -1273,6 +1310,66 @@ class AIAssistant {
         }
     }
 
+    // Show bulk apply modal
+    showBulkApply() {
+        // Create a modal for bulk apply
+        const modalHtml = `
+            <div class="bulk-apply-modal" id="bulk-apply-modal">
+                <div class="bulk-apply-content">
+                    <h3>Apply to All Entries</h3>
+                    <p>Enter client and matter codes to apply to all time entries:</p>
+                    <div class="bulk-apply-fields">
+                        <input type="text" id="bulk-client-code" placeholder="Client Code" class="bulk-apply-input">
+                        <input type="text" id="bulk-matter-code" placeholder="Matter Number" class="bulk-apply-input">
+                    </div>
+                    <div class="bulk-apply-actions">
+                        <button onclick="window.aiAssistant.applyBulkCodes()" class="apply-bulk-btn">Apply</button>
+                        <button onclick="window.aiAssistant.closeBulkApply()" class="cancel-bulk-btn">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Add modal to body
+        const modalDiv = document.createElement('div');
+        modalDiv.innerHTML = modalHtml;
+        document.body.appendChild(modalDiv.firstElementChild);
+        
+        // Focus on first input
+        setTimeout(() => {
+            document.getElementById('bulk-client-code')?.focus();
+        }, 100);
+    }
+    
+    // Apply bulk codes to all entries
+    applyBulkCodes() {
+        const clientCode = document.getElementById('bulk-client-code')?.value || '';
+        const matterCode = document.getElementById('bulk-matter-code')?.value || '';
+        
+        // Apply to all narrative inputs
+        this.lastResponse.entry.narratives.forEach((_, index) => {
+            const clientInput = document.getElementById(`narrative-client-${index}`);
+            const matterInput = document.getElementById(`narrative-matter-${index}`);
+            
+            if (clientInput && clientCode) clientInput.value = clientCode;
+            if (matterInput && matterCode) matterInput.value = matterCode;
+        });
+        
+        // Close modal
+        this.closeBulkApply();
+        
+        // Show confirmation
+        this.updateStatus('Applied codes to all entries');
+    }
+    
+    // Close bulk apply modal
+    closeBulkApply() {
+        const modal = document.getElementById('bulk-apply-modal');
+        if (modal) {
+            modal.remove();
+        }
+    }
+
     // Action Methods
     async confirmEntries() {
         this.addUserMessage('Yes, save these entries');
@@ -1282,22 +1379,33 @@ class AIAssistant {
             // Show saving process
             this.addAssistantThinking('Saving your time entries...');
             
-            // Get client/matter codes from inputs
-            const clientCode = document.getElementById('ai-client-code')?.value || '';
-            const matterCode = document.getElementById('ai-matter-code')?.value || '';
+            // Prepare narratives with client/matter codes
+            let narrativesToSave = [...this.lastResponse.entry.narratives];
             
-            // Save the single entry with all narratives (assuming we have response data stored)
+            // Since we default to individual mode now, always get individual codes
+            narrativesToSave = narrativesToSave.map((narrative, index) => {
+                const clientInput = document.getElementById(`narrative-client-${index}`);
+                const matterInput = document.getElementById(`narrative-matter-${index}`);
+                
+                return {
+                    ...narrative,
+                    client_code: clientInput?.value || narrative.client_code || '',
+                    matter_number: matterInput?.value || narrative.matter_number || ''
+                };
+            });
+            
+            // Save the single entry with all narratives
             if (this.lastResponse && this.lastResponse.entry) {
                 await dbOperations.saveEntry({
                     id: Date.now() + Math.random(), // Generate unique ID
                     original_text: this.lastResponse.original_text || this.finalTranscript,
                     cleaned_text: this.lastResponse.cleaned_text || this.finalTranscript,
-                    narratives: this.lastResponse.entry.narratives,
+                    narratives: narrativesToSave,
                     total_hours: this.lastResponse.entry.total_hours,
                     status: 'draft',
                     created_at: new Date().toISOString(),
-                    client_code: clientCode,
-                    matter_number: matterCode
+                    client_code: '', // Entry-level codes are now per-narrative
+                    matter_number: ''
                 });
             }
             

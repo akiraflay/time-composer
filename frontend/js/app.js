@@ -76,6 +76,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Make closeContextRecorder available globally for onclick handlers
     window.closeContextRecorder = closeContextRecorder;
     
+    // Initialize view toggle icon to show current state
+    const listIcon = document.getElementById('list-view-icon');
+    const cardIcon = document.getElementById('card-view-icon');
+    if (listIcon && cardIcon) {
+        // viewMode starts as 'expanded' (card view), so show card icon
+        listIcon.style.display = 'none';
+        cardIcon.style.display = 'block';
+    }
+    
     // Load initial view
     loadDashboard();
     
@@ -122,8 +131,9 @@ function setupEventListeners() {
             const listIcon = document.getElementById('list-view-icon');
             const cardIcon = document.getElementById('card-view-icon');
             if (listIcon && cardIcon) {
-                listIcon.style.display = 'block';
-                cardIcon.style.display = 'none';
+                // Show card icon when in expanded/card mode
+                listIcon.style.display = 'none';
+                cardIcon.style.display = 'block';
             }
             // Switch to dashboard
             switchView('dashboard');
@@ -444,13 +454,13 @@ function toggleViewMode() {
     
     if (listIcon && cardIcon) {
         if (viewMode === 'condensed') {
-            // Show card icon when in condensed/list mode (button shows what we'll switch TO)
-            listIcon.style.display = 'none';
-            cardIcon.style.display = 'block';
-        } else {
-            // Show list icon when in expanded/card mode (button shows what we'll switch TO)
+            // Show list icon when in condensed/list mode (current state)
             listIcon.style.display = 'block';
             cardIcon.style.display = 'none';
+        } else {
+            // Show card icon when in expanded/card mode (current state)
+            listIcon.style.display = 'none';
+            cardIcon.style.display = 'block';
         }
     }
     
