@@ -962,6 +962,13 @@ function createEntryCard(entry) {
                     <path d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"/>
                 </svg>
             </button>
+            ${isEnhanced ? `
+            <button class="undo-enhance-btn" onclick="undoEnhancement(${entry.id}, ${index})" title="Undo enhancement">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12.5,8C9.85,8 7.45,9 5.6,10.6L2,7V16H11L7.38,12.38C8.77,11.22 10.54,10.5 12.5,10.5C16.04,10.5 19.05,12.81 20.1,16L22.47,15.22C21.08,11.03 17.15,8 12.5,8Z"/>
+                </svg>
+            </button>
+            ` : ''}
             <div class="narrative-header">
                 <span class="editable-field editable-hours" data-field="hours" data-entry-id="${entry.id}" data-narrative-index="${index}">
                     ${n.hours} hours
@@ -1100,10 +1107,22 @@ function setupInlineEditing(card) {
     const editableFields = card.querySelectorAll('.editable-field');
     
     editableFields.forEach(field => {
-        field.addEventListener('click', (e) => {
+        // Remove any existing listeners to prevent duplicates
+        if (field.handleEditClick) {
+            field.removeEventListener('click', field.handleEditClick);
+        }
+        
+        // Store the handler reference on the field
+        field.handleEditClick = function(e) {
             e.stopPropagation();
-            startInlineEdit(field);
-        });
+            
+            // Don't start editing if already editing
+            if (!field.classList.contains('editing')) {
+                startInlineEdit(field);
+            }
+        };
+        
+        field.addEventListener('click', field.handleEditClick);
     });
 }
 
@@ -1122,7 +1141,22 @@ async function startInlineEdit(field) {
         // Total hours should not be editable - it's calculated from narratives
         return;
     } else if (fieldType === 'text') {
-        currentValue = field.textContent.trim();
+        // For narrative text, get the full text from the entry data
+        if (narrativeIndex !== undefined) {
+            try {
+                const entry = await dbOperations.getEntry(parseInt(entryId));
+                if (entry && entry.narratives && entry.narratives[narrativeIndex]) {
+                    currentValue = entry.narratives[narrativeIndex].text || '';
+                } else {
+                    currentValue = field.textContent.trim();
+                }
+            } catch (error) {
+                console.error('Failed to get narrative text:', error);
+                currentValue = field.textContent.trim();
+            }
+        } else {
+            currentValue = field.textContent.trim();
+        }
     } else if (fieldType === 'created_at') {
         // For date, we need to get the ISO string from the entry data
         try {
@@ -1146,6 +1180,9 @@ async function startInlineEdit(field) {
         currentValue = textNode ? textNode.textContent.trim() : field.textContent.trim();
     }
     
+    // Store original value for comparison
+    field.dataset.originalValue = currentValue;
+    
     // Mark as editing
     field.classList.add('editing');
     
@@ -1153,11 +1190,13 @@ async function startInlineEdit(field) {
     let inputElement;
     if (fieldType === 'text') {
         inputElement = document.createElement('textarea');
-        inputElement.className = 'inline-textarea';
+        inputElement.className = 'inline-textarea seamless';
         inputElement.value = currentValue;
+        inputElement.rows = 1;
+        // Auto-resize will happen after appending to DOM
     } else {
         inputElement = document.createElement('input');
-        inputElement.className = 'inline-input';
+        inputElement.className = 'inline-input seamless';
         
         if (fieldType === 'hours' || fieldType === 'total_hours') {
             inputElement.type = 'number';
@@ -1172,47 +1211,71 @@ async function startInlineEdit(field) {
         inputElement.value = currentValue;
     }
     
-    // Create action buttons
-    const actionsDiv = document.createElement('div');
-    actionsDiv.className = 'inline-actions';
-    
-    const saveBtn = document.createElement('button');
-    saveBtn.className = 'inline-save-btn';
-    saveBtn.textContent = 'Save';
-    saveBtn.onclick = (e) => {
-        e.stopPropagation();
-        saveInlineEdit(field, inputElement, entryId, fieldType, narrativeIndex);
-    };
-    
-    const cancelBtn = document.createElement('button');
-    cancelBtn.className = 'inline-cancel-btn';
-    cancelBtn.textContent = 'Cancel';
-    cancelBtn.onclick = (e) => {
-        e.stopPropagation();
-        cancelInlineEdit(field);
-    };
-    
-    actionsDiv.appendChild(saveBtn);
-    actionsDiv.appendChild(cancelBtn);
-    
-    // Replace content
+    // Replace content (no action buttons)
     field.innerHTML = '';
     field.appendChild(inputElement);
-    field.appendChild(actionsDiv);
     
-    // Focus input
+    // Focus and select input
     inputElement.focus();
     if (inputElement.select) inputElement.select();
     
-    // Handle escape key
+    // Auto-resize textarea on input
+    if (fieldType === 'text') {
+        const autoResize = () => {
+            inputElement.style.height = 'auto';
+            inputElement.style.height = (inputElement.scrollHeight + 2) + 'px';
+        };
+        
+        inputElement.addEventListener('input', autoResize);
+        
+        // Initial resize after DOM update
+        setTimeout(autoResize, 0);
+    }
+    
+    // Handle blur (auto-save)
+    inputElement.addEventListener('blur', async (e) => {
+        // Small delay to handle any click events first
+        setTimeout(() => {
+            // Only process if still in editing mode
+            if (field.classList.contains('editing')) {
+                const newValue = inputElement.value.trim();
+                const originalValue = field.dataset.originalValue;
+                
+                // Save if value changed, otherwise just exit edit mode
+                if (newValue !== originalValue) {
+                    saveInlineEdit(field, inputElement, entryId, fieldType, narrativeIndex);
+                } else {
+                    cancelInlineEditWithoutReload(field, originalValue, fieldType);
+                }
+            }
+        }, 100);
+    });
+    
+    // Handle keyboard shortcuts
     inputElement.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            e.stopPropagation();
-            cancelInlineEdit(field);
-        } else if (e.key === 'Enter' && !e.shiftKey && inputElement.type !== 'textarea') {
             e.preventDefault();
             e.stopPropagation();
-            saveInlineEdit(field, inputElement, entryId, fieldType, narrativeIndex);
+            // Cancel editing without saving
+            cancelInlineEditWithoutReload(field, currentValue, fieldType);
+        } else if (e.key === 'Enter' && !e.shiftKey && fieldType !== 'text') {
+            e.preventDefault();
+            e.stopPropagation();
+            // Save changes on Enter
+            const newValue = inputElement.value.trim();
+            if (newValue !== currentValue) {
+                saveInlineEdit(field, inputElement, entryId, fieldType, narrativeIndex);
+            } else {
+                cancelInlineEditWithoutReload(field, currentValue, fieldType);
+            }
+        } else if (e.key === 'Tab') {
+            // Let blur handle the save, then move to next field
+            setTimeout(() => {
+                const allEditableFields = document.querySelectorAll('.editable-field:not(.editing)');
+                if (allEditableFields.length > 0) {
+                    allEditableFields[0].click();
+                }
+            }, 150);
         }
     });
 }
@@ -1221,6 +1284,9 @@ async function saveInlineEdit(field, inputElement, entryId, fieldType, narrative
     const newValue = inputElement.value.trim();
     
     try {
+        // Show saving state
+        field.classList.add('saving');
+        
         // Get current entry data
         const entry = await dbOperations.getEntry(parseInt(entryId));
         if (!entry) {
@@ -1250,7 +1316,8 @@ async function saveInlineEdit(field, inputElement, entryId, fieldType, narrative
         // If no change, just cancel editing without showing error
         if (newValue === currentValue) {
             updateFieldDisplay(field, fieldType, newValue);
-            field.classList.remove('editing');
+            field.classList.remove('editing', 'saving');
+            delete field.dataset.originalValue;
             return;
         }
         
@@ -1286,7 +1353,14 @@ async function saveInlineEdit(field, inputElement, entryId, fieldType, narrative
         updateFieldDisplay(field, fieldType, newValue);
         
         // Remove editing state
-        field.classList.remove('editing');
+        field.classList.remove('editing', 'saving');
+        delete field.dataset.originalValue;
+        
+        // Show success feedback
+        field.classList.add('saved');
+        setTimeout(() => {
+            field.classList.remove('saved');
+        }, 1500);
         
         // Sync with server
         try {
@@ -1299,13 +1373,28 @@ async function saveInlineEdit(field, inputElement, entryId, fieldType, narrative
         
     } catch (error) {
         console.error('Failed to save inline edit:', error);
-        cancelInlineEdit(field);
-        // Show specific error message
-        if (error.message === 'Entry not found') {
-            alert('Entry not found. The entry may have been deleted. Please refresh the page.');
-        } else {
-            alert(`Failed to save changes: ${error.message}. Please try again.`);
-        }
+        field.classList.remove('saving');
+        
+        // Show inline error
+        field.classList.add('error');
+        
+        // Create error message
+        const errorMsg = document.createElement('div');
+        errorMsg.className = 'inline-error-message';
+        errorMsg.textContent = error.message === 'Entry not found' ? 
+            'Entry not found. Please refresh.' : 
+            'Failed to save. Click to retry.';
+        
+        // Show error for a few seconds
+        field.appendChild(errorMsg);
+        setTimeout(() => {
+            if (errorMsg.parentNode) {
+                errorMsg.remove();
+            }
+            field.classList.remove('error');
+            // Restore original value
+            cancelInlineEditWithoutReload(field, field.dataset.originalValue, fieldType);
+        }, 3000);
     }
 }
 
@@ -1313,6 +1402,14 @@ function cancelInlineEdit(field) {
     field.classList.remove('editing');
     // Trigger a reload of the dashboard to restore original content
     loadDashboard();
+}
+
+function cancelInlineEditWithoutReload(field, originalValue, fieldType) {
+    field.classList.remove('editing');
+    delete field.dataset.originalValue;
+    
+    // Restore original display without reloading
+    updateFieldDisplay(field, fieldType, originalValue);
 }
 
 function updateFieldDisplay(field, fieldType, newValue) {
@@ -1376,10 +1473,22 @@ function updateFieldDisplay(field, fieldType, newValue) {
 }
 
 function setupInlineEditingForField(field) {
-    field.addEventListener('click', (e) => {
+    // Remove existing listener if any
+    if (field.handleEditClick) {
+        field.removeEventListener('click', field.handleEditClick);
+    }
+    
+    // Create new handler
+    field.handleEditClick = function(e) {
         e.stopPropagation();
-        startInlineEdit(field);
-    });
+        
+        // Don't start editing if already editing
+        if (!field.classList.contains('editing')) {
+            startInlineEdit(field);
+        }
+    };
+    
+    field.addEventListener('click', field.handleEditClick);
 }
 
 // Condensed table view rendering
@@ -3203,6 +3312,63 @@ function updateEntryStatusInDOM(entryId, entry) {
     }
 }
 
+// Undo enhancement function
+async function undoEnhancement(entryId, narrativeIndex) {
+    try {
+        // Get the entry from local storage
+        const entry = await dbOperations.getEntry(entryId);
+        if (!entry || !entry.narratives || !entry.narratives[narrativeIndex]) {
+            showNotification('Entry not found', 'error');
+            return;
+        }
+        
+        const narrative = entry.narratives[narrativeIndex];
+        if (!narrative.metadata || !narrative.metadata.enhanced || !narrative.metadata.original_text) {
+            showNotification('No enhancement to undo', 'error');
+            return;
+        }
+        
+        // Restore the original text
+        narrative.text = narrative.metadata.original_text;
+        
+        // Clear enhancement metadata
+        delete narrative.metadata.enhanced;
+        delete narrative.metadata.original_text;
+        delete narrative.metadata.enhancement_context;
+        delete narrative.metadata.enhanced_at;
+        
+        // If metadata is now empty, remove it
+        if (Object.keys(narrative.metadata).length === 0) {
+            delete narrative.metadata;
+        }
+        
+        // Save the updated entry
+        await dbOperations.saveEntry(entry);
+        
+        // Update the backend if the entry has a real ID
+        if (typeof entryId === 'number') {
+            try {
+                await api.updateEntry(entryId, entry);
+            } catch (error) {
+                console.error('Failed to update backend:', error);
+            }
+        }
+        
+        // Update the UI
+        const entryIndex = currentEntries.findIndex(e => e.id === entryId);
+        if (entryIndex !== -1) {
+            currentEntries[entryIndex] = entry;
+        }
+        
+        renderFilteredEntries();
+        showNotification('Enhancement undone', 'success');
+        
+    } catch (error) {
+        console.error('Error undoing enhancement:', error);
+        showNotification('Failed to undo enhancement', 'error');
+    }
+}
+
 // Make functions available globally
 window.editEntry = editEntry;
 window.deleteEntry = deleteEntry;
@@ -3218,6 +3384,7 @@ window.addNewPreset = addNewPreset;
 window.duplicateEntry = duplicateEntry;
 window.toggleDescription = toggleDescription;
 window.changeEntryStatus = changeEntryStatus;
+window.undoEnhancement = undoEnhancement;
 
 // Bulk assignment functions
 function showBulkAssignmentControls() {

@@ -1531,6 +1531,7 @@ main {
     padding: 0.5rem;
     border-radius: 0.375rem;
     margin-bottom: 0.35rem;
+    position: relative; /* Ensure positioning context for absolute children */
 }
 
 .narrative-header {
@@ -1545,6 +1546,37 @@ main {
 .narrative-text {
     color: var(--text-primary);
     line-height: 1.5;
+    font-size: 0.9375rem;
+    margin-top: 0.75rem;
+    word-wrap: break-word;
+}
+
+/* Special handling for narrative text editing in cards */
+.narrative-text.editable-field.editing {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    background: transparent;
+    border: none;
+    min-height: 100px;
+}
+
+.narrative-text.editing .inline-textarea.seamless {
+    padding: 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--primary-color);
+    border-radius: 0.375rem;
+    width: 100%;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+    font-family: inherit;
+    min-height: auto;
+    overflow: hidden;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    resize: none;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
 }
 
 /* Narrative Meta Information */
@@ -1636,6 +1668,8 @@ main {
     display: flex;
     align-items: center;
     gap: 1rem;
+    position: relative;
+    min-height: 2rem; /* Ensure space for buttons */
 }
 
 .compact-view .narrative-header {
@@ -1644,7 +1678,7 @@ main {
     font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
 }
 
-.compact-view .narrative-text {
+.compact-view .narrative-text:not(.editing) {
     flex: 1;
     white-space: nowrap;
     overflow: hidden;
@@ -1652,9 +1686,11 @@ main {
     font-size: 0.875rem;
 }
 
-.compact-view .entry-card.expanded .narrative-text {
-    white-space: normal;
-    overflow: visible;
+.compact-view .entry-card.expanded .narrative-text,
+.compact-view .narrative-text.editing {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: initial !important;
 }
 
 .compact-view .entry-card.expanded .narrative-item {
@@ -1710,35 +1746,121 @@ main {
     transform: scale(0.95);
 }
 
-/* Enhanced Narrative Indicator */
+/* Enhanced Narrative Indicator - Very Subtle */
 .narrative-item.enhanced {
-    background: linear-gradient(135deg, #f0f9ff 0%, #eff6ff 100%);
-    border: 1px solid #bfdbfe;
+    background: linear-gradient(135deg, #fafbff 0%, #f8f9ff 100%);
+    border: 1px solid rgba(99, 102, 241, 0.08);
+    position: relative;
+    padding-right: 4rem; /* Extra space for both buttons */
+}
+
+/* Adjust padding for compact view */
+.compact-view .narrative-item.enhanced {
+    padding-right: 3.5rem;
 }
 
 .narrative-item.enhanced::before {
     content: '';
     position: absolute;
-    top: 0.5rem;
-    left: 0.5rem;
-    width: 6px;
-    height: 6px;
-    background: var(--primary-color);
+    top: 0.75rem;
+    left: 0.75rem;
+    width: 4px;
+    height: 4px;
+    background: rgba(99, 102, 241, 0.3);
     border-radius: 50%;
-    opacity: 0.8;
+    opacity: 0.6;
+    z-index: 1;
+}
+
+/* Undo enhancement button */
+.undo-enhance-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 3rem; /* Positioned left of mic button */
+    background: transparent;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    z-index: 10;
+}
+
+.narrative-item.enhanced:hover .undo-enhance-btn {
+    opacity: 1;
+}
+
+.undo-enhance-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #6b7280;
+}
+
+.undo-enhance-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Adjust button positioning for enhanced narratives */
+.narrative-item.enhanced .context-mic-btn {
+    right: 0.5rem; /* Keep mic button on far right */
+}
+
+.narrative-item.enhanced .undo-enhance-btn {
+    right: 3rem; /* Position undo button to the left of mic */
+}
+
+/* Compact view adjustments */
+.compact-view .narrative-item.enhanced .undo-enhance-btn {
+    top: 0.25rem;
+    right: 2.5rem;
+    padding: 0.125rem;
+}
+
+.compact-view .narrative-item.enhanced .context-mic-btn {
+    width: 28px;
+    height: 28px;
+}
+
+.compact-view .undo-enhance-btn svg {
+    width: 12px;
+    height: 12px;
+}
+
+/* Ultra-compact view adjustments */
+.entry-card.ultra-compact .narrative-item.enhanced .undo-enhance-btn {
+    display: none; /* Hide in ultra-compact unless expanded */
+}
+
+.entry-card.ultra-compact.expanded .narrative-item.enhanced .undo-enhance-btn {
+    display: flex;
+    top: 0.25rem;
+    right: 2.25rem;
 }
 
 /* Inline Editing Styles */
 .editable-field {
     position: relative;
     cursor: pointer;
-    padding: 0.125rem 0.25rem;
-    border-radius: 0.25rem;
     transition: all 0.2s ease;
-    border: 1px solid transparent;
 }
 
-.editable-field:hover {
+/* Small inline fields (hours, client, matter) */
+.editable-field:not(.narrative-text) {
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.editable-field:not(.narrative-text):hover {
     background-color: var(--background);
     border-color: var(--border);
     padding-right: 1.5rem;
@@ -1751,23 +1873,37 @@ main {
 }
 
 .editable-field .edit-icon {
-    display: none;
     position: absolute;
     top: 50%;
     right: 0.25rem;
     transform: translateY(-50%);
     color: var(--text-secondary);
-    opacity: 0.7;
     width: 14px;
     height: 14px;
+    opacity: 0;
+    transition: opacity 0.15s ease;
 }
 
 .editable-field:hover .edit-icon {
-    display: block;
+    opacity: 0.7;
 }
 
 .editable-field.editing .edit-icon {
     display: none;
+}
+
+/* Keep edit icon inline for narrative text */
+.narrative-text.editable-field .edit-icon {
+    width: 14px;
+    height: 14px;
+    margin-left: 0.25rem;
+    opacity: 0;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.narrative-text.editable-field:hover .edit-icon {
+    opacity: 0.5;
 }
 
 .inline-input {
@@ -1783,6 +1919,30 @@ main {
     box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
 }
 
+/* Seamless inline editing */
+.inline-input.seamless,
+.inline-textarea.seamless {
+    width: 100%;
+    padding: inherit;
+    border: 1px solid transparent;
+    border-radius: 0.25rem;
+    font-size: inherit;
+    font-family: inherit;
+    line-height: inherit;
+    background: transparent;
+    color: var(--text-primary);
+    outline: none;
+    transition: all 0.15s ease;
+    margin: -1px;
+}
+
+.inline-input.seamless:focus,
+.inline-textarea.seamless:focus {
+    background: var(--surface);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
 .inline-textarea {
     width: 100%;
     min-height: 5rem;
@@ -1796,6 +1956,93 @@ main {
     outline: none;
     box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
     resize: vertical;
+}
+
+.inline-textarea.seamless {
+    min-height: auto;
+    resize: none;
+    overflow: hidden;
+}
+
+/* Visual feedback states */
+.editable-field {
+    transition: all 0.15s ease;
+    position: relative;
+}
+
+.editable-field.saving {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.editable-field.saving::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 0.5rem;
+    width: 14px;
+    height: 14px;
+    margin-top: -7px;
+    border: 2px solid var(--primary-color);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.editable-field.saved {
+    background-color: rgba(34, 197, 94, 0.05);
+}
+
+.editable-field.saved::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    right: 0.5rem;
+    color: #22c55e;
+    font-weight: bold;
+    margin-top: -0.5em;
+    animation: fadeInOut 1.5s ease;
+}
+
+.editable-field.error {
+    background-color: rgba(239, 68, 68, 0.05);
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.1); }
+    100% { opacity: 0; transform: scale(0.9); }
+}
+
+/* Inline error message */
+.inline-error-message {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    background: var(--error-color);
+    color: white;
+    font-size: 0.75rem;
+    border-radius: 0.25rem;
+    z-index: 1000;
+    animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+    from { 
+        opacity: 0;
+        transform: translateY(-0.5rem);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .inline-actions {
@@ -3306,7 +3553,7 @@ main {
     font-weight: 600;
 }
 
-.compact-view .narrative-text {
+.compact-view .narrative-text:not(.editing) {
     flex: 1;
     font-size: 0.8125rem;
     line-height: 1.3;
@@ -3315,9 +3562,11 @@ main {
     white-space: nowrap;
 }
 
-.compact-view .entry-card.expanded .narrative-text {
-    white-space: normal;
-    overflow: visible;
+.compact-view .entry-card.expanded .narrative-text,
+.compact-view .narrative-text.editing {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: initial !important;
 }
 
 /* Quick expand indicator for compact cards */
