@@ -150,17 +150,24 @@ main {
 
 /* Icon control buttons - better visibility */
 .control-btn.icon-btn {
-    background: var(--surface);
-    border: 1px solid #cbd5e1;
+    background: white;
+    border: 1px solid #e2e8f0;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    color: #475569;
+    color: #64748b;
+    padding: 0;
 }
 
 .control-btn.icon-btn:hover {
     border-color: var(--primary-color);
     background: #f0f9ff;
     color: var(--primary-color);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+    transform: translateY(-1px);
+}
+
+.control-btn.icon-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(37, 99, 235, 0.2);
 }
 
 .control-btn.icon-btn:focus {
@@ -1528,9 +1535,9 @@ main {
 
 .narrative-item {
     background: var(--background);
-    padding: 0.5rem;
+    padding: 0.75rem;
     border-radius: 0.375rem;
-    margin-bottom: 0.35rem;
+    margin-bottom: 0.5rem;
     position: relative; /* Ensure positioning context for absolute children */
 }
 
@@ -1545,8 +1552,7 @@ main {
 
 .narrative-text {
     color: var(--text-primary);
-    line-height: 1.5;
-    font-size: 0.9375rem;
+    line-height: 1.6;
     margin-top: 0.75rem;
     word-wrap: break-word;
 }
@@ -1557,18 +1563,19 @@ main {
     margin: 0;
     width: 100%;
     background: transparent;
-    border: none;
-    min-height: 100px;
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    border-radius: 0.25rem;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.05);
 }
 
 .narrative-text.editing .inline-textarea.seamless {
-    padding: 0.5rem;
-    background: var(--surface);
-    border: 1px solid var(--primary-color);
-    border-radius: 0.375rem;
+    padding: 0.375rem;
+    background: transparent;
+    border: none;
+    border-radius: 0;
     width: 100%;
-    font-size: 0.9375rem;
-    line-height: 1.5;
+    font-size: inherit;
+    line-height: inherit;
     color: var(--text-primary);
     font-family: inherit;
     min-height: auto;
@@ -1576,16 +1583,17 @@ main {
     white-space: pre-wrap;
     word-wrap: break-word;
     resize: none;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    outline: none;
+    margin: 0;
+    display: block;
+}
+
+.narrative-text.editing .inline-textarea.seamless:focus {
+    outline: none;
 }
 
 /* Narrative Meta Information */
-.narrative-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-}
+/* Duplicate removed - see line 1537 for narrative-header styles */
 
 .narrative-status-icon {
     cursor: pointer;
@@ -1643,8 +1651,8 @@ main {
 .narrative-meta {
     display: flex;
     gap: 0.75rem;
-    margin-top: 0.35rem;
-    font-size: 0.8125rem;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
     color: var(--text-secondary);
 }
 
@@ -1894,12 +1902,19 @@ main {
 
 /* Keep edit icon inline for narrative text */
 .narrative-text.editable-field .edit-icon {
+    position: absolute;
+    right: 0;
+    top: 0;
     width: 14px;
     height: 14px;
-    margin-left: 0.25rem;
     opacity: 0;
-    display: inline-block;
-    vertical-align: middle;
+    padding: 0.25rem;
+    background: var(--surface);
+    border-radius: 0.25rem;
+}
+
+.narrative-text.editable-field {
+    position: relative;
 }
 
 .narrative-text.editable-field:hover .edit-icon {

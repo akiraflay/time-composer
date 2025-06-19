@@ -1193,6 +1193,13 @@ async function startInlineEdit(field) {
         inputElement.className = 'inline-textarea seamless';
         inputElement.value = currentValue;
         inputElement.rows = 1;
+        // Copy computed styles from the original element
+        const computedStyle = window.getComputedStyle(field);
+        inputElement.style.lineHeight = computedStyle.lineHeight;
+        inputElement.style.fontSize = computedStyle.fontSize;
+        inputElement.style.fontFamily = computedStyle.fontFamily;
+        inputElement.style.fontWeight = computedStyle.fontWeight;
+        inputElement.style.letterSpacing = computedStyle.letterSpacing;
         // Auto-resize will happen after appending to DOM
     } else {
         inputElement = document.createElement('input');
@@ -1223,7 +1230,12 @@ async function startInlineEdit(field) {
     if (fieldType === 'text') {
         const autoResize = () => {
             inputElement.style.height = 'auto';
-            inputElement.style.height = (inputElement.scrollHeight + 2) + 'px';
+            // Add extra pixels to prevent text cutoff
+            const scrollHeight = inputElement.scrollHeight;
+            const computedStyle = window.getComputedStyle(inputElement);
+            const lineHeight = parseFloat(computedStyle.lineHeight);
+            // Add a small buffer (about 1/4 line height) to prevent cutoff
+            inputElement.style.height = (scrollHeight + lineHeight * 0.25) + 'px';
         };
         
         inputElement.addEventListener('input', autoResize);
