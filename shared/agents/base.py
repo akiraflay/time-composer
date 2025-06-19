@@ -9,7 +9,7 @@ load_dotenv()
 class BaseAgent(ABC):
     """Base class for all processing agents"""
     
-    def __init__(self, model="gpt-4o"):
+    def __init__(self, model="gpt-4-turbo-preview"):
         self.model = model
         api_key = os.getenv('OPENAI_API_KEY')
         if not api_key:

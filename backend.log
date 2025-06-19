@@ -1,6 +1,5 @@
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
- * Serving Flask app 'simple_app'
+Database initialized successfully
+ * Serving Flask app 'app'
  * Debug mode: on
 [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
  * Running on all addresses (0.0.0.0)
@@ -9,495 +8,997 @@ OpenAI API Key: Set
 [33mPress CTRL+C to quit[0m
  * Restarting with stat
  * Debugger is active!
- * Debugger PIN: 575-830-486
- * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/config.py', reloading
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 575-830-486
- * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/config.py', reloading
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 575-830-486
- * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/config.py', reloading
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 575-830-486
- * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/config.py', reloading
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 575-830-486
- * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/config.py', reloading
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 575-830-486
- * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/config.py', reloading
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 575-830-486
- * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/app.py', reloading
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 575-830-486
- * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/config.py', reloading
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 575-830-486
- * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/run.py', reloading
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 575-830-486
-/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:34: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
-  return jsonify({'status': 'healthy', 'timestamp': datetime.utcnow().isoformat()})
-127.0.0.1 - - [10/Jun/2025 22:03:57] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:04:09] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:04:55] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:04:57] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:05:45] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:06:15] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:06:45] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:07:00] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:07:06] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:07:15] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:07:45] "GET /api/entries HTTP/1.1" 200 -
-[2025-06-10 22:08:12,197] ERROR in simple_app: Transcription error: Client.__init__() got an unexpected keyword argument 'proxies'
-127.0.0.1 - - [10/Jun/2025 22:08:12] "[35m[1mPOST /api/transcribe HTTP/1.1[0m" 500 -
-127.0.0.1 - - [10/Jun/2025 22:11:02] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:12:07] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:12:36] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:12:58] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:13:07] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:13:28] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:13:37] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:13:58] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:14:07] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:14:28] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:14:37] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:14:58] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:15:07] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:15:16] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:15:28] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:15:36] "GET /api/entries HTTP/1.1" 200 -
-[2025-06-10 22:15:39,955] ERROR in simple_app: Transcription error: Client.__init__() got an unexpected keyword argument 'proxies'
-127.0.0.1 - - [10/Jun/2025 22:15:39] "[35m[1mPOST /api/transcribe HTTP/1.1[0m" 500 -
-127.0.0.1 - - [10/Jun/2025 22:15:55] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:15:58] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:15:58] "GET /api/entries HTTP/1.1" 200 -
-[2025-06-10 22:16:04,290] ERROR in simple_app: Transcription error: Client.__init__() got an unexpected keyword argument 'proxies'
-127.0.0.1 - - [10/Jun/2025 22:16:04] "[35m[1mPOST /api/transcribe HTTP/1.1[0m" 500 -
-127.0.0.1 - - [10/Jun/2025 22:16:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:16:16] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:16:46] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:17:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:17:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:17:16] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:17:46] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:18:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:18:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:18:16] "GET /api/entries HTTP/1.1" 200 -
-[2025-06-10 22:18:24,220] ERROR in simple_app: Enhancement error: 
+ * Debugger PIN: 110-318-270
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 1320, in <module>
+    test(
+    ~~~~^
+        HandlerClass=handler_class,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        protocol=args.protocol,
+        ^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 1267, in test
+    with ServerClass(addr, HandlerClass) as httpd:
+         ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 457, in __init__
+    self.server_bind()
+    ~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 1314, in server_bind
+    return super().server_bind()
+           ~~~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 136, in server_bind
+    socketserver.TCPServer.server_bind(self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 473, in server_bind
+    self.socket.bind(self.server_address)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 48] Address already in use
+127.0.0.1 - - [18/Jun/2025 22:28:08] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:28:09] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:09] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:09] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:09] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:09] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:09] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:09] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:09] "OPTIONS /api/entries/1749947646274 HTTP/1.1" 200 -
+[2025-06-18 22:28:09,244] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:28:09] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:28:09] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:09] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:09] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:09] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:09] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:09] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:09] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:09] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:09] "OPTIONS /api/entries/1750201217119 HTTP/1.1" 200 -
+[2025-06-18 22:28:09,315] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:28:09] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:28:09] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:28:10] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:11] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:11] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:11] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:11] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:11] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:11] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+[2025-06-18 22:28:11,030] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:28:11] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:28:11] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:11] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:11] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:11] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:11] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:11] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:11] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:11] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+[2025-06-18 22:28:11,068] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:28:11] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:28:11] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:28:28] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:29] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:29] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:29] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:29] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:29] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:29] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:29] "OPTIONS /api/entries/1749947646274 HTTP/1.1" 200 -
+[2025-06-18 22:28:29,029] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:28:29] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:28:29] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:29] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:29] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:29] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:29] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:29] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:29] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:29] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:29] "OPTIONS /api/entries/1750201217119 HTTP/1.1" 200 -
+[2025-06-18 22:28:29,070] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:28:29] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:28:29] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:28:39] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:39] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:39] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:39] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:39] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:39] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:39] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:39] "OPTIONS /api/entries/1749947646274 HTTP/1.1" 200 -
+[2025-06-18 22:28:39,031] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:28:39] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:28:39] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:39] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:39] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:39] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:39] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:39] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:39] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:39] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:39] "OPTIONS /api/entries/1750201217119 HTTP/1.1" 200 -
+[2025-06-18 22:28:39,067] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:28:39] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:28:39] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:28:58] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:58] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:59] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:59] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:59] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:59] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:59] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:59] "OPTIONS /api/entries/1749947646274 HTTP/1.1" 200 -
+[2025-06-18 22:28:59,028] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:28:59] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:28:59] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:59] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:59] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:59] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:59] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:59] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:59] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:59] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:28:59] "OPTIONS /api/entries/1750201217119 HTTP/1.1" 200 -
+[2025-06-18 22:28:59,068] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:28:59] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:28:59] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:29:09] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:09] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:09] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:09] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:09] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:09] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:09] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:09] "OPTIONS /api/entries/1749947646274 HTTP/1.1" 200 -
+[2025-06-18 22:29:09,032] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:29:09] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:29:09] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:09] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:09] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:09] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:09] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:09] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:09] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:09] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:09] "OPTIONS /api/entries/1750201217119 HTTP/1.1" 200 -
+[2025-06-18 22:29:09,071] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:29:09] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:29:09] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:29:10] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:10] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:11] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:11] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:11] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:11] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:11] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+[2025-06-18 22:29:11,023] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:29:11] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:29:11] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:11] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:11] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:11] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:11] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:11] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:11] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:11] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+[2025-06-18 22:29:11,059] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:29:11] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:29:11] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:29:39] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:39] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:39] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:39] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:39] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:39] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:39] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:39] "OPTIONS /api/entries/1749947646274 HTTP/1.1" 200 -
+[2025-06-18 22:29:39,027] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:29:39] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:29:39] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:39] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:39] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:39] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:39] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:39] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:39] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:39] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:29:39] "OPTIONS /api/entries/1750201217119 HTTP/1.1" 200 -
+[2025-06-18 22:29:39,063] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:29:39] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:29:39] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:29:56] "OPTIONS /api/entries/1750201217119/enhance-context HTTP/1.1" 200 -
+[2025-06-18 22:29:56,305] ERROR in app: Error enhancing context: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2025-06-18 22:29:56,310] ERROR in app: Traceback: Traceback (most recent call last):
+  File "/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/app.py", line 208, in enhance_context
+    entry = TimeEntry.query.get_or_404(entry_id)
+  File "/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/venv/lib/python3.13/site-packages/flask_sqlalchemy/query.py", line 33, in get_or_404
+    abort(404, description=description)
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/venv/lib/python3.13/site-packages/flask/helpers.py", line 277, in abort
+    current_app.aborter(code, *args, **kwargs)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/venv/lib/python3.13/site-packages/werkzeug/exceptions.py", line 876, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
 
-You tried to access openai.ChatCompletion, but this is no longer supported in openai>=1.0.0 - see the README at https://github.com/openai/openai-python for the API.
+127.0.0.1 - - [18/Jun/2025 22:29:56] "[35m[1mPOST /api/entries/1750201217119/enhance-context HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:30:09] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:10] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:10] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:10] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:10] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:10] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:10] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:10] "OPTIONS /api/entries/1749947646274 HTTP/1.1" 200 -
+[2025-06-18 22:30:10,023] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:30:10] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:30:10] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:10] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:10] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:10] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:10] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:10] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:10] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:10] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:10] "OPTIONS /api/entries/1750201217119 HTTP/1.1" 200 -
+[2025-06-18 22:30:10,051] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:30:10] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:30:10] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:30:10] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:10] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+[2025-06-18 22:30:11,029] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+[2025-06-18 22:30:11,031] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+[2025-06-18 22:30:11,049] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+[2025-06-18 22:30:11,051] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:30:11] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:30:11] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:30:39] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:40] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:40] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:40] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:40] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:40] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:40] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:40] "OPTIONS /api/entries/1749947646274 HTTP/1.1" 200 -
+[2025-06-18 22:30:40,027] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:30:40] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:30:40] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:40] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:40] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:40] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:40] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:40] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:40] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:40] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:30:40] "OPTIONS /api/entries/1750201217119 HTTP/1.1" 200 -
+[2025-06-18 22:30:40,063] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:30:40] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:30:40] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:31:09] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:09] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:10] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:10] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:10] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:10] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:10] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:10] "OPTIONS /api/entries/1749947646274 HTTP/1.1" 200 -
+[2025-06-18 22:31:10,030] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:31:10] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:31:10] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:10] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:10] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:10] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:10] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:10] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:10] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:10] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:10] "OPTIONS /api/entries/1750201217119 HTTP/1.1" 200 -
+[2025-06-18 22:31:10,073] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:31:10] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:31:10] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:31:10] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+[2025-06-18 22:31:11,024] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+[2025-06-18 22:31:11,025] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+[2025-06-18 22:31:11,040] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+[2025-06-18 22:31:11,044] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:31:11] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:31:11] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:31:58] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:58] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:58] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:58] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:58] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:58] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:58] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:58] "OPTIONS /api/entries/1749947646274 HTTP/1.1" 200 -
+[2025-06-18 22:31:58,468] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:31:58] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:31:58] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:58] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:58] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:58] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:58] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:58] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:58] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:58] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:31:58] "OPTIONS /api/entries/1750201217119 HTTP/1.1" 200 -
+[2025-06-18 22:31:58,502] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:31:58] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:31:58] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:31:59] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:32:00] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:00] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:00] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:00] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:00] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:00] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:00] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+[2025-06-18 22:32:00,394] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:32:00] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:32:00] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:00] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:00] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:00] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:00] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:00] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:00] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:00] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+[2025-06-18 22:32:00,450] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:32:00] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:32:00] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:32:07] "POST /api/transcribe HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:32:07] "OPTIONS /api/entries/1750201217119/enhance-context HTTP/1.1" 200 -
+[2025-06-18 22:32:07,013] ERROR in app: Error enhancing context: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2025-06-18 22:32:07,014] ERROR in app: Traceback: Traceback (most recent call last):
+  File "/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/app.py", line 208, in enhance_context
+    entry = TimeEntry.query.get_or_404(entry_id)
+  File "/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/venv/lib/python3.13/site-packages/flask_sqlalchemy/query.py", line 33, in get_or_404
+    abort(404, description=description)
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/venv/lib/python3.13/site-packages/flask/helpers.py", line 277, in abort
+    current_app.aborter(code, *args, **kwargs)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/venv/lib/python3.13/site-packages/werkzeug/exceptions.py", line 876, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
 
-You can run `openai migrate` to automatically upgrade your codebase to use the 1.0.0 interface. 
+127.0.0.1 - - [18/Jun/2025 22:32:07] "[35m[1mPOST /api/entries/1750201217119/enhance-context HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:32:10] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "OPTIONS /api/entries/1749947646274 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "OPTIONS /api/entries/1749947646274 HTTP/1.1" 200 -
+[2025-06-18 22:32:11,026] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+[2025-06-18 22:32:11,028] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "OPTIONS /api/entries/1750201217119 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "OPTIONS /api/entries/1750201217119 HTTP/1.1" 200 -
+[2025-06-18 22:32:11,045] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+[2025-06-18 22:32:11,046] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:32:11] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:32:11] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:32:14] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:14] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:14] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:14] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:14] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:14] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:14] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+[2025-06-18 22:32:14,419] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:32:14] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:32:14] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:14] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:14] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:14] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:14] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:14] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:14] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:14] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+[2025-06-18 22:32:14,437] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:32:14] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:32:14] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:32:21] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:21] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:21] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:21] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:21] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:21] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:21] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:21] "OPTIONS /api/entries/1749947646274 HTTP/1.1" 200 -
+[2025-06-18 22:32:21,625] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:32:21] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:32:21] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:21] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:21] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:21] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:21] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:21] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:21] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:21] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:21] "OPTIONS /api/entries/1750201217119 HTTP/1.1" 200 -
+[2025-06-18 22:32:21,637] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:32:21] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:32:21] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:32:27] "OPTIONS /api/entries/1750201217119/enhance-context HTTP/1.1" 200 -
+[2025-06-18 22:32:27,581] ERROR in app: Error enhancing context: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2025-06-18 22:32:27,582] ERROR in app: Traceback: Traceback (most recent call last):
+  File "/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/app.py", line 208, in enhance_context
+    entry = TimeEntry.query.get_or_404(entry_id)
+  File "/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/venv/lib/python3.13/site-packages/flask_sqlalchemy/query.py", line 33, in get_or_404
+    abort(404, description=description)
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/venv/lib/python3.13/site-packages/flask/helpers.py", line 277, in abort
+    current_app.aborter(code, *args, **kwargs)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/venv/lib/python3.13/site-packages/werkzeug/exceptions.py", line 876, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
 
-Alternatively, you can pin your installation to the old version, e.g. `pip install openai==0.28`
+127.0.0.1 - - [18/Jun/2025 22:32:27] "[35m[1mPOST /api/entries/1750201217119/enhance-context HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:32:30] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:30] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:30] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:30] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:30] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:30] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:30] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:30] "OPTIONS /api/entries/1749947646274 HTTP/1.1" 200 -
+[2025-06-18 22:32:30,185] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:32:30] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:32:30] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:30] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:30] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:30] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:30] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:30] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:30] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:30] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:30] "OPTIONS /api/entries/1750201217119 HTTP/1.1" 200 -
+[2025-06-18 22:32:30,216] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:32:30] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:32:30] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:32:36] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:36] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:36] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:36] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:36] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:36] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:36] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:36] "OPTIONS /api/entries/1749947646274 HTTP/1.1" 200 -
+[2025-06-18 22:32:36,698] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:32:36] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:32:36] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:36] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:36] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:36] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:36] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:36] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:36] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:36] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:32:36] "OPTIONS /api/entries/1750201217119 HTTP/1.1" 200 -
+[2025-06-18 22:32:36,709] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:32:36] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:32:36] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:32:52] "OPTIONS /api/enhance HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:33:00] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:00] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:00] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:00] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:00] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:00] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:00] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:00] "OPTIONS /api/entries/1749947646274 HTTP/1.1" 200 -
+[2025-06-18 22:33:00,182] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:33:00] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:33:00] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:00] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:00] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:00] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:00] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:00] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:00] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:00] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:00] "OPTIONS /api/entries/1750201217119 HTTP/1.1" 200 -
+[2025-06-18 22:33:00,203] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:33:00] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:33:00] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:33:06] "POST /api/enhance HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:33:10] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:10] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "OPTIONS /api/entries/1749947646274 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "OPTIONS /api/entries/1749947646274 HTTP/1.1" 200 -
+[2025-06-18 22:33:11,018] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+[2025-06-18 22:33:11,019] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "OPTIONS /api/entries/1750201217119 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "OPTIONS /api/entries/1750201217119 HTTP/1.1" 200 -
+[2025-06-18 22:33:11,038] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+[2025-06-18 22:33:11,039] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:33:11] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:33:11] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:33:25] "OPTIONS /api/entries/39/enhance-context HTTP/1.1" 200 -
+[2025-06-18 22:33:25,035] INFO in app: Enhance context request for entry 39: {'narrative_index': 0, 'original_narrative': 'Attend a client relations dinner to foster professional relationships and discuss ongoing legal matters for a duration of 2.0 hours.', 'additional_context': 'shortness remove the time '}
+[2025-06-18 22:33:25,035] INFO in app: Entry narratives: [{'text': 'Attend a client relations dinner to foster professional relationships and discuss ongoing legal matters for a duration of 2.0 hours.', 'hours': 2.0, 'original': 'client relations dinner'}, {'text': 'Draft a memorandum for the Jarvis matter, dedicating 0.67 hours to the task.', 'hours': 0.67, 'original': 'worked on a memorandum for the Jarvis matter'}]
+[2025-06-18 22:33:25,035] INFO in app: Narrative index: 0, Type: <class 'int'>
+[2025-06-18 22:33:25,040] INFO in app: Context enhancer input: Original Narrative:
+Attend a client relations dinner to foster professional relationships and discuss ongoing legal matters for a duration of 2.0 hours.
 
-A detailed migration guide is available here: https://github.com/openai/openai-python/discussions/742
+Additional Context:
+shortness remove the time 
+[2025-06-18 22:33:26,700] INFO in app: Context Enhancement Debug:
+[2025-06-18 22:33:26,700] INFO in app:   Original: Attend a client relations dinner to foster professional relationships and discuss ongoing legal matters for a duration of 2.0 hours.
+[2025-06-18 22:33:26,700] INFO in app:   Context: shortness remove the time 
+[2025-06-18 22:33:26,700] INFO in app:   Enhanced: Attend a client relations dinner to foster professional relationships, discuss ongoing legal matters, and motion to dismiss.
+/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/app.py:282: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  updated_narratives[narrative_index]['metadata']['enhanced_at'] = datetime.utcnow().isoformat()
+/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/app.py:288: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  entry.updated_at = datetime.utcnow()
+[2025-06-18 22:33:26,705] INFO in app: Successfully enhanced narrative 0 for entry 39
+127.0.0.1 - - [18/Jun/2025 22:33:26] "POST /api/entries/39/enhance-context HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:33:30] "OPTIONS /api/entries/39 HTTP/1.1" 200 -
+/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/app.py:180: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  entry.updated_at = datetime.utcnow()
+127.0.0.1 - - [18/Jun/2025 22:33:30] "PUT /api/entries/39 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:33:30] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:30] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:30] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:30] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:30] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:30] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:30] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:30] "OPTIONS /api/entries/1749947646274 HTTP/1.1" 200 -
+[2025-06-18 22:33:30,190] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:33:30] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:33:30] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:30] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:30] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:30] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:30] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:30] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:30] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:30] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:30] "OPTIONS /api/entries/1750201217119 HTTP/1.1" 200 -
+[2025-06-18 22:33:30,208] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:33:30] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:33:30] "[33mOPTIONS /api/entries/1750303991506.5203 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:33:30] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:33:35] "OPTIONS /api/entries/39/enhance-context HTTP/1.1" 200 -
+[2025-06-18 22:33:35,256] INFO in app: Enhance context request for entry 39: {'narrative_index': 1, 'original_narrative': 'Draft a memorandum for the Jarvis matter, dedicating 0.67 hours to the task.', 'additional_context': 'make this longer '}
+[2025-06-18 22:33:35,256] INFO in app: Entry narratives: [{'text': 'Attend a client relations dinner to foster professional relationships, discuss ongoing legal matters, and motion to dismiss.', 'hours': 2.0, 'original': 'client relations dinner', 'metadata': {'enhanced': True, 'original_text': 'Attend a client relations dinner to foster professional relationships and discuss ongoing legal matters for a duration of 2.0 hours.', 'enhancement_context': 'shortness remove the time ', 'enhanced_at': '2025-06-19T03:33:26.701204'}}, {'text': 'Draft a memorandum for the Jarvis matter, dedicating 0.67 hours to the task.', 'hours': 0.67, 'original': 'worked on a memorandum for the Jarvis matter'}]
+[2025-06-18 22:33:35,256] INFO in app: Narrative index: 1, Type: <class 'int'>
+[2025-06-18 22:33:35,256] INFO in app: Context enhancer input: Original Narrative:
+Draft a memorandum for the Jarvis matter, dedicating 0.67 hours to the task.
 
-127.0.0.1 - - [10/Jun/2025 22:18:24] "[35m[1mPOST /api/enhance HTTP/1.1[0m" 500 -
-127.0.0.1 - - [10/Jun/2025 22:18:46] "GET /api/entries HTTP/1.1" 200 -
- * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/base.py', reloading
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
-OpenAI client initialization error: Client.__init__() got an unexpected keyword argument 'proxies'
-OpenAI client initialization error: Client.__init__() got an unexpected keyword argument 'proxies'
-OpenAI client initialization error: Client.__init__() got an unexpected keyword argument 'proxies'
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 575-830-486
- * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/base.py', reloading
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 575-830-486
-[2025-06-10 22:19:12,859] ERROR in simple_app: Enhancement error: Client.__init__() got an unexpected keyword argument 'proxies'
-127.0.0.1 - - [10/Jun/2025 22:19:12] "[35m[1mPOST /api/enhance HTTP/1.1[0m" 500 -
-127.0.0.1 - - [10/Jun/2025 22:19:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:19:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:19:16] "GET /api/entries HTTP/1.1" 200 -
- * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/base.py', reloading
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 575-830-486
-[2025-06-10 22:19:35,331] ERROR in simple_app: Enhancement error: Client.__init__() got an unexpected keyword argument 'proxies'
-127.0.0.1 - - [10/Jun/2025 22:19:35] "[35m[1mPOST /api/enhance HTTP/1.1[0m" 500 -
-127.0.0.1 - - [10/Jun/2025 22:19:46] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:20:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:20:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:20:16] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:20:46] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:21:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:21:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:21:16] "GET /api/entries HTTP/1.1" 200 -
-[2025-06-10 22:21:42,218] ERROR in simple_app: Enhancement error: Client.__init__() got an unexpected keyword argument 'proxies'
-127.0.0.1 - - [10/Jun/2025 22:21:42] "[35m[1mPOST /api/enhance HTTP/1.1[0m" 500 -
-127.0.0.1 - - [10/Jun/2025 22:21:46] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:22:08] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:22:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:22:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:22:16] "GET /api/entries HTTP/1.1" 200 -
-[2025-06-10 22:22:18,811] ERROR in simple_app: Enhancement error: Client.__init__() got an unexpected keyword argument 'proxies'
-127.0.0.1 - - [10/Jun/2025 22:22:18] "[35m[1mPOST /api/enhance HTTP/1.1[0m" 500 -
-127.0.0.1 - - [10/Jun/2025 22:22:38] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:22:46] "GET /api/entries HTTP/1.1" 200 -
- * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/base.py', reloading
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 575-830-486
-[2025-06-10 22:22:59,860] ERROR in simple_app: Enhancement error: Client.__init__() got an unexpected keyword argument 'proxies'
-127.0.0.1 - - [10/Jun/2025 22:22:59] "[35m[1mPOST /api/enhance HTTP/1.1[0m" 500 -
- * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/base.py', reloading
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 575-830-486
-127.0.0.1 - - [10/Jun/2025 22:23:08] "GET /api/entries HTTP/1.1" 200 -
- * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/base.py', reloading
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 575-830-486
-127.0.0.1 - - [10/Jun/2025 22:23:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:23:13] "GET /api/entries HTTP/1.1" 200 -
-[2025-06-10 22:23:23,057] ERROR in simple_app: Enhancement error: Client.__init__() got an unexpected keyword argument 'proxies'
-127.0.0.1 - - [10/Jun/2025 22:23:23] "[35m[1mPOST /api/enhance HTTP/1.1[0m" 500 -
-[2025-06-10 22:23:28,548] ERROR in simple_app: Enhancement error: Client.__init__() got an unexpected keyword argument 'proxies'
-127.0.0.1 - - [10/Jun/2025 22:23:28] "[35m[1mPOST /api/enhance HTTP/1.1[0m" 500 -
-127.0.0.1 - - [10/Jun/2025 22:23:38] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:23:43] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:24:08] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:24:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:24:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:24:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:24:13] "GET /api/entries HTTP/1.1" 200 -
-[2025-06-10 22:24:15,385] ERROR in simple_app: Enhancement error: Client.__init__() got an unexpected keyword argument 'proxies'
-127.0.0.1 - - [10/Jun/2025 22:24:15] "[35m[1mPOST /api/enhance HTTP/1.1[0m" 500 -
- * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/venv/lib/python3.13/site-packages/openai/types/fine_tuning/jobs/checkpoint_list_params.py', reloading
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 575-830-486
-127.0.0.1 - - [10/Jun/2025 22:24:38] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:24:43] "GET /api/entries HTTP/1.1" 200 -
-[2025-06-10 22:24:44,046] ERROR in simple_app: Enhancement error: Client.__init__() got an unexpected keyword argument 'proxies'
-127.0.0.1 - - [10/Jun/2025 22:24:44] "[35m[1mPOST /api/enhance HTTP/1.1[0m" 500 -
- * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/venv/lib/python3.13/site-packages/httpx/_transports/__init__.py', reloading
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 575-830-486
-127.0.0.1 - - [10/Jun/2025 22:25:08] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:25:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:25:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:25:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:25:13] "GET /api/entries HTTP/1.1" 200 -
-/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:93: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
-  'created_at': datetime.utcnow().isoformat(),
-/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:94: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
-  'updated_at': datetime.utcnow().isoformat(),
-127.0.0.1 - - [10/Jun/2025 22:25:38] "POST /api/enhance HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:25:43] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:26:05] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:26:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:26:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:26:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:26:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:26:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:26:15] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:26:43] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:26:45] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:27:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:27:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:27:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:27:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:27:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:27:15] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:27:45] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:28:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:28:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:28:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:28:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:28:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:28:15] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:28:45] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:29:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:29:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:29:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:29:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:29:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:29:15] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:29:45] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:30:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:30:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:30:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:30:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:30:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:30:15] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:30:41] "POST /api/transcribe HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:30:41] "OPTIONS /api/enhance HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:30:44] "POST /api/enhance HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:30:45] "OPTIONS /api/entries/2 HTTP/1.1" 200 -
-/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:148: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
-  entry['updated_at'] = datetime.utcnow().isoformat()
-127.0.0.1 - - [10/Jun/2025 22:30:45] "PUT /api/entries/2 HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:30:45] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:31:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:31:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:31:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:31:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:31:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:31:15] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:31:45] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:32:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:32:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:32:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:32:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:32:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:32:15] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:32:45] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:33:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:33:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:33:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:33:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:33:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:33:15] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:33:45] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:34:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:34:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:34:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:34:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:34:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:34:15] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:34:45] "OPTIONS /api/entries/2 HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:34:45] "PUT /api/entries/2 HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:34:45] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:35:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:35:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:35:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:35:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:35:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:35:15] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:35:40] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:35:45] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:36:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:36:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:36:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:36:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:36:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:36:15] "GET /api/entries HTTP/1.1" 200 -
- * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/separator.py', reloading
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 575-830-486
- * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/separator.py', reloading
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 575-830-486
-127.0.0.1 - - [10/Jun/2025 22:36:45] "GET /api/entries HTTP/1.1" 200 -
-/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:93: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
-  'created_at': datetime.utcnow().isoformat(),
-/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:94: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
-  'updated_at': datetime.utcnow().isoformat(),
-127.0.0.1 - - [10/Jun/2025 22:37:10] "POST /api/enhance HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:37:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:37:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:37:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:37:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:37:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:37:15] "GET /api/entries HTTP/1.1" 200 -
- * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/separator.py', reloading
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 575-830-486
-127.0.0.1 - - [10/Jun/2025 22:37:45] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:38:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:38:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:38:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:38:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:38:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:38:15] "GET /api/entries HTTP/1.1" 200 -
- * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/refiner.py', reloading
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 575-830-486
-127.0.0.1 - - [10/Jun/2025 22:38:45] "GET /api/entries HTTP/1.1" 200 -
-/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:93: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
-  'created_at': datetime.utcnow().isoformat(),
-/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:94: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
-  'updated_at': datetime.utcnow().isoformat(),
-127.0.0.1 - - [10/Jun/2025 22:38:48] "POST /api/enhance HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:39:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:39:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:39:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:39:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:39:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:39:15] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:39:16] "POST /api/enhance HTTP/1.1" 200 -
- * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/pipeline.py', reloading
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 575-830-486
-127.0.0.1 - - [10/Jun/2025 22:39:45] "GET /api/entries HTTP/1.1" 200 -
-/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:93: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
-  'created_at': datetime.utcnow().isoformat(),
-/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:94: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
-  'updated_at': datetime.utcnow().isoformat(),
-127.0.0.1 - - [10/Jun/2025 22:39:58] "POST /api/enhance HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:40:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:40:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:40:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:40:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:40:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:40:15] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:40:45] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:41:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:41:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:41:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:41:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:41:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:41:15] "GET /api/entries HTTP/1.1" 200 -
- * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/grammar.py', reloading
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 575-830-486
- * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/separator.py', reloading
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 575-830-486
- * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/shared/agents/refiner.py', reloading
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 575-830-486
-127.0.0.1 - - [10/Jun/2025 22:41:45] "GET /api/entries HTTP/1.1" 200 -
-/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:93: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
-  'created_at': datetime.utcnow().isoformat(),
-/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:94: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
-  'updated_at': datetime.utcnow().isoformat(),
-127.0.0.1 - - [10/Jun/2025 22:42:05] "POST /api/enhance HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:42:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:42:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:42:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:42:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:42:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:42:15] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:42:26] "POST /api/enhance HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:42:45] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:43:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:43:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:43:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:43:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:43:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:43:15] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:43:45] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:44:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:44:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:44:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:44:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:44:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:44:15] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:44:45] "GET /api/entries HTTP/1.1" 200 -
- * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/app.py', reloading
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 575-830-486
-/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:93: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
-  'created_at': datetime.utcnow().isoformat(),
-/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:94: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
-  'updated_at': datetime.utcnow().isoformat(),
-127.0.0.1 - - [10/Jun/2025 22:45:02] "POST /api/enhance HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:45:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:45:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:45:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:45:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:45:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:45:15] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:45:16] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:45:45] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:45:46] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:46:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:46:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:46:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:46:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:46:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:46:15] "POST /api/enhance HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:46:15] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:46:16] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:46:23] "POST /api/enhance HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:46:29] "GET /api/entries HTTP/1.1" 200 -
- * Detected change in '/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/app.py', reloading
-🚀 Starting Time Composer API...
-OpenAI API Key: Set
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 575-830-486
-127.0.0.1 - - [10/Jun/2025 22:46:45] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:46:46] "GET /api/entries HTTP/1.1" 200 -
-/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:93: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
-  'created_at': datetime.utcnow().isoformat(),
-/Users/uditgupta/Documents/GitHub/timecomposer4/time-composer/backend/simple_app.py:94: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
-  'updated_at': datetime.utcnow().isoformat(),
-127.0.0.1 - - [10/Jun/2025 22:46:58] "POST /api/enhance HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:47:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:47:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:47:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:47:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:47:13] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:47:15] "GET /api/entries HTTP/1.1" 200 -
-127.0.0.1 - - [10/Jun/2025 22:47:16] "GET /api/entries HTTP/1.1" 200 -
-/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/resource_tracker.py:276: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown: {'/mp-6bwe75k3'}
-  warnings.warn(
+Additional Context:
+make this longer 
+[2025-06-18 22:33:36,702] INFO in app: Context Enhancement Debug:
+[2025-06-18 22:33:36,703] INFO in app:   Original: Draft a memorandum for the Jarvis matter, dedicating 0.67 hours to the task.
+[2025-06-18 22:33:36,703] INFO in app:   Context: make this longer 
+[2025-06-18 22:33:36,703] INFO in app:   Enhanced: Draft a memorandum for the Jarvis matter, dedicating 0.67 hours to the task, and motion to dismiss.
+[2025-06-18 22:33:36,705] INFO in app: Successfully enhanced narrative 1 for entry 39
+127.0.0.1 - - [18/Jun/2025 22:33:36] "POST /api/entries/39/enhance-context HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:33:41] "OPTIONS /api/entries/39/enhance-context HTTP/1.1" 200 -
+[2025-06-18 22:33:41,916] INFO in app: Enhance context request for entry 39: {'narrative_index': 1, 'original_narrative': 'Draft a memorandum for the Jarvis matter, dedicating 0.67 hours to the task, and motion to dismiss.', 'additional_context': 'shortness '}
+[2025-06-18 22:33:41,916] INFO in app: Entry narratives: [{'text': 'Attend a client relations dinner to foster professional relationships, discuss ongoing legal matters, and motion to dismiss.', 'hours': 2.0, 'original': 'client relations dinner', 'metadata': {'enhanced': True, 'original_text': 'Attend a client relations dinner to foster professional relationships and discuss ongoing legal matters for a duration of 2.0 hours.', 'enhancement_context': 'shortness remove the time ', 'enhanced_at': '2025-06-19T03:33:26.701204'}}, {'text': 'Draft a memorandum for the Jarvis matter, dedicating 0.67 hours to the task, and motion to dismiss.', 'hours': 0.67, 'original': 'worked on a memorandum for the Jarvis matter', 'metadata': {'enhanced': True, 'original_text': 'Draft a memorandum for the Jarvis matter, dedicating 0.67 hours to the task.', 'enhancement_context': 'make this longer ', 'enhanced_at': '2025-06-19T03:33:36.703237'}}]
+[2025-06-18 22:33:41,916] INFO in app: Narrative index: 1, Type: <class 'int'>
+[2025-06-18 22:33:41,916] INFO in app: Context enhancer input: Original Narrative:
+Draft a memorandum for the Jarvis matter, dedicating 0.67 hours to the task, and motion to dismiss.
+
+Additional Context:
+shortness 
+[2025-06-18 22:33:46,019] INFO in app: Context Enhancement Debug:
+[2025-06-18 22:33:46,019] INFO in app:   Original: Draft a memorandum for the Jarvis matter, dedicating 0.67 hours to the task, and motion to dismiss.
+[2025-06-18 22:33:46,019] INFO in app:   Context: shortness 
+[2025-06-18 22:33:46,020] INFO in app:   Enhanced: Draft a memorandum for the Jarvis matter, dedicating 0.67 hours to the task, including the motion to dismiss due to the shortness of the provided documentation.
+[2025-06-18 22:33:46,022] INFO in app: Successfully enhanced narrative 1 for entry 39
+127.0.0.1 - - [18/Jun/2025 22:33:46] "POST /api/entries/39/enhance-context HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:33:52] "OPTIONS /api/entries/39/enhance-context HTTP/1.1" 200 -
+[2025-06-18 22:33:52,060] INFO in app: Enhance context request for entry 39: {'narrative_index': 1, 'original_narrative': 'Draft a memorandum for the Jarvis matter, dedicating 0.67 hours to the task, including the motion to dismiss due to the shortness of the provided documentation.', 'additional_context': 'remove the time '}
+[2025-06-18 22:33:52,060] INFO in app: Entry narratives: [{'text': 'Attend a client relations dinner to foster professional relationships, discuss ongoing legal matters, and motion to dismiss.', 'hours': 2.0, 'original': 'client relations dinner', 'metadata': {'enhanced': True, 'original_text': 'Attend a client relations dinner to foster professional relationships and discuss ongoing legal matters for a duration of 2.0 hours.', 'enhancement_context': 'shortness remove the time ', 'enhanced_at': '2025-06-19T03:33:26.701204'}}, {'text': 'Draft a memorandum for the Jarvis matter, dedicating 0.67 hours to the task, including the motion to dismiss due to the shortness of the provided documentation.', 'hours': 0.67, 'original': 'worked on a memorandum for the Jarvis matter', 'metadata': {'enhanced': True, 'original_text': 'Draft a memorandum for the Jarvis matter, dedicating 0.67 hours to the task, and motion to dismiss.', 'enhancement_context': 'shortness ', 'enhanced_at': '2025-06-19T03:33:46.020059'}}]
+[2025-06-18 22:33:52,061] INFO in app: Narrative index: 1, Type: <class 'int'>
+[2025-06-18 22:33:52,061] INFO in app: Context enhancer input: Original Narrative:
+Draft a memorandum for the Jarvis matter, dedicating 0.67 hours to the task, including the motion to dismiss due to the shortness of the provided documentation.
+
+Additional Context:
+remove the time 
+[2025-06-18 22:33:54,213] INFO in app: Context Enhancement Debug:
+[2025-06-18 22:33:54,213] INFO in app:   Original: Draft a memorandum for the Jarvis matter, dedicating 0.67 hours to the task, including the motion to dismiss due to the shortness of the provided documentation.
+[2025-06-18 22:33:54,213] INFO in app:   Context: remove the time 
+[2025-06-18 22:33:54,213] INFO in app:   Enhanced: Draft a memorandum for the Jarvis matter, including the motion to dismiss due to the shortness of the provided documentation.
+[2025-06-18 22:33:54,216] INFO in app: Successfully enhanced narrative 1 for entry 39
+127.0.0.1 - - [18/Jun/2025 22:33:54] "POST /api/entries/39/enhance-context HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:34:00] "OPTIONS /api/entries/39 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:34:00] "PUT /api/entries/39 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:34:00] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:00] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:00] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:00] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:00] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:00] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:00] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:00] "OPTIONS /api/entries/1749947646274 HTTP/1.1" 200 -
+[2025-06-18 22:34:00,178] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:34:00] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:34:00] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:00] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:00] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:00] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:00] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:00] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:00] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:00] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:00] "OPTIONS /api/entries/1750201217119 HTTP/1.1" 200 -
+[2025-06-18 22:34:00,194] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:34:00] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:34:00] "[33mOPTIONS /api/entries/1750303991506.5203 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:00] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:34:09] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:09] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:09] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:09] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:09] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:09] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:09] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:09] "OPTIONS /api/entries/1749947646274 HTTP/1.1" 200 -
+[2025-06-18 22:34:09,595] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:34:09] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:34:09] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:09] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:09] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:09] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:09] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:09] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:09] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:09] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:09] "OPTIONS /api/entries/1750201217119 HTTP/1.1" 200 -
+[2025-06-18 22:34:09,624] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:34:09] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:34:09] "[33mOPTIONS /api/entries/1750303991506.5203 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:09] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:34:10] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:10] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:10] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:10] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+[2025-06-18 22:34:11,013] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+[2025-06-18 22:34:11,014] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+[2025-06-18 22:34:11,031] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1750303991506.5203 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+[2025-06-18 22:34:11,043] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "[33mOPTIONS /api/entries/1750303991506.5203 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:11] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:34:16] "OPTIONS /api/entries/38/enhance-context HTTP/1.1" 200 -
+[2025-06-18 22:34:16,942] INFO in app: Enhance context request for entry 38: {'narrative_index': 1, 'original_narrative': 'Attend a collaborative discussion with a partner over coffee to strategize and align on ongoing matters, utilizing 0.8 hours.', 'additional_context': 'make this longer '}
+[2025-06-18 22:34:16,942] INFO in app: Entry narratives: [{'hours': 0.5, 'matter_number': '12345', 'metadata': {'enhanced': True, 'enhanced_at': '2025-06-18T16:26:54.186337', 'enhancement_context': 'summary judgment and motion of dismiss ', 'original_text': 'Draft a memorandum for summary judgment, expending 0.5 hours.'}, 'original': 'worked on a memo', 'text': 'Draft a memorandum for summary judgment and motion to dismiss, expending 0.5 hours.', 'client_code': '12345'}, {'hours': 0.8, 'original': 'grab coffee with a partner', 'text': 'Attend a collaborative discussion with a partner over coffee to strategize and align on ongoing matters, utilizing 0.8 hours.'}]
+[2025-06-18 22:34:16,942] INFO in app: Narrative index: 1, Type: <class 'int'>
+[2025-06-18 22:34:16,942] INFO in app: Context enhancer input: Original Narrative:
+Attend a collaborative discussion with a partner over coffee to strategize and align on ongoing matters, utilizing 0.8 hours.
+
+Additional Context:
+make this longer 
+[2025-06-18 22:34:19,402] INFO in app: Context Enhancement Debug:
+[2025-06-18 22:34:19,402] INFO in app:   Original: Attend a collaborative discussion with a partner over coffee to strategize and align on ongoing matters, utilizing 0.8 hours.
+[2025-06-18 22:34:19,402] INFO in app:   Context: make this longer 
+[2025-06-18 22:34:19,402] INFO in app:   Enhanced: Engage in a comprehensive and collaborative discussion with a partner over coffee, specifically aimed at strategizing and aligning on ongoing matters including case strategies, client communications, and a motion to dismiss, utilizing 0.8 hours.
+[2025-06-18 22:34:19,405] INFO in app: Successfully enhanced narrative 1 for entry 38
+127.0.0.1 - - [18/Jun/2025 22:34:19] "POST /api/entries/38/enhance-context HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:34:30] "OPTIONS /api/entries/38 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:34:31] "PUT /api/entries/38 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:34:31] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:31] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:31] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:31] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:31] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:31] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:31] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:31] "OPTIONS /api/entries/1749947646274 HTTP/1.1" 200 -
+[2025-06-18 22:34:31,034] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:34:31] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:34:31] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:31] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:31] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:31] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:31] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:31] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:31] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:31] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:31] "OPTIONS /api/entries/1750201217119 HTTP/1.1" 200 -
+[2025-06-18 22:34:31,058] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:34:31] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:34:31] "[33mOPTIONS /api/entries/1750303991506.5203 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:34:31] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:35:00] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:01] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:01] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:01] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:01] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:01] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:01] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:01] "OPTIONS /api/entries/1749947646274 HTTP/1.1" 200 -
+[2025-06-18 22:35:01,026] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:35:01] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:35:01] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:01] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:01] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:01] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:01] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:01] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:01] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:01] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:01] "OPTIONS /api/entries/1750201217119 HTTP/1.1" 200 -
+[2025-06-18 22:35:01,063] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:35:01] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:35:01] "[33mOPTIONS /api/entries/1750303991506.5203 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:01] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:35:06] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:06] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:06] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:06] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:06] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:06] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:06] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:06] "OPTIONS /api/entries/1749947646274 HTTP/1.1" 200 -
+[2025-06-18 22:35:06,554] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:35:06] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:35:06] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:06] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:06] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:06] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:06] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:06] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:06] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:06] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:06] "OPTIONS /api/entries/1750201217119 HTTP/1.1" 200 -
+[2025-06-18 22:35:06,576] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:35:06] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:35:06] "[33mOPTIONS /api/entries/1750303991506.5203 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:06] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:35:10] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+[2025-06-18 22:35:11,027] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+[2025-06-18 22:35:11,029] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+[2025-06-18 22:35:11,044] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+[2025-06-18 22:35:11,045] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1750303991506.5203 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "[33mOPTIONS /api/entries/1750303991506.5203 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:35:11] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:35:13] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:13] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:13] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:13] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:13] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:13] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:13] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:13] "OPTIONS /api/entries/1749947646274 HTTP/1.1" 200 -
+[2025-06-18 22:35:13,283] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:35:13] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:35:13] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:13] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:13] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:13] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:13] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:13] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:13] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:13] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:13] "OPTIONS /api/entries/1750201217119 HTTP/1.1" 200 -
+[2025-06-18 22:35:13,303] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:35:13] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:35:13] "[33mOPTIONS /api/entries/1750303991506.5203 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:13] "GET /api/entries HTTP/1.1" 200 -
+127.0.0.1 - - [18/Jun/2025 22:35:30] "[33mOPTIONS /api/entries/1749704532047.9746 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:30] "[33mOPTIONS /api/entries/1749761840907.7415 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:31] "[33mOPTIONS /api/entries/1749946741258.952 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:31] "[33mOPTIONS /api/entries/1749946741262.344 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:31] "[33mOPTIONS /api/entries/1749947247423.984 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:31] "[33mOPTIONS /api/entries/1749947247429.0813 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:31] "[33mOPTIONS /api/entries/1749947646269.9744 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:31] "OPTIONS /api/entries/1749947646274 HTTP/1.1" 200 -
+[2025-06-18 22:35:31,017] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:35:31] "[35m[1mPUT /api/entries/1749947646274 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:35:31] "[33mOPTIONS /api/entries/1750086531751.7917 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:31] "[33mOPTIONS /api/entries/1750087286506.0466 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:31] "[33mOPTIONS /api/entries/1750087525340.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:31] "[33mOPTIONS /api/entries/1750088069896.178 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:31] "[33mOPTIONS /api/entries/1750088464877.0398 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:31] "[33mOPTIONS /api/entries/1750094456450.418 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:31] "[33mOPTIONS /api/entries/1750201026305.2886 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:31] "[33mOPTIONS /api/entries/1750201217118.2168 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:31] "OPTIONS /api/entries/1750201217119 HTTP/1.1" 200 -
+[2025-06-18 22:35:31,048] ERROR in app: Error updating entry: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+127.0.0.1 - - [18/Jun/2025 22:35:31] "[35m[1mPUT /api/entries/1750201217119 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [18/Jun/2025 22:35:31] "[33mOPTIONS /api/entries/1750303991506.5203 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Jun/2025 22:35:31] "GET /api/entries HTTP/1.1" 200 -

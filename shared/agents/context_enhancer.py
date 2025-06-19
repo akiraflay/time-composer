@@ -1,8 +1,14 @@
 from typing import Dict, Any
+import logging
+import re
 from .base import BaseAgent
 
 class ContextEnhancerAgent(BaseAgent):
     """Agent for intelligently merging additional context into existing narratives"""
+    
+    def __init__(self):
+        super().__init__()
+        self.logger = logging.getLogger(__name__)
     
     def get_prompt(self, input_data: str) -> str:
         """Generate the enhancement prompt"""
@@ -32,6 +38,34 @@ Provide ONLY the enhanced narrative text, nothing else. Do not include explanati
     
     def parse_response(self, response: str) -> Dict[str, Any]:
         """Parse the enhanced narrative response"""
+        # Clean up the response
+        enhanced_text = response.strip()
+        
+        # Remove any unwanted prefixes that the model might add
+        enhanced_text = re.sub(r'^Enhanced Narrative:\s*', '', enhanced_text, flags=re.IGNORECASE)
+        enhanced_text = re.sub(r'^Enhanced:\s*', '', enhanced_text, flags=re.IGNORECASE)
+        
         return {
-            'enhanced_narrative': response.strip()
+            'enhanced_narrative': enhanced_text
         }
+    
+    def process(self, input_data: str) -> Dict[str, Any]:
+        """Process input with enhanced error handling"""
+        try:
+            self.logger.info(f"Processing context enhancement with input: {input_data[:100]}...")
+            result = super().process(input_data)
+            self.logger.info(f"Context enhancement successful: {result}")
+            return result
+        except Exception as e:
+            self.logger.error(f"Context enhancement failed: {str(e)}", exc_info=True)
+            
+            # Try to extract the original narrative as fallback
+            try:
+                lines = input_data.strip().split('\n')
+                for i, line in enumerate(lines):
+                    if 'Original Narrative:' in line and i + 1 < len(lines):
+                        return {'enhanced_narrative': lines[i + 1].strip()}
+            except:
+                pass
+            
+            raise Exception(f"Failed to enhance narrative: {str(e)}")

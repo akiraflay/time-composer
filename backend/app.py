@@ -230,6 +230,13 @@ def enhance_context(entry_id):
         # Import context enhancer
         from shared.agents.context_enhancer import ContextEnhancerAgent
         
+        # Validate inputs
+        if not original_narrative:
+            return jsonify({'error': 'Original narrative is empty'}), 400
+        
+        if not additional_context.strip():
+            return jsonify({'error': 'Additional context is empty'}), 400
+        
         # Format the input for the agent
         input_text = f"""Original Narrative:
 {original_narrative}
@@ -237,9 +244,20 @@ def enhance_context(entry_id):
 Additional Context:
 {additional_context}"""
         
+        app.logger.info(f"Context enhancer input: {input_text}")
+        
         # Process enhancement
-        enhancer = ContextEnhancerAgent()
-        result = enhancer.process(input_text)
+        try:
+            enhancer = ContextEnhancerAgent()
+            result = enhancer.process(input_text)
+        except Exception as agent_error:
+            app.logger.error(f"Agent processing error: {str(agent_error)}")
+            return jsonify({'error': f'AI processing failed: {str(agent_error)}'}), 500
+        
+        # Validate the result
+        if not result or 'enhanced_narrative' not in result:
+            app.logger.error("Agent returned invalid result")
+            return jsonify({'error': 'AI processing returned invalid result'}), 500
         
         # Log the enhancement for debugging
         app.logger.info(f"Context Enhancement Debug:")
@@ -284,11 +302,15 @@ Additional Context:
             'enhanced_narrative': result['enhanced_narrative']
         })
     
+    except ValueError as e:
+        app.logger.error(f"Validation error: {str(e)}")
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 400
     except Exception as e:
         app.logger.error(f"Error enhancing context: {str(e)}")
         app.logger.error(f"Traceback: {traceback.format_exc()}")
         db.session.rollback()
-        return jsonify({'error': f'Failed to enhance context: {str(e)}'}), 500
+        return jsonify({'error': f'Server error: {str(e)}'}), 500
 
 @app.route('/api/export', methods=['POST'])
 def export_entries():
