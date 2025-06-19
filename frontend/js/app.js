@@ -1016,14 +1016,21 @@ function createEntryCard(entry) {
         </div>
     `;}).join('');
     
-    // Add click handler for compact and ultra-compact mode expansion
-    if (viewMode === 'compact' || viewMode === 'ultra-compact') {
-        card.addEventListener('click', (e) => {
-            if (!e.target.matches('button')) {
+    // Add click handler for card interaction
+    card.addEventListener('click', (e) => {
+        // Check if clicked element is interactive
+        const isInteractive = e.target.matches('button, input, select, textarea, .editable-field, .editable-field *, .dropdown-trigger, .dropdown-menu, .dropdown-menu *, .bulk-checkbox, .status-dropdown, .status-dropdown *');
+        
+        if (!isInteractive) {
+            if (viewMode === 'compact' || viewMode === 'ultra-compact') {
+                // In compact/ultra-compact mode, toggle expansion
                 card.classList.toggle('expanded');
+            } else {
+                // In normal mode, open edit modal
+                openEditModal(entry.id);
             }
-        });
-    }
+        }
+    });
     
     // Create different layouts based on view mode
     if (viewMode === 'ultra-compact') {

@@ -1426,7 +1426,7 @@ main {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 0.5rem;
-    padding: 1rem;
+    padding: 0.75rem;
     transition: all 0.2s;
     cursor: pointer;
 }
@@ -1450,7 +1450,7 @@ main {
 .entry-header {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.375rem;
     align-items: flex-start;
 }
 
@@ -1532,9 +1532,9 @@ main {
 
 .narrative-item {
     background: var(--background);
-    padding: 0.75rem;
+    padding: 0.5rem;
     border-radius: 0.375rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.375rem;
     position: relative; /* Ensure positioning context for absolute children */
 }
 
@@ -1552,6 +1552,7 @@ main {
     line-height: 1.6;
     margin-top: 0.75rem;
     word-wrap: break-word;
+    font-size: 1rem;
 }
 
 /* Special handling for narrative text editing in cards */
@@ -1688,7 +1689,7 @@ main {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
 }
 
 .compact-view .entry-card.expanded .narrative-text,
@@ -5847,57 +5848,68 @@ main {
 .integrated-actions {
     display: flex;
     gap: 0.375rem;
-    padding: 0.75rem 0.5rem 0.5rem;
+    padding: 0.625rem 0.5rem 0.5rem;
     border-top: 1px solid var(--border);
     margin-top: 0.5rem;
 }
 
-.action-btn {
-    display: flex;
+/* Unified Action Buttons - Professional & Sleek */
+.unified-action-btn {
+    display: inline-flex;
     align-items: center;
-    gap: 0.375rem;
-    padding: 0.5rem 0.875rem;
+    gap: 0.25rem;
+    padding: 0.375rem 0.625rem;
+    background: none;
     border: 1px solid var(--border);
-    border-radius: 6px;
-    font-size: 0.8125rem;
+    border-radius: 5px;
+    font-size: 0.75rem;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.15s ease;
-    background: var(--background);
-    color: var(--text-primary);
+    color: var(--text-secondary);
+    white-space: nowrap;
 }
 
-.action-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+.unified-action-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: rgba(37, 99, 235, 0.04);
 }
 
-.action-btn.primary-action {
+.unified-action-btn:active {
+    transform: scale(0.98);
+}
+
+.unified-action-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.unified-action-btn svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    opacity: 0.8;
+}
+
+.unified-action-btn span {
+    font-weight: 500;
+}
+
+/* Primary action variant */
+.unified-action-btn.primary {
     background: var(--primary-color);
     border-color: var(--primary-color);
     color: white;
-    flex: 1.5;
 }
 
-.action-btn.primary-action:hover {
+.unified-action-btn.primary:hover {
     background: var(--primary-color-dark);
     border-color: var(--primary-color-dark);
 }
 
-.action-btn.secondary-action {
-    flex: 1;
-}
-
-.action-btn.secondary-action:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-    background: rgba(37, 99, 235, 0.05);
-}
-
-.action-btn svg {
-    width: 14px;
-    height: 14px;
-    flex-shrink: 0;
+.unified-action-btn.primary svg {
+    opacity: 1;
 }
 
 /* AI Assistant Compact Review Styles - Legacy */
@@ -6245,16 +6257,22 @@ main {
     .integrated-actions {
         padding: 0.5rem 0.375rem 0.375rem;
         gap: 0.25rem;
+        flex-wrap: wrap;
     }
     
-    .action-btn {
-        padding: 0.375rem 0.625rem;
-        font-size: 0.75rem;
+    .unified-action-btn {
+        padding: 0.3125rem 0.5rem;
+        font-size: 0.7rem;
+        gap: 0.1875rem;
     }
     
-    .action-btn svg {
+    .unified-action-btn svg {
         width: 12px;
         height: 12px;
+    }
+    
+    .unified-action-btn span {
+        font-size: 0.7rem;
     }
 }
 

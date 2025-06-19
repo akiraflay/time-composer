@@ -639,38 +639,37 @@ class AIAssistant {
                                        placeholder="Matter #" 
                                        class="ultra-compact-input"
                                        value="${narrative.matter_number || ''}">
-                                ${narrativeCount > 1 && index === 0 ? `
-                                    <button class="inline-apply-all-btn" 
-                                            onclick="window.aiAssistant.showBulkApply()"
-                                            title="Apply to all entries">
-                                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                                            <path d="M19,3H14.82C14.4,1.84 13.3,1 12,1C10.7,1 9.6,1.84 9.18,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M12,3A1,1 0 0,1 13,4A1,1 0 0,1 12,5A1,1 0 0,1 11,4A1,1 0 0,1 12,3M7,7H17V5H19V19H5V5H7V7Z"/>
-                                        </svg>
-                                    </button>
-                                ` : ''}
                             </div>
                         </div>
                     `).join('')}
                 </div>
                 <div class="integrated-actions">
-                    <button class="action-btn primary-action" onclick="window.aiAssistant.confirmEntries()">
+                    <button class="unified-action-btn primary" onclick="window.aiAssistant.confirmEntries()">
                         <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                             <path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z"/>
                         </svg>
-                        Save entries
+                        <span>Save entries</span>
                     </button>
-                    <button class="action-btn secondary-action" onclick="window.aiAssistant.requestModifications()">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                    <button class="unified-action-btn" onclick="window.aiAssistant.requestModifications()">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                             <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
                         </svg>
-                        Edit
+                        <span>Edit</span>
                     </button>
-                    <button class="action-btn secondary-action" onclick="window.aiAssistant.startOver()">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                    <button class="unified-action-btn" onclick="window.aiAssistant.startOver()">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                             <path d="M12,5V1L7,6L12,11V7A6,6 0 0,1 18,13A6,6 0 0,1 12,19A6,6 0 0,1 6,13H4A8,8 0 0,0 12,21A8,8 0 0,0 20,13A8,8 0 0,0 12,5Z"/>
                         </svg>
-                        Restart
+                        <span>Restart</span>
                     </button>
+                    ${narrativeCount > 1 ? `
+                        <button class="unified-action-btn" onclick="window.aiAssistant.showBulkApply()">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                                <path d="M19,3H14.82C14.4,1.84 13.3,1 12,1C10.7,1 9.6,1.84 9.18,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M12,3A1,1 0 0,1 13,4A1,1 0 0,1 12,5A1,1 0 0,1 11,4A1,1 0 0,1 12,3M7,7H17V5H19V19H5V5H7V7Z"/>
+                            </svg>
+                            <span>Apply to all</span>
+                        </button>
+                    ` : ''}
                 </div>
             </div>
         `;
