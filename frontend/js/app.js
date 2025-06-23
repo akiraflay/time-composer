@@ -1968,52 +1968,251 @@ function navigateCalendar(direction) {
 
 // Export functionality
 function loadExport() {
-    // Set default dates
-    const today = new Date();
-    const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    // Initialize date presets
+    initializeDatePresets();
     
-    document.getElementById('export-start').valueAsDate = firstOfMonth;
-    document.getElementById('export-end').valueAsDate = today;
+    // Set default to this month
+    setDatePreset('this-month');
+    
+    // Mark this-month button as active
+    const thisMonthBtn = document.querySelector('.preset-btn[data-preset="this-month"]');
+    if (thisMonthBtn) {
+        document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+        thisMonthBtn.classList.add('active');
+    }
+    
+    // Add event listeners
+    const startInput = document.getElementById('export-start');
+    const endInput = document.getElementById('export-end');
+    const filenameInput = document.getElementById('export-filename');
+    
+    if (startInput) startInput.addEventListener('change', updateExportPreview);
+    if (endInput) endInput.addEventListener('change', updateExportPreview);
+    if (filenameInput) filenameInput.addEventListener('input', updateExportPreview);
     
     updateExportPreview();
 }
 
+function initializeDatePresets() {
+    const presetButtons = document.querySelectorAll('.preset-btn');
+    presetButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const preset = e.target.dataset.preset;
+            setDatePreset(preset);
+            
+            // Update active state
+            presetButtons.forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+        });
+    });
+}
+
+function setDatePreset(preset) {
+    const startInput = document.getElementById('export-start');
+    const endInput = document.getElementById('export-end');
+    const today = new Date();
+    let startDate, endDate;
+    
+    switch (preset) {
+        case 'today':
+            startDate = endDate = today;
+            break;
+            
+        case 'this-week':
+            startDate = new Date(today);
+            startDate.setDate(today.getDate() - today.getDay()); // Start of week (Sunday)
+            endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + 6); // End of week (Saturday)
+            break;
+            
+        case 'this-month':
+            startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+            endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            break;
+            
+        case 'last-month':
+            startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+            endDate = new Date(today.getFullYear(), today.getMonth(), 0);
+            break;
+            
+        case 'custom':
+            // Don't change dates for custom
+            return;
+    }
+    
+    // Format dates for input
+    if (startInput && startDate) {
+        startInput.valueAsDate = startDate;
+    }
+    if (endInput && endDate) {
+        endInput.valueAsDate = endDate;
+    }
+    
+    // Update preview
+    updateExportPreview();
+}
+
 async function updateExportPreview() {
-    const startDate = document.getElementById('export-start').value;
-    const endDate = document.getElementById('export-end').value;
-    const clientCode = document.getElementById('export-client').value;
+    try {
+        const startDate = document.getElementById('export-start').value;
+        const endDate = document.getElementById('export-end').value;
+        
+        const filters = {};
+        if (startDate) filters.start_date = startDate;
+        if (endDate) filters.end_date = endDate;
+        
+        // Show loading state
+        const preview = document.getElementById('export-preview');
+        preview.innerHTML = `
+            <div class="export-loading">
+                <div class="spinner"></div>
+                <span>Loading preview...</span>
+            </div>
+        `;
+        
+        const entries = await dbOperations.getEntries(filters);
+        
+        // Update statistics
+        updateExportStats(entries, startDate, endDate);
+        
+        // Generate preview table
+        if (entries.length === 0) {
+            preview.innerHTML = `
+                <div class="export-empty-state">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3M19,5V19H5V5H19Z"/>
+                    </svg>
+                    <p>No entries found for the selected date range</p>
+                </div>
+            `;
+        } else {
+            preview.innerHTML = generatePreviewTable(entries);
+        }
+        
+        // Update preview count
+        const previewCount = document.getElementById('preview-count');
+        if (previewCount) {
+            previewCount.textContent = `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}`;
+        }
+        
+    } catch (error) {
+        console.error('Error updating export preview:', error);
+        const preview = document.getElementById('export-preview');
+        preview.innerHTML = `
+            <div class="export-empty-state">
+                <p>Error loading preview</p>
+            </div>
+        `;
+    }
+}
+
+function updateExportStats(entries, startDate, endDate) {
+    // Update entry count
+    const statEntries = document.getElementById('stat-entries');
+    if (statEntries) {
+        statEntries.textContent = entries.length;
+    }
     
-    const filters = {};
-    if (startDate) filters.start_date = startDate;
-    if (endDate) filters.end_date = endDate;
-    if (clientCode) filters.client_code = clientCode;
+    // Update total hours
+    const statHours = document.getElementById('stat-hours');
+    if (statHours) {
+        const totalHours = entries.reduce((sum, e) => sum + (e.total_hours || 0), 0);
+        statHours.textContent = totalHours.toFixed(1);
+    }
     
-    const entries = await dbOperations.getEntries(filters);
+    // Update date range
+    const statDateRange = document.getElementById('stat-date-range');
+    if (statDateRange) {
+        if (startDate && endDate) {
+            const start = new Date(startDate).toLocaleDateString();
+            const end = new Date(endDate).toLocaleDateString();
+            statDateRange.textContent = start === end ? start : `${start} - ${end}`;
+        } else {
+            statDateRange.textContent = 'All dates';
+        }
+    }
+}
+
+function generatePreviewTable(entries) {
+    const rows = entries.map(entry => {
+        const date = new Date(entry.created_at).toLocaleDateString();
+        const time = new Date(entry.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const narratives = entry.narratives || [];
+        const description = narratives.map(n => n.text).join('; ') || entry.original_text || '';
+        const hours = entry.total_hours || 0;
+        const clientCode = entry.client_code || '-';
+        const matterNumber = entry.matter_number || '-';
+        const status = entry.status || 'draft';
+        
+        return `
+            <tr>
+                <td>${date}</td>
+                <td>${time}</td>
+                <td>${description.substring(0, 100)}${description.length > 100 ? '...' : ''}</td>
+                <td>${hours.toFixed(1)}</td>
+                <td>${clientCode}</td>
+                <td>${matterNumber}</td>
+                <td><span class="status-badge ${status}">${status}</span></td>
+            </tr>
+        `;
+    }).join('');
     
-    const preview = document.getElementById('export-preview');
-    preview.innerHTML = `
-        <h3>Preview: ${entries.length} entries found</h3>
-        <p>Total hours: ${entries.reduce((sum, e) => sum + (e.total_hours || 0), 0).toFixed(1)}</p>
+    return `
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Description</th>
+                    <th>Hours</th>
+                    <th>Client</th>
+                    <th>Matter</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${rows}
+            </tbody>
+        </table>
     `;
 }
 
 async function exportEntries() {
     try {
+        console.log('Export button clicked');
         showLoading('Exporting entries...');
         
         const startDate = document.getElementById('export-start').value;
         const endDate = document.getElementById('export-end').value;
-        const clientCode = document.getElementById('export-client').value;
+        let filename = document.getElementById('export-filename').value.trim();
+        
+        console.log('Export params:', { startDate, endDate, filename });
         
         const filters = {};
         if (startDate) filters.start_date = startDate;
         if (endDate) filters.end_date = endDate;
-        if (clientCode) filters.client_code = clientCode;
         
         const entries = await dbOperations.getEntries(filters);
         const entryIds = entries.map(e => e.id);
         
-        await api.exportEntries(entryIds);
+        console.log(`Exporting ${entries.length} entries`);
+        
+        if (entries.length === 0) {
+            hideLoading();
+            showNotification('No entries to export', 'warning');
+            return;
+        }
+        
+        // Generate filename if not provided
+        if (!filename) {
+            const dateStr = new Date().toISOString().split('T')[0];
+            filename = `time-entries-${dateStr}`;
+        }
+        
+        // Ensure filename doesn't include .csv extension (we'll add it)
+        filename = filename.replace(/\.csv$/i, '');
+        
+        await api.exportEntries(entryIds, filename);
         
         // Update status of exported entries to 'exported'
         for (const entry of entries) {
@@ -2044,7 +2243,7 @@ async function exportEntries() {
     } catch (err) {
         console.error('Export failed:', err);
         hideLoading();
-        showNotification('Export failed', 'error');
+        showNotification(`Export failed: ${err.message}`, 'error');
     }
 }
 

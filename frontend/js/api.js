@@ -109,7 +109,7 @@ const api = {
         return response.json();
     },
     
-    async exportEntries(entryIds = []) {
+    async exportEntries(entryIds = [], filename = null) {
         const response = await fetch(`${API_BASE}/export`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -125,7 +125,14 @@ const api = {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `time_entries_${new Date().toISOString().split('T')[0]}.csv`;
+        
+        // Use provided filename or generate one
+        if (filename) {
+            a.download = `${filename}.csv`;
+        } else {
+            a.download = `time_entries_${new Date().toISOString().split('T')[0]}.csv`;
+        }
+        
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
