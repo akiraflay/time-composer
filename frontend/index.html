@@ -134,61 +134,62 @@
 
             <!-- Export View -->
             <div id="export-view" class="view">
-                <div class="export-header">
-                    <h2>Export Time Entries</h2>
-                    <p class="export-subtitle">Generate billing reports for your time entries</p>
-                </div>
-                
-                <!-- Export Controls Card -->
-                <div class="export-card">
-                    <div class="card-header">
-                        <h3>Export Settings</h3>
+                <div class="export-container">
+                    <div class="export-header">
+                        <h2>Export Time Entries</h2>
+                        <p class="export-subtitle">Generate billing reports for your time entries</p>
                     </div>
-                    <div class="card-body">
-                        <!-- Date Selection Section -->
-                        <div class="date-selection-section">
-                            <label class="section-label">Date Range</label>
-                            <div class="date-presets">
-                                <button class="preset-btn" data-preset="today">Today</button>
-                                <button class="preset-btn" data-preset="this-week">This Week</button>
-                                <button class="preset-btn" data-preset="this-month">This Month</button>
-                                <button class="preset-btn" data-preset="last-month">Last Month</button>
-                                <button class="preset-btn" data-preset="custom">Custom Range</button>
+                    
+                    <!-- Export Controls Card -->
+                    <div class="export-card">
+                        <div class="card-header">
+                            <h3>Export Settings</h3>
+                            <button id="export-btn" class="export-button header-action">
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M16,11L12,15L8,11L10.17,9L11,9.83V7H13V9.83L13.83,9L16,11Z"/>
+                                </svg>
+                                Export to CSV
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <!-- Date Selection Section -->
+                            <div class="date-selection-section">
+                                <label class="section-label">Date Range</label>
+                                <div class="date-controls-row">
+                                    <div class="date-presets">
+                                        <button class="preset-btn" data-preset="today">Today</button>
+                                        <button class="preset-btn" data-preset="this-week">This Week</button>
+                                        <button class="preset-btn" data-preset="this-month">This Month</button>
+                                        <button class="preset-btn" data-preset="last-month">Last Month</button>
+                                    </div>
+                                    <div class="date-range-inputs">
+                                        <div class="date-separator"></div>
+                                        <div class="date-input-group compact">
+                                            <label for="export-start">From</label>
+                                            <input type="date" id="export-start" class="date-input compact">
+                                        </div>
+                                        <div class="date-input-group compact">
+                                            <label for="export-end">To</label>
+                                            <input type="date" id="export-end" class="date-input compact">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="custom-date-range">
-                                <div class="date-input-group">
-                                    <label for="export-start">From</label>
-                                    <input type="date" id="export-start" class="date-input">
+                            
+                            <!-- File Name Section -->
+                            <div class="filename-section">
+                                <label for="export-filename" class="section-label">File Name</label>
+                                <div class="filename-input-wrapper">
+                                    <input type="text" id="export-filename" placeholder="time-entries" class="filename-input">
+                                    <span class="filename-extension">.csv</span>
                                 </div>
-                                <div class="date-input-group">
-                                    <label for="export-end">To</label>
-                                    <input type="date" id="export-end" class="date-input">
-                                </div>
+                                <p class="field-hint">Leave blank for auto-generated filename with date</p>
                             </div>
                         </div>
-                        
-                        <!-- File Name Section -->
-                        <div class="filename-section">
-                            <label for="export-filename" class="section-label">File Name</label>
-                            <div class="filename-input-wrapper">
-                                <input type="text" id="export-filename" placeholder="time-entries" class="filename-input">
-                                <span class="filename-extension">.csv</span>
-                            </div>
-                            <p class="field-hint">Leave blank for auto-generated filename with date</p>
-                        </div>
-                        
-                        <!-- Export Button -->
-                        <button id="export-btn" class="export-button">
-                            <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M16,11L12,15L8,11L10.17,9L11,9.83V7H13V9.83L13.83,9L16,11Z"/>
-                            </svg>
-                            Export to CSV
-                        </button>
                     </div>
-                </div>
-                
-                <!-- Statistics Card -->
-                <div class="export-stats-card" id="export-stats">
+                    
+                    <!-- Statistics Card -->
+                    <div class="export-stats-card" id="export-stats">
                     <div class="stat-item">
                         <div class="stat-icon">
                             <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
@@ -222,17 +223,24 @@
                             <div class="stat-label">Date Range</div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Preview Table Card -->
-                <div class="export-preview-card">
+                    </div>
+                    
+                    <!-- Preview Table Card -->
+                    <div class="export-preview-card">
                     <div class="card-header">
-                        <h3>Preview</h3>
-                        <span class="preview-count" id="preview-count"></span>
+                        <div class="header-title-group">
+                            <h3>Preview</h3>
+                            <span class="preview-count" id="preview-count"></span>
+                        </div>
+                        <label class="checkbox-wrapper compact">
+                            <input type="checkbox" id="export-non-exported-only" class="styled-checkbox">
+                            <span class="checkbox-label">Hide previously exported</span>
+                        </label>
                     </div>
                     <div class="card-body">
                         <div id="export-preview" class="export-preview-table"></div>
                     </div>
+                </div>
                 </div>
             </div>
         </main>

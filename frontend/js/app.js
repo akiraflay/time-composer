@@ -1968,6 +1968,20 @@ function navigateCalendar(direction) {
 
 // Export functionality
 function loadExport() {
+    // Remove any existing event listeners first to prevent duplicates
+    const exportBtn = document.getElementById('export-btn');
+    const startInput = document.getElementById('export-start');
+    const endInput = document.getElementById('export-end');
+    const filenameInput = document.getElementById('export-filename');
+    const nonExportedCheckbox = document.getElementById('export-non-exported-only');
+    
+    // Clone elements to remove all event listeners
+    if (exportBtn) {
+        const newExportBtn = exportBtn.cloneNode(true);
+        exportBtn.parentNode.replaceChild(newExportBtn, exportBtn);
+        newExportBtn.addEventListener('click', exportEntries);
+    }
+    
     // Initialize date presets
     initializeDatePresets();
     
@@ -1981,30 +1995,61 @@ function loadExport() {
         thisMonthBtn.classList.add('active');
     }
     
-    // Add event listeners
-    const startInput = document.getElementById('export-start');
-    const endInput = document.getElementById('export-end');
-    const filenameInput = document.getElementById('export-filename');
+    // Date inputs are always visible now, no need to hide them
     
-    if (startInput) startInput.addEventListener('change', updateExportPreview);
-    if (endInput) endInput.addEventListener('change', updateExportPreview);
-    if (filenameInput) filenameInput.addEventListener('input', updateExportPreview);
+    // Add event listeners with proper cleanup
+    if (startInput) {
+        startInput.removeEventListener('change', updateExportPreview);
+        startInput.addEventListener('change', updateExportPreview);
+    }
+    if (endInput) {
+        endInput.removeEventListener('change', updateExportPreview);
+        endInput.addEventListener('change', updateExportPreview);
+    }
+    if (filenameInput) {
+        filenameInput.removeEventListener('input', updateExportPreview);
+        filenameInput.addEventListener('input', updateExportPreview);
+    }
+    if (nonExportedCheckbox) {
+        nonExportedCheckbox.removeEventListener('change', updateExportPreview);
+        nonExportedCheckbox.addEventListener('change', updateExportPreview);
+    }
     
+    // Initial preview update
     updateExportPreview();
 }
 
 function initializeDatePresets() {
     const presetButtons = document.querySelectorAll('.preset-btn');
     presetButtons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const preset = e.target.dataset.preset;
+        // Clone to remove existing listeners
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        
+        newBtn.addEventListener('click', (e) => {
+            const preset = e.currentTarget.dataset.preset;
             setDatePreset(preset);
             
             // Update active state
-            presetButtons.forEach(b => b.classList.remove('active'));
-            e.target.classList.add('active');
+            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            e.currentTarget.classList.add('active');
         });
     });
+    
+    // Add event listeners to date inputs to clear preset selection when manually changed
+    const startInput = document.getElementById('export-start');
+    const endInput = document.getElementById('export-end');
+    
+    const clearPresetSelection = () => {
+        document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    };
+    
+    if (startInput) {
+        startInput.addEventListener('input', clearPresetSelection);
+    }
+    if (endInput) {
+        endInput.addEventListener('input', clearPresetSelection);
+    }
 }
 
 function setDatePreset(preset) {
@@ -2034,10 +2079,6 @@ function setDatePreset(preset) {
             startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
             endDate = new Date(today.getFullYear(), today.getMonth(), 0);
             break;
-            
-        case 'custom':
-            // Don't change dates for custom
-            return;
     }
     
     // Format dates for input
@@ -2056,10 +2097,7 @@ async function updateExportPreview() {
     try {
         const startDate = document.getElementById('export-start').value;
         const endDate = document.getElementById('export-end').value;
-        
-        const filters = {};
-        if (startDate) filters.start_date = startDate;
-        if (endDate) filters.end_date = endDate;
+        const nonExportedOnly = document.getElementById('export-non-exported-only').checked;
         
         // Show loading state
         const preview = document.getElementById('export-preview');
@@ -2070,19 +2108,42 @@ async function updateExportPreview() {
             </div>
         `;
         
-        const entries = await dbOperations.getEntries(filters);
+        // Get all entries first
+        let entries = await dbOperations.getEntries();
         
-        // Update statistics
+        // Apply date filtering
+        if (startDate || endDate) {
+            entries = entries.filter(entry => {
+                const entryDate = new Date(entry.created_at).toISOString().split('T')[0];
+                if (startDate && entryDate < startDate) return false;
+                if (endDate && entryDate > endDate) return false;
+                return true;
+            });
+        }
+        
+        // Filter out exported entries if checkbox is checked
+        if (nonExportedOnly) {
+            entries = entries.filter(entry => {
+                // Use the helper function to determine effective status
+                const effectiveStatus = determineEntryStatus(entry);
+                return effectiveStatus !== 'exported';
+            });
+        }
+        
+        // Update statistics BEFORE generating the table
         updateExportStats(entries, startDate, endDate);
         
         // Generate preview table
         if (entries.length === 0) {
+            const message = nonExportedOnly ? 
+                'No non-exported entries found for the selected date range' : 
+                'No entries found for the selected date range';
             preview.innerHTML = `
                 <div class="export-empty-state">
                     <svg viewBox="0 0 24 24" fill="currentColor">
                         <path d="M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3M19,5V19H5V5H19Z"/>
                     </svg>
-                    <p>No entries found for the selected date range</p>
+                    <p>${message}</p>
                 </div>
             `;
         } else {
@@ -2103,6 +2164,8 @@ async function updateExportPreview() {
                 <p>Error loading preview</p>
             </div>
         `;
+        // Reset statistics on error
+        updateExportStats([], null, null);
     }
 }
 
@@ -2124,9 +2187,31 @@ function updateExportStats(entries, startDate, endDate) {
     const statDateRange = document.getElementById('stat-date-range');
     if (statDateRange) {
         if (startDate && endDate) {
-            const start = new Date(startDate).toLocaleDateString();
-            const end = new Date(endDate).toLocaleDateString();
+            const start = new Date(startDate).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+            const end = new Date(endDate).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric', 
+                year: 'numeric'
+            });
             statDateRange.textContent = start === end ? start : `${start} - ${end}`;
+        } else if (startDate) {
+            const start = new Date(startDate).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+            statDateRange.textContent = `From ${start}`;
+        } else if (endDate) {
+            const end = new Date(endDate).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+            statDateRange.textContent = `Until ${end}`;
         } else {
             statDateRange.textContent = 'All dates';
         }
@@ -2142,7 +2227,7 @@ function generatePreviewTable(entries) {
         const hours = entry.total_hours || 0;
         const clientCode = entry.client_code || '-';
         const matterNumber = entry.matter_number || '-';
-        const status = entry.status || 'draft';
+        const effectiveStatus = determineEntryStatus(entry);
         
         return `
             <tr>
@@ -2152,7 +2237,7 @@ function generatePreviewTable(entries) {
                 <td>${hours.toFixed(1)}</td>
                 <td>${clientCode}</td>
                 <td>${matterNumber}</td>
-                <td><span class="status-badge ${status}">${status}</span></td>
+                <td><span class="status-badge ${effectiveStatus}">${effectiveStatus.toUpperCase()}</span></td>
             </tr>
         `;
     }).join('');
@@ -2184,22 +2269,43 @@ async function exportEntries() {
         
         const startDate = document.getElementById('export-start').value;
         const endDate = document.getElementById('export-end').value;
+        const nonExportedOnly = document.getElementById('export-non-exported-only').checked;
         let filename = document.getElementById('export-filename').value.trim();
         
-        console.log('Export params:', { startDate, endDate, filename });
+        console.log('Export params:', { startDate, endDate, filename, nonExportedOnly });
         
-        const filters = {};
-        if (startDate) filters.start_date = startDate;
-        if (endDate) filters.end_date = endDate;
+        // Get all entries first
+        let entries = await dbOperations.getEntries();
         
-        const entries = await dbOperations.getEntries(filters);
+        // Apply date filtering
+        if (startDate || endDate) {
+            entries = entries.filter(entry => {
+                const entryDate = new Date(entry.created_at).toISOString().split('T')[0];
+                if (startDate && entryDate < startDate) return false;
+                if (endDate && entryDate > endDate) return false;
+                return true;
+            });
+        }
+        
+        // Filter out exported entries if checkbox is checked
+        if (nonExportedOnly) {
+            entries = entries.filter(entry => {
+                // Use the helper function to determine effective status
+                const effectiveStatus = determineEntryStatus(entry);
+                return effectiveStatus !== 'exported';
+            });
+        }
+        
         const entryIds = entries.map(e => e.id);
         
         console.log(`Exporting ${entries.length} entries`);
         
         if (entries.length === 0) {
             hideLoading();
-            showNotification('No entries to export', 'warning');
+            const message = nonExportedOnly ? 
+                'No non-exported entries to export' : 
+                'No entries to export';
+            showNotification(message, 'warning');
             return;
         }
         
@@ -2237,7 +2343,7 @@ async function exportEntries() {
         if (currentView === 'dashboard') {
             await loadDashboard();
         } else if (currentView === 'export') {
-            updateExportPreview();
+            await updateExportPreview();
         }
         
     } catch (err) {
