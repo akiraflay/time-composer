@@ -339,7 +339,7 @@ main {
     }
     
     .time-filter-bar {
-        margin: 0 2rem 1.5rem 2rem !important;
+        margin: 0 2rem -1px 2rem !important;
     }
     
     /* Hide actions column on very small screens */
@@ -351,6 +351,12 @@ main {
     /* Description cell with space for action buttons */
     .condensed-table td.condensed-description {
         padding-bottom: 1rem;
+    }
+    
+    /* Double the padding on table cells for smallest screens */
+    .condensed-table th,
+    .condensed-table td {
+        padding: 0.5rem 0.75rem !important;
     }
     
     /* Show and position action buttons in description area */
@@ -4763,13 +4769,16 @@ main {
 .condensed-table-wrapper {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 0.625rem;
-    overflow-x: auto;
-    overflow-y: visible;
+    border-radius: 0.75rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    margin: 0 0 1.5rem 0;
+    overflow: hidden;
+}
+
+/* Inner scrollable area for table */
+.condensed-table-scroll {
+    overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    margin: 0;
-    margin-bottom: 1.5rem;
 }
 
 .condensed-table {
@@ -4884,6 +4893,13 @@ main {
     border-bottom: none;
 }
 
+/* Empty state in table */
+.empty-state-cell {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-secondary);
+}
+
 /* Select column styling */
 .select-column {
     text-align: center;
@@ -4915,13 +4931,22 @@ main {
     padding-left: 1.5rem;
 }
 
-/* Time filter bar above table */
+/* Time filter bar above table - visually connected to table */
 .time-filter-bar {
-    margin-bottom: 1.5rem;
-    padding: 1rem;
+    padding: 0.625rem 1rem;
+    margin: 0 0 -1px 0; /* Negative margin to connect with table */
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 0.625rem;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0.75rem 0.75rem 0 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* When time filter is present, adjust table wrapper */
+.time-filter-bar + .condensed-table-wrapper {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    margin-top: 0;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
@@ -4929,7 +4954,6 @@ main {
     display: flex;
     align-items: center;
     gap: 1rem;
-    justify-content: space-between;
 }
 
 .time-filter-label {
@@ -4945,6 +4969,7 @@ main {
     border: 1px solid var(--border);
     border-radius: 0.25rem;
     padding: 0.125rem;
+    margin-left: auto;
 }
 
 .time-filter-btn {
@@ -7276,9 +7301,9 @@ main {
         padding: 0 1rem;
     }
     
-    /* Add margin to table wrapper instead of table */
+    /* Add margin to table wrapper */
     .condensed-table-wrapper {
-        margin: 0 1rem;
+        margin: 0 1rem 1.5rem 1rem;
     }
     
     /* Time Period container mobile styles */
@@ -7456,7 +7481,6 @@ main {
     .condensed-table-wrapper {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
-        margin: 0;
         padding: 0;
     }
     
@@ -7750,10 +7774,10 @@ main {
         min-height: auto;
     }
     
-    /* Time filter bar - more compact */
+    /* Time filter bar - adjust for mobile */
     .time-filter-bar {
-        margin: 0 1rem 1.5rem 1rem;
-        padding: 1rem;
+        padding: 0.5rem 1rem;
+        margin: 0 1rem -1px 1rem;
     }
     
     /* Hide inline editing on mobile for cleaner look */

@@ -846,18 +846,18 @@ async function loadDashboard() {
         
         container.innerHTML = '';
         
-        if (entries.length === 0) {
+        // Always render view structure first
+        if (viewMode === 'condensed') {
+            // For list view, always show time filter bar
+            renderCondensedView(entries, container);
+        } else if (entries.length === 0) {
+            // For card view, show empty state
             container.innerHTML = `
                 <div class="empty-state">
                     <p>No entries found. Click "Add New Time Entry" to get started.</p>
                 </div>
             `;
             return;
-        }
-        
-        // Render based on view mode
-        if (viewMode === 'condensed') {
-            renderCondensedView(entries, container);
         } else {
             // Entries are now naturally grouped by session in the backend
             entries.forEach(entry => {
@@ -1573,6 +1573,23 @@ function renderCondensedView(entries, container) {
     `;
     
     const tbody = table.querySelector('tbody');
+    
+    // Handle empty state
+    if (entries.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="empty-state-cell">
+                    <div class="empty-state">
+                        <p>No entries found. Click "Add Entry" to get started.</p>
+                    </div>
+                </td>
+            </tr>
+        `;
+        container.appendChild(timeFilterBar);
+        tableWrapper.appendChild(table);
+        container.appendChild(tableWrapper);
+        return;
+    }
     
     // Create flat list of all narratives with their entries
     const flatRows = [];
