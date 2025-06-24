@@ -22,7 +22,9 @@
       "Bash(git commit:*)",
       "Bash(awk:*)",
       "Bash(kill:*)",
-      "mcp__puppeteer__puppeteer_navigate"
+      "mcp__puppeteer__puppeteer_navigate",
+      "mcp__puppeteer__puppeteer_click",
+      "mcp__puppeteer__puppeteer_screenshot"
     ],
     "deny": []
   }

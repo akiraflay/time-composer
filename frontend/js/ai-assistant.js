@@ -189,15 +189,16 @@ class AIAssistant {
                             <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4Z"/>
                         </svg>
                         Browser Only
-                        <span class="mode-desc">Fast, works offline</span>
+                        <span class="mode-desc">Low latency • Moderate accuracy</span>
                     </button>
                     <button class="mode-option ${this.transcriptionMode === 'dual' ? 'active' : ''}" 
                             onclick="window.aiAssistant.setTranscriptionModeUI('dual')">
+                        <span class="experimental-tag">Experimental</span>
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
                             <path d="M8,2A6,6 0 0,0 2,8A6,6 0 0,0 8,14A6,6 0 0,0 14,8A6,6 0 0,0 8,2M8,4A4,4 0 0,1 12,8A4,4 0 0,1 8,12A4,4 0 0,1 4,8A4,4 0 0,1 8,4M16,10A6,6 0 0,0 10,16A6,6 0 0,0 16,22A6,6 0 0,0 22,16A6,6 0 0,0 16,10M16,12A4,4 0 0,1 20,16A4,4 0 0,1 16,20A4,4 0 0,1 12,16A4,4 0 0,1 16,12Z"/>
                         </svg>
                         Dual Mode
-                        <span class="mode-desc">Browser + Whisper AI</span>
+                        <span class="mode-desc">Higher accuracy for legal terms</span>
                     </button>
                 </div>
             </div>
@@ -302,6 +303,11 @@ class AIAssistant {
             this.updateRecordingUI();
             this.startTimer();
             this.updateStatus('Recording... Tell me about your billable work');
+            
+            // Start continuous chunk processing for dual mode
+            if (this.transcriptionMode === 'dual') {
+                this.checkChunkProcessing();
+            }
             
         } catch (err) {
             console.error('Error accessing microphone:', err);
