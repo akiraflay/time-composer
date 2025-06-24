@@ -313,6 +313,13 @@ function setupEventListeners() {
         nextMonth.addEventListener('click', () => navigateCalendar(1));
     }
     
+    // Prevent text selection during calendar drag
+    document.addEventListener('selectstart', (e) => {
+        if (isDraggingDateRange) {
+            e.preventDefault();
+        }
+    });
+    
     // Modal functionality for fallback
     const modal = document.getElementById('add-modal');
     const closeButton = document.getElementById('close-modal');
@@ -1907,8 +1914,11 @@ function createTableRow(entry) {
 
 // Calendar functionality
 let currentCalendarDate = new Date();
+let calendarSelectedDates = { start: null, end: null };
+let isDraggingDateRange = false;
 
 function loadCalendar() {
+    const calendarView = document.getElementById('calendar-view');
     const calendar = document.getElementById('calendar');
     const monthHeader = document.getElementById('calendar-month');
     
@@ -1921,6 +1931,47 @@ function loadCalendar() {
         month: 'long', 
         year: 'numeric' 
     });
+    
+    // Add export controls if not present
+    let exportControls = document.getElementById('calendar-export-controls');
+    if (!exportControls) {
+        exportControls = document.createElement('div');
+        exportControls.id = 'calendar-export-controls';
+        exportControls.className = 'calendar-export-controls';
+        exportControls.innerHTML = `
+            <div class="export-selection-info">
+                <span id="calendar-selection-text">Click and drag to select dates for export</span>
+            </div>
+            <div class="export-actions">
+                <button class="calendar-preset-btn" data-preset="this-week">This Week</button>
+                <button class="calendar-preset-btn" data-preset="last-week">Last Week</button>
+                <button id="calendar-export-btn" class="calendar-export-btn" disabled>
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M16,11L12,15L8,11L10.17,9L11,9.83V7H13V9.83L13.83,9L16,11Z"/>
+                    </svg>
+                    Export
+                </button>
+            </div>
+        `;
+        
+        // Insert after calendar header
+        const calendarHeader = document.querySelector('.calendar-header');
+        if (calendarHeader && calendarHeader.parentNode) {
+            if (calendarHeader.nextSibling) {
+                calendarHeader.parentNode.insertBefore(exportControls, calendarHeader.nextSibling);
+            } else {
+                calendarHeader.parentNode.appendChild(exportControls);
+            }
+        }
+        
+        // Add event listeners for preset buttons
+        exportControls.querySelectorAll('.calendar-preset-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => selectCalendarPreset(e.target.dataset.preset));
+        });
+        
+        // Add export button listener
+        document.getElementById('calendar-export-btn').addEventListener('click', exportCalendarSelection);
+    }
     
     // Build calendar
     calendar.innerHTML = '';
@@ -1950,15 +2001,20 @@ function loadCalendar() {
     for (let day = 1; day <= daysInMonth; day++) {
         const dayCell = document.createElement('div');
         dayCell.className = 'calendar-day';
+        dayCell.dataset.date = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         
         const currentDate = new Date(year, month, day);
         if (currentDate.toDateString() === today.toDateString()) {
             dayCell.classList.add('today');
         }
         
-        dayCell.innerHTML = `<div class="calendar-day-number">${day}</div>`;
+        // Add day content container
+        const dayContent = document.createElement('div');
+        dayContent.className = 'calendar-day-content';
         
-        // Add entries for this day
+        dayContent.innerHTML = `<div class="calendar-day-number">${day}</div>`;
+        
+        // Get entries for this day
         const dayEntries = currentEntries.filter(entry => {
             const entryDate = new Date(entry.created_at);
             return entryDate.getDate() === day && 
@@ -1966,21 +2022,255 @@ function loadCalendar() {
                    entryDate.getFullYear() === year;
         });
         
-        dayEntries.forEach(entry => {
+        // Create entries container
+        const entriesContainer = document.createElement('div');
+        entriesContainer.className = 'calendar-entries-container';
+        
+        // Add up to 4 entries
+        const entriesToShow = dayEntries.slice(0, 4);
+        entriesToShow.forEach(entry => {
             const entryEl = document.createElement('div');
             entryEl.className = 'calendar-entry';
-            entryEl.textContent = `${entry.total_hours}h - ${entry.client_code || 'No Client'}`;
-            entryEl.onclick = () => editEntry(entry.id);
-            dayCell.appendChild(entryEl);
+            entryEl.innerHTML = `${entry.total_hours || 0}h`;
+            entryEl.title = `${entry.client_code || 'No Client'}${entry.matter_number ? ' - ' + entry.matter_number : ''}`;
+            entryEl.onclick = (e) => {
+                e.stopPropagation();
+                openEditModal(entry.id);
+            };
+            entriesContainer.appendChild(entryEl);
         });
+        
+        // Add "more" indicator if needed
+        if (dayEntries.length > 4) {
+            const moreEl = document.createElement('div');
+            moreEl.className = 'calendar-more-entries';
+            moreEl.textContent = `+${dayEntries.length - 4} more`;
+            moreEl.onclick = (e) => {
+                e.stopPropagation();
+                showDayEntriesModal(currentDate, dayEntries);
+            };
+            entriesContainer.appendChild(moreEl);
+        }
+        
+        dayContent.appendChild(entriesContainer);
+        dayCell.appendChild(dayContent);
+        
+        // Add date selection handlers
+        dayCell.addEventListener('mousedown', (e) => startDateSelection(e, currentDate));
+        dayCell.addEventListener('mouseenter', (e) => updateDateSelection(e, currentDate));
+        dayCell.addEventListener('mouseup', (e) => endDateSelection(e, currentDate));
         
         calendar.appendChild(dayCell);
     }
+    
+    // Update selection display if dates are selected
+    updateCalendarSelectionDisplay();
 }
 
 function navigateCalendar(direction) {
     currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
+    // Clear selection when navigating months
+    calendarSelectedDates = { start: null, end: null };
     loadCalendar();
+}
+
+// Calendar date selection functions
+function startDateSelection(e, date) {
+    e.preventDefault();
+    isDraggingDateRange = true;
+    calendarSelectedDates.start = date;
+    calendarSelectedDates.end = date;
+    updateCalendarSelectionDisplay();
+    
+    // Add mouse move listener to document for drag selection
+    document.addEventListener('mousemove', handleDateSelectionDrag);
+}
+
+function updateDateSelection(e, date) {
+    if (isDraggingDateRange && calendarSelectedDates.start) {
+        calendarSelectedDates.end = date;
+        updateCalendarSelectionDisplay();
+    }
+}
+
+function endDateSelection(e, date) {
+    if (isDraggingDateRange) {
+        isDraggingDateRange = false;
+        calendarSelectedDates.end = date;
+        
+        // Ensure start is before end
+        if (calendarSelectedDates.start > calendarSelectedDates.end) {
+            [calendarSelectedDates.start, calendarSelectedDates.end] = 
+            [calendarSelectedDates.end, calendarSelectedDates.start];
+        }
+        
+        updateCalendarSelectionDisplay();
+        
+        // Remove mouse move listener
+        document.removeEventListener('mousemove', handleDateSelectionDrag);
+    }
+}
+
+function handleDateSelectionDrag(e) {
+    // Handle drag selection across calendar cells
+    const dayCell = document.elementFromPoint(e.clientX, e.clientY);
+    if (dayCell && dayCell.classList.contains('calendar-day') && dayCell.dataset.date) {
+        const [year, month, day] = dayCell.dataset.date.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        updateDateSelection(e, date);
+    }
+}
+
+function selectCalendarPreset(preset) {
+    const today = new Date();
+    const currentMonth = currentCalendarDate.getMonth();
+    const currentYear = currentCalendarDate.getFullYear();
+    
+    switch (preset) {
+        case 'this-week':
+            // Get current week in the displayed month
+            const startOfWeek = new Date(today);
+            startOfWeek.setDate(today.getDate() - today.getDay());
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+            
+            calendarSelectedDates.start = startOfWeek;
+            calendarSelectedDates.end = endOfWeek;
+            break;
+            
+        case 'last-week':
+            // Get last week
+            const startOfLastWeek = new Date(today);
+            startOfLastWeek.setDate(today.getDate() - today.getDay() - 7);
+            const endOfLastWeek = new Date(startOfLastWeek);
+            endOfLastWeek.setDate(startOfLastWeek.getDate() + 6);
+            
+            calendarSelectedDates.start = startOfLastWeek;
+            calendarSelectedDates.end = endOfLastWeek;
+            break;
+    }
+    
+    updateCalendarSelectionDisplay();
+}
+
+function updateCalendarSelectionDisplay() {
+    const calendar = document.getElementById('calendar');
+    if (!calendar) return;
+    
+    // Clear existing selection
+    calendar.querySelectorAll('.calendar-day').forEach(day => {
+        day.classList.remove('selected', 'selection-start', 'selection-end');
+    });
+    
+    // Apply new selection
+    if (calendarSelectedDates.start && calendarSelectedDates.end) {
+        const start = calendarSelectedDates.start;
+        const end = calendarSelectedDates.end;
+        
+        calendar.querySelectorAll('.calendar-day').forEach(day => {
+            if (day.dataset.date) {
+                const [year, month, dayNum] = day.dataset.date.split('-').map(Number);
+                const dayDate = new Date(year, month - 1, dayNum);
+                
+                // Normalize dates for comparison (remove time component)
+                const dayDateNorm = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate());
+                const startNorm = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+                const endNorm = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+                
+                if (dayDateNorm >= startNorm && dayDateNorm <= endNorm) {
+                    day.classList.add('selected');
+                    if (dayDateNorm.getTime() === startNorm.getTime()) {
+                        day.classList.add('selection-start');
+                    }
+                    if (dayDateNorm.getTime() === endNorm.getTime()) {
+                        day.classList.add('selection-end');
+                    }
+                }
+            }
+        });
+        
+        // Update selection text and enable export button
+        const selectionText = document.getElementById('calendar-selection-text');
+        const exportBtn = document.getElementById('calendar-export-btn');
+        
+        if (selectionText && exportBtn) {
+            const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+            const startStr = start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            const endStr = end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            
+            selectionText.textContent = `${startStr} - ${endStr} (${days} days selected)`;
+            exportBtn.disabled = false;
+        }
+    } else {
+        // Reset to default state
+        const selectionText = document.getElementById('calendar-selection-text');
+        const exportBtn = document.getElementById('calendar-export-btn');
+        
+        if (selectionText) {
+            selectionText.textContent = 'Click and drag to select dates for export';
+        }
+        if (exportBtn) {
+            exportBtn.disabled = true;
+        }
+    }
+}
+
+function exportCalendarSelection() {
+    if (!calendarSelectedDates.start || !calendarSelectedDates.end) {
+        showNotification('Please select a date range to export', 'error');
+        return;
+    }
+    
+    // Switch to export view with the selected dates
+    const startInput = document.getElementById('export-start');
+    const endInput = document.getElementById('export-end');
+    
+    if (startInput && endInput) {
+        startInput.valueAsDate = calendarSelectedDates.start;
+        endInput.valueAsDate = calendarSelectedDates.end;
+    }
+    
+    // Switch to export view
+    showView('export');
+    updateExportPreview();
+}
+
+function showDayEntriesModal(date, entries) {
+    // Create modal to show all entries for a specific day
+    const modal = document.createElement('div');
+    modal.className = 'day-entries-modal';
+    modal.innerHTML = `
+        <div class="day-entries-content">
+            <div class="day-entries-header">
+                <h3>${date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</h3>
+                <button class="close-btn" onclick="this.closest('.day-entries-modal').remove()">&times;</button>
+            </div>
+            <div class="day-entries-list">
+                ${entries.map(entry => `
+                    <div class="day-entry-item" onclick="openEditModal(${entry.id}); this.closest('.day-entries-modal').remove();">
+                        <div class="entry-time">${new Date(entry.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</div>
+                        <div class="entry-details">
+                            <div class="entry-hours-client">
+                                <span class="entry-hours">${entry.total_hours || 0}h</span>
+                                <span class="entry-client">${entry.client_code || 'No Client'}</span>
+                                ${entry.matter_number ? `<span class="entry-matter">${entry.matter_number}</span>` : ''}
+                            </div>
+                            <div class="entry-description">${entry.narratives && entry.narratives[0] ? entry.narratives[0].text : entry.original_text || 'No description'}</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Close on backdrop click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
 }
 
 // Export functionality
