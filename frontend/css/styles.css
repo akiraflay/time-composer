@@ -302,9 +302,8 @@ main {
     .streamlined-controls {
         gap: 0.5rem;
         padding: 0.75rem;
-        border-radius: 0;
-        border-left: 0;
-        border-right: 0;
+        border-radius: 0.625rem;
+        margin: 0 1rem 1.5rem 1rem;
     }
     
     .streamlined-controls .search-input {
@@ -327,6 +326,7 @@ main {
     .streamlined-controls {
         flex-wrap: wrap;
         gap: 0.5rem;
+        margin: 0 1rem 1.5rem 1rem;
     }
     
     /* Hide actions column on very small screens */
@@ -7215,8 +7215,8 @@ main {
     }
     
     main {
-        padding: 0;
-        margin: 0;
+        padding: 0 1rem;
+        margin: 0.5rem 0;
     }
     
     .main-filter-row {
@@ -7229,6 +7229,29 @@ main {
     .quick-time-filters {
         order: 2;
         justify-content: center;
+        margin: 0 1rem;
+    }
+    
+    /* Add padding to entries container */
+    .entries-container {
+        padding: 0 1rem;
+    }
+    
+    /* Add padding to condensed table wrapper */
+    .condensed-table {
+        margin: 0 1rem;
+    }
+    
+    /* Time Period label styling */
+    .time-period-section {
+        padding: 0 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    /* Date header rows in table */
+    .table-grouped-row td {
+        padding-left: 2rem;
+        padding-right: 2rem;
     }
     
     .date-range-picker {
