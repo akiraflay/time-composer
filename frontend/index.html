@@ -137,19 +137,13 @@
                 <div class="export-container">
                     <div class="export-header">
                         <h2>Export Time Entries</h2>
-                        <p class="export-subtitle">Generate billing reports for your time entries</p>
+                        <p class="export-subtitle">Export Narratives to IntApp Time</p>
                     </div>
                     
                     <!-- Export Controls Card -->
                     <div class="export-card">
                         <div class="card-header">
                             <h3>Export Settings</h3>
-                            <button id="export-btn" class="export-button header-action">
-                                <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-                                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M16,11L12,15L8,11L10.17,9L11,9.83V7H13V9.83L13.83,9L16,11Z"/>
-                                </svg>
-                                Export to CSV
-                            </button>
                         </div>
                         <div class="card-body">
                             <!-- Date Selection Section -->
@@ -184,6 +178,16 @@
                                     <span class="filename-extension">.csv</span>
                                 </div>
                                 <p class="field-hint">Leave blank for auto-generated filename with date</p>
+                            </div>
+                            
+                            <!-- Export Button -->
+                            <div class="export-action-section">
+                                <button id="export-btn" class="export-button">
+                                    <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M16,11L12,15L8,11L10.17,9L11,9.83V7H13V9.83L13.83,9L16,11Z"/>
+                                    </svg>
+                                    Export to CSV
+                                </button>
                             </div>
                         </div>
                     </div>

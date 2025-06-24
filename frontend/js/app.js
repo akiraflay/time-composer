@@ -2220,8 +2220,15 @@ function updateExportStats(entries, startDate, endDate) {
 
 function generatePreviewTable(entries) {
     const rows = entries.map(entry => {
-        const date = new Date(entry.created_at).toLocaleDateString();
-        const time = new Date(entry.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const dateObj = new Date(entry.created_at);
+        const dateTime = `${dateObj.toLocaleDateString('en-US', { 
+            month: '2-digit', 
+            day: '2-digit' 
+        })} ${dateObj.toLocaleTimeString([], { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        })}`;
+        
         const narratives = entry.narratives || [];
         const description = narratives.map(n => n.text).join('; ') || entry.original_text || '';
         const hours = entry.total_hours || 0;
@@ -2231,10 +2238,9 @@ function generatePreviewTable(entries) {
         
         return `
             <tr>
-                <td>${date}</td>
-                <td>${time}</td>
-                <td>${description.substring(0, 100)}${description.length > 100 ? '...' : ''}</td>
-                <td>${hours.toFixed(1)}</td>
+                <td>${dateTime}</td>
+                <td><span class="export-description" title="${description.replace(/"/g, '&quot;')}">${description}</span></td>
+                <td style="text-align: center;">${hours.toFixed(1)}</td>
                 <td>${clientCode}</td>
                 <td>${matterNumber}</td>
                 <td><span class="status-badge ${effectiveStatus}">${effectiveStatus.toUpperCase()}</span></td>
@@ -2246,8 +2252,7 @@ function generatePreviewTable(entries) {
         <table>
             <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>Time</th>
+                    <th>Date/Time</th>
                     <th>Description</th>
                     <th>Hours</th>
                     <th>Client</th>
