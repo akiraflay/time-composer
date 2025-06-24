@@ -108,6 +108,31 @@ class AIAssistant {
         this.currentMode = 'initial';
         this.updateStatus('Ready to capture your billable time');
         this.resetInterface();
+        this.selectedDate = null;
+    }
+
+    openWithDate(date) {
+        const assistant = document.getElementById('ai-assistant');
+        assistant.classList.add('active');
+        this.currentMode = 'initial';
+        this.selectedDate = date;
+        
+        // Format the date for display
+        const dateStr = date.toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+        
+        this.updateStatus(`Creating entry for ${dateStr}`);
+        this.resetInterface();
+        
+        // Update the initial message to reflect the selected date
+        const initialMessage = document.querySelector('.initial-message .message-text');
+        if (initialMessage) {
+            initialMessage.textContent = `What billable work did you accomplish on ${dateStr}? I'll help you turn it into professional time entries.`;
+        }
     }
 
     close() {
@@ -115,6 +140,7 @@ class AIAssistant {
         assistant.classList.remove('active');
         this.stopRecording();
         this.resetInterface();
+        this.selectedDate = null;
     }
 
     handleSuggestionClick(action) {
@@ -557,7 +583,7 @@ class AIAssistant {
                 id: Date.now(),
                 narratives: narratives,
                 total_hours: totalHours,
-                created_at: new Date().toISOString()
+                created_at: this.selectedDate ? this.selectedDate.toISOString() : new Date().toISOString()
             },
             total_narratives: narratives.length,
             total_hours: totalHours,

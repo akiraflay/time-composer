@@ -1949,6 +1949,12 @@ async function loadCalendar() {
             <div class="export-actions">
                 <button class="calendar-preset-btn" data-preset="this-week">This Week</button>
                 <button class="calendar-preset-btn" data-preset="last-week">Last Week</button>
+                <button id="calendar-add-entry-btn" class="calendar-add-entry-btn">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                        <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+                    </svg>
+                    Add Entry
+                </button>
                 <button id="calendar-export-btn" class="calendar-export-btn" disabled>
                     <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
                         <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M16,11L12,15L8,11L10.17,9L11,9.83V7H13V9.83L13.83,9L16,11Z"/>
@@ -1975,6 +1981,11 @@ async function loadCalendar() {
         
         // Add export button listener
         document.getElementById('calendar-export-btn').addEventListener('click', exportCalendarSelection);
+        
+        // Add entry button listener
+        document.getElementById('calendar-add-entry-btn').addEventListener('click', () => {
+            openCalendarAddEntry();
+        });
     }
     
     // Build calendar
@@ -2061,7 +2072,11 @@ async function loadCalendar() {
         if (dayEntries.length > 4) {
             const moreEl = document.createElement('div');
             moreEl.className = 'calendar-more-entries';
-            moreEl.textContent = `+${dayEntries.length - maxEntriesToShow} more`;
+            // On mobile (<=768px), show just "+X", on larger screens show "+X more"
+            const isMobile = window.innerWidth <= 768;
+            moreEl.textContent = isMobile 
+                ? `+${dayEntries.length - maxEntriesToShow}` 
+                : `+${dayEntries.length - maxEntriesToShow} more`;
             moreEl.onclick = (e) => {
                 e.stopPropagation();
                 showDayEntriesModal(currentDate, dayEntries);
@@ -2272,6 +2287,27 @@ function updateCalendarSelectionDisplay(isPreview = false) {
         if (exportBtn) {
             exportBtn.disabled = true;
         }
+    }
+}
+
+function openCalendarAddEntry() {
+    // Get the selected date(s)
+    let selectedDate = null;
+    
+    if (calendarSelectedDates.start) {
+        // If a range is selected, use the end date (latest date)
+        selectedDate = calendarSelectedDates.end || calendarSelectedDates.start;
+    } else {
+        // If no date is selected, use today
+        selectedDate = new Date();
+    }
+    
+    // Open the AI assistant with the selected date
+    if (window.aiAssistant) {
+        window.aiAssistant.openWithDate(selectedDate);
+    } else {
+        // Fallback to old modal if AI assistant isn't loaded
+        showNotification('AI Assistant not available', 'error');
     }
 }
 
