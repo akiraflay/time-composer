@@ -422,7 +422,7 @@ function setupEventListeners() {
 }
 
 // View switching
-function switchView(view) {
+async function switchView(view) {
     currentView = view;
     
     // Update navigation
@@ -441,7 +441,7 @@ function switchView(view) {
             loadDashboard();
             break;
         case 'calendar':
-            loadCalendar();
+            await loadCalendar();
             break;
         case 'export':
             loadExport();
@@ -1916,13 +1916,17 @@ function createTableRow(entry) {
 let currentCalendarDate = new Date();
 let calendarSelectedDates = { start: null, end: null };
 let isDraggingDateRange = false;
+let isSelectingDateRange = false;
 
-function loadCalendar() {
+async function loadCalendar() {
     const calendarView = document.getElementById('calendar-view');
     const calendar = document.getElementById('calendar');
     const monthHeader = document.getElementById('calendar-month');
     
     if (!calendar || !monthHeader) return;
+    
+    // Fetch all entries for the calendar
+    const entries = await dbOperations.getEntries();
     
     const year = currentCalendarDate.getFullYear();
     const month = currentCalendarDate.getMonth();
@@ -2008,31 +2012,44 @@ function loadCalendar() {
             dayCell.classList.add('today');
         }
         
-        // Add day content container
-        const dayContent = document.createElement('div');
-        dayContent.className = 'calendar-day-content';
-        
-        dayContent.innerHTML = `<div class="calendar-day-number">${day}</div>`;
-        
         // Get entries for this day
-        const dayEntries = currentEntries.filter(entry => {
+        const dayEntries = entries.filter(entry => {
             const entryDate = new Date(entry.created_at);
             return entryDate.getDate() === day && 
                    entryDate.getMonth() === month && 
                    entryDate.getFullYear() === year;
         });
         
+        // Add day content container
+        const dayContent = document.createElement('div');
+        dayContent.className = 'calendar-day-content';
+        
+        // Calculate total hours for the day
+        const dayTotalHours = dayEntries.reduce((sum, entry) => sum + (entry.total_hours || 0), 0);
+        
+        dayContent.innerHTML = `
+            <div class="calendar-day-header-row">
+                <div class="calendar-day-number">${day}</div>
+                ${dayTotalHours > 0 ? `<div class="calendar-day-total">${dayTotalHours.toFixed(1)}h</div>` : ''}
+            </div>
+        `;
+        
         // Create entries container
         const entriesContainer = document.createElement('div');
         entriesContainer.className = 'calendar-entries-container';
         
-        // Add up to 4 entries
-        const entriesToShow = dayEntries.slice(0, 4);
+        // Show up to 4 entries if there are exactly 4, otherwise show 3
+        const maxEntriesToShow = dayEntries.length === 4 ? 4 : 3;
+        const entriesToShow = dayEntries.slice(0, maxEntriesToShow);
+        
         entriesToShow.forEach(entry => {
             const entryEl = document.createElement('div');
             entryEl.className = 'calendar-entry';
-            entryEl.innerHTML = `${entry.total_hours || 0}h`;
-            entryEl.title = `${entry.client_code || 'No Client'}${entry.matter_number ? ' - ' + entry.matter_number : ''}`;
+            entryEl.innerHTML = `
+                <span class="entry-time">${entry.total_hours || 0}h</span>
+                <span class="entry-client-name">${entry.client_code || 'No Client'}</span>
+            `;
+            entryEl.title = `${entry.client_code || 'No Client'}${entry.matter_number ? ' - ' + entry.matter_number : ''}\n${entry.narratives && entry.narratives[0] ? entry.narratives[0].text : ''}`;
             entryEl.onclick = (e) => {
                 e.stopPropagation();
                 openEditModal(entry.id);
@@ -2040,11 +2057,11 @@ function loadCalendar() {
             entriesContainer.appendChild(entryEl);
         });
         
-        // Add "more" indicator if needed
+        // Add "more" indicator if there are more than 4 entries
         if (dayEntries.length > 4) {
             const moreEl = document.createElement('div');
             moreEl.className = 'calendar-more-entries';
-            moreEl.textContent = `+${dayEntries.length - 4} more`;
+            moreEl.textContent = `+${dayEntries.length - maxEntriesToShow} more`;
             moreEl.onclick = (e) => {
                 e.stopPropagation();
                 showDayEntriesModal(currentDate, dayEntries);
@@ -2067,29 +2084,58 @@ function loadCalendar() {
     updateCalendarSelectionDisplay();
 }
 
-function navigateCalendar(direction) {
+async function navigateCalendar(direction) {
     currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
     // Clear selection when navigating months
     calendarSelectedDates = { start: null, end: null };
-    loadCalendar();
+    isSelectingDateRange = false;
+    await loadCalendar();
 }
 
 // Calendar date selection functions
 function startDateSelection(e, date) {
     e.preventDefault();
-    isDraggingDateRange = true;
-    calendarSelectedDates.start = date;
-    calendarSelectedDates.end = date;
-    updateCalendarSelectionDisplay();
     
-    // Add mouse move listener to document for drag selection
-    document.addEventListener('mousemove', handleDateSelectionDrag);
+    // Check if this is a click or drag
+    if (!isSelectingDateRange && !calendarSelectedDates.start) {
+        // First click - start selection
+        isSelectingDateRange = true;
+        calendarSelectedDates.start = date;
+        calendarSelectedDates.end = null;
+        updateCalendarSelectionDisplay();
+    } else if (isSelectingDateRange && calendarSelectedDates.start && !isDraggingDateRange) {
+        // Second click - complete selection
+        calendarSelectedDates.end = date;
+        
+        // Ensure start is before end
+        if (calendarSelectedDates.start > calendarSelectedDates.end) {
+            [calendarSelectedDates.start, calendarSelectedDates.end] = 
+            [calendarSelectedDates.end, calendarSelectedDates.start];
+        }
+        
+        isSelectingDateRange = false;
+        updateCalendarSelectionDisplay();
+    } else {
+        // Starting a drag
+        isDraggingDateRange = true;
+        calendarSelectedDates.start = date;
+        calendarSelectedDates.end = date;
+        isSelectingDateRange = false;
+        updateCalendarSelectionDisplay();
+        
+        // Add mouse move listener to document for drag selection
+        document.addEventListener('mousemove', handleDateSelectionDrag);
+    }
 }
 
 function updateDateSelection(e, date) {
     if (isDraggingDateRange && calendarSelectedDates.start) {
         calendarSelectedDates.end = date;
         updateCalendarSelectionDisplay();
+    } else if (isSelectingDateRange && calendarSelectedDates.start) {
+        // Show hover preview during click selection
+        calendarSelectedDates.end = date;
+        updateCalendarSelectionDisplay(true); // true = preview mode
     }
 }
 
@@ -2153,19 +2199,19 @@ function selectCalendarPreset(preset) {
     updateCalendarSelectionDisplay();
 }
 
-function updateCalendarSelectionDisplay() {
+function updateCalendarSelectionDisplay(isPreview = false) {
     const calendar = document.getElementById('calendar');
     if (!calendar) return;
     
     // Clear existing selection
     calendar.querySelectorAll('.calendar-day').forEach(day => {
-        day.classList.remove('selected', 'selection-start', 'selection-end');
+        day.classList.remove('selected', 'selection-start', 'selection-end', 'selection-pending');
     });
     
     // Apply new selection
-    if (calendarSelectedDates.start && calendarSelectedDates.end) {
+    if (calendarSelectedDates.start) {
         const start = calendarSelectedDates.start;
-        const end = calendarSelectedDates.end;
+        const end = calendarSelectedDates.end || start;
         
         calendar.querySelectorAll('.calendar-day').forEach(day => {
             if (day.dataset.date) {
@@ -2177,14 +2223,21 @@ function updateCalendarSelectionDisplay() {
                 const startNorm = new Date(start.getFullYear(), start.getMonth(), start.getDate());
                 const endNorm = new Date(end.getFullYear(), end.getMonth(), end.getDate());
                 
-                if (dayDateNorm >= startNorm && dayDateNorm <= endNorm) {
+                // Ensure start is before end for display
+                const displayStart = startNorm <= endNorm ? startNorm : endNorm;
+                const displayEnd = startNorm <= endNorm ? endNorm : startNorm;
+                
+                if (dayDateNorm >= displayStart && dayDateNorm <= displayEnd) {
                     day.classList.add('selected');
-                    if (dayDateNorm.getTime() === startNorm.getTime()) {
+                    if (dayDateNorm.getTime() === displayStart.getTime()) {
                         day.classList.add('selection-start');
                     }
-                    if (dayDateNorm.getTime() === endNorm.getTime()) {
+                    if (dayDateNorm.getTime() === displayEnd.getTime()) {
                         day.classList.add('selection-end');
                     }
+                } else if (isSelectingDateRange && dayDateNorm.getTime() === startNorm.getTime() && !calendarSelectedDates.end) {
+                    // Show pending selection state for first click
+                    day.classList.add('selection-pending');
                 }
             }
         });
@@ -2194,12 +2247,19 @@ function updateCalendarSelectionDisplay() {
         const exportBtn = document.getElementById('calendar-export-btn');
         
         if (selectionText && exportBtn) {
-            const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
-            const startStr = start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            const endStr = end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            
-            selectionText.textContent = `${startStr} - ${endStr} (${days} days selected)`;
-            exportBtn.disabled = false;
+            if (calendarSelectedDates.end) {
+                const days = Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1;
+                const startStr = start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const endStr = end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                
+                selectionText.textContent = `${startStr} - ${endStr} (${days} days selected)`;
+                exportBtn.disabled = false;
+            } else {
+                // First click state
+                const startStr = start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                selectionText.textContent = `${startStr} - Click another date to complete selection`;
+                exportBtn.disabled = true;
+            }
         }
     } else {
         // Reset to default state
@@ -2215,24 +2275,80 @@ function updateCalendarSelectionDisplay() {
     }
 }
 
-function exportCalendarSelection() {
+async function exportCalendarSelection() {
     if (!calendarSelectedDates.start || !calendarSelectedDates.end) {
         showNotification('Please select a date range to export', 'error');
         return;
     }
     
-    // Switch to export view with the selected dates
-    const startInput = document.getElementById('export-start');
-    const endInput = document.getElementById('export-end');
-    
-    if (startInput && endInput) {
-        startInput.valueAsDate = calendarSelectedDates.start;
-        endInput.valueAsDate = calendarSelectedDates.end;
+    try {
+        showLoading('Exporting entries...');
+        
+        // Get all entries
+        let entries = await dbOperations.getEntries();
+        
+        // Format dates for comparison
+        const startDate = calendarSelectedDates.start.toISOString().split('T')[0];
+        const endDate = calendarSelectedDates.end.toISOString().split('T')[0];
+        
+        // Filter entries by selected date range
+        entries = entries.filter(entry => {
+            const entryDate = new Date(entry.created_at).toISOString().split('T')[0];
+            return entryDate >= startDate && entryDate <= endDate;
+        });
+        
+        if (entries.length === 0) {
+            hideLoading();
+            showNotification('No entries found in selected date range', 'warning');
+            return;
+        }
+        
+        // Generate filename with date range
+        const startStr = calendarSelectedDates.start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const endStr = calendarSelectedDates.end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const filename = `time-entries-${startDate}-to-${endDate}`;
+        
+        // Export entries
+        const entryIds = entries.map(e => e.id);
+        await api.exportEntries(entryIds, filename);
+        
+        // Update status of exported entries to 'exported'
+        for (const entry of entries) {
+            // Update all narratives to exported status
+            if (entry.narratives && entry.narratives.length > 0) {
+                entry.narratives = entry.narratives.map(narrative => ({
+                    ...narrative,
+                    status: 'exported'
+                }));
+            }
+            
+            // Update entry status
+            entry.status = 'exported';
+            
+            // Save to local database
+            await dbOperations.saveEntry(entry);
+            
+            // Update backend if it's a real entry
+            if (typeof entry.id === 'number') {
+                try {
+                    await api.updateEntry(entry.id, entry);
+                } catch (error) {
+                    console.error('Failed to update backend for entry', entry.id, error);
+                }
+            }
+        }
+        
+        hideLoading();
+        showNotification(`Successfully exported ${entries.length} entries from ${startStr} to ${endStr}`, 'success');
+        
+        // Refresh the calendar to show updated statuses
+        loadCalendar();
+        
+    } catch (error) {
+        console.error('Export failed:', error);
+        hideLoading();
+        showNotification('Failed to export entries', 'error');
     }
-    
-    // Switch to export view
-    showView('export');
-    updateExportPreview();
 }
 
 function showDayEntriesModal(date, entries) {
