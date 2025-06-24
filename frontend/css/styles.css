@@ -2903,6 +2903,38 @@ main {
     border-color: var(--border);
 }
 
+/* Specific styles for client and matter fields */
+.editable-field.client-field,
+.editable-field.matter-field {
+    position: relative;
+    min-width: fit-content;
+    display: inline-block;
+}
+
+/* Only add padding for list view fields on hover */
+.condensed-table .editable-field.client-field:hover,
+.condensed-table .editable-field.matter-field:hover {
+    padding-right: 1.75rem; /* Make room for edit icon */
+}
+
+/* Ensure minimum width when editing */
+.editable-field.client-field.editing,
+.editable-field.matter-field.editing {
+    min-width: 100px;
+}
+
+/* Container adjustments to prevent layout shift */
+.client-matter {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.condensed-client,
+.condensed-matter {
+    overflow: visible;
+}
+
 .editable-field.editing {
     background-color: var(--surface);
     border-color: var(--primary-color);
@@ -2923,6 +2955,31 @@ main {
 
 .editable-field:hover .edit-icon {
     opacity: 0.7;
+}
+
+/* Specific positioning for client and matter field edit icons */
+.editable-field.client-field .edit-icon,
+.editable-field.matter-field .edit-icon {
+    right: 0.375rem;
+    transition: opacity 0.15s ease 0.1s; /* Slight delay for smoother appearance */
+}
+
+/* Hide edit icons for card view client/matter fields */
+.narrative-client.editable-field .edit-icon,
+.narrative-matter.editable-field .edit-icon,
+.editable-client.editable-field .edit-icon,
+.editable-matter.editable-field .edit-icon {
+    display: none !important;
+}
+
+/* Card view client/matter fields - hover without edit icon */
+.narrative-client.editable-field:hover,
+.narrative-matter.editable-field:hover,
+.editable-client.editable-field:hover,
+.editable-matter.editable-field:hover {
+    background-color: var(--background);
+    border-color: var(--border);
+    cursor: pointer;
 }
 
 .editable-field.editing .edit-icon {
@@ -2977,6 +3034,8 @@ main {
     color: var(--text-primary);
     outline: none;
     transition: all 0.15s ease;
+    min-width: 100%;
+    box-sizing: border-box;
     margin: -1px;
 }
 
@@ -5776,51 +5835,40 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
     background: var(--background);
 }
 
-/* Override general editable field icon rules for condensed table */
-.condensed-table .editable-field .edit-icon,
-.condensed-table .edit-icon {
-    display: none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-}
-
-/* Ensure icons stay hidden in ALL states for condensed table */
-.condensed-table .editable-field:hover .edit-icon,
-.condensed-table .editable-field:focus .edit-icon,
-.condensed-table .editable-field:focus-within .edit-icon,
-.condensed-table .editable-field.editing .edit-icon,
-.condensed-table td .edit-icon {
-    display: none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-}
-
-/* Extra specificity to override any inline styles */
-.condensed-table td span.editable-field svg.edit-icon {
-    display: none !important;
-}
-
-/* Never show icons on hover in condensed view */
-.condensed-table td span.editable-field:hover svg.edit-icon {
-    display: none !important;
-}
-
-/* Hide only edit icons in condensed table cells, not action button icons */
-.entries-condensed .condensed-table td .edit-icon,
-.entries-condensed .condensed-table td .editable-field .edit-icon,
-.entries-condensed .condensed-table svg.edit-icon,
-.condensed-table td .editable-field .edit-icon,
-.condensed-table td .edit-icon {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-}
-
-/* Override opacity transitions that might be causing visibility */
+/* Edit icon rules for condensed table - show on hover for client/matter fields */
 .condensed-table .editable-field .edit-icon {
-    transition: none !important;
+    position: absolute;
+    top: 50%;
+    right: 0.25rem;
+    transform: translateY(-50%);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+
+/* Show edit icons on hover for client and matter fields */
+.condensed-table .editable-field.client-field:hover .edit-icon,
+.condensed-table .editable-field.matter-field:hover .edit-icon {
+    opacity: 0.7;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+/* Hide edit icon when editing */
+.condensed-table .editable-field.editing .edit-icon {
+    display: none !important;
+}
+
+/* Hide edit icons for other fields (description, hours) in condensed view */
+.condensed-table .editable-field:not(.client-field):not(.matter-field) .edit-icon {
+    display: none !important;
+}
+
+/* Ensure proper transitions for edit icons */
+.condensed-table .editable-field.client-field .edit-icon,
+.condensed-table .editable-field.matter-field .edit-icon {
+    transition: opacity 0.15s ease 0.1s, visibility 0.15s ease 0.1s;
 }
 
 /* Remove any focus outlines in condensed view */

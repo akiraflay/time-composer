@@ -989,9 +989,6 @@ function createEntryCard(entry) {
             <div class="narrative-header">
                 <span class="editable-field editable-hours" data-field="hours" data-entry-id="${entry.id}" data-narrative-index="${index}">
                     ${n.hours} hours
-                    <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
-                    </svg>
                 </span>
             </div>
             <div class="narrative-text editable-field editable-narrative" data-field="text" data-entry-id="${entry.id}" data-narrative-index="${index}">
@@ -1006,18 +1003,12 @@ function createEntryCard(entry) {
                         <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/>
                     </svg>
                     ${n.client_code || entry.client_code || 'No Client'}
-                    <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
-                    </svg>
                 </div>
                 <div class="narrative-matter editable-field editable-matter" data-field="matter_number" data-entry-id="${entry.id}" data-narrative-index="${index}">
                     <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
                         <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
                     </svg>
                     ${n.matter_number || entry.matter_number || 'No Matter'}
-                    <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
-                    </svg>
                 </div>
             </div>
         </div>
@@ -1091,9 +1082,6 @@ function createEntryCard(entry) {
                         </svg>
                         <span class="editable-field editable-date" data-field="created_at" data-entry-id="${entry.id}">
                             ${dateStr} ${timeStr}
-                            <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
-                            </svg>
                         </span>
                     </span>
                     <span class="entry-meta-item">
@@ -1157,13 +1145,15 @@ async function startInlineEdit(field) {
     const fieldType = field.dataset.field;
     const narrativeIndex = field.dataset.narrativeIndex;
     
+    // Prevent editing of total_hours (calculated) and date fields
+    if (fieldType === 'total_hours' || fieldType === 'created_at') {
+        return;
+    }
+    
     // Get current value
     let currentValue = '';
     if (fieldType === 'hours') {
         currentValue = field.textContent.replace(' hours', '').trim();
-    } else if (fieldType === 'total_hours') {
-        // Total hours should not be editable - it's calculated from narratives
-        return;
     } else if (fieldType === 'text') {
         // For narrative text, get the full text from the entry data
         if (narrativeIndex !== undefined) {
@@ -1181,27 +1171,20 @@ async function startInlineEdit(field) {
         } else {
             currentValue = field.textContent.trim();
         }
-    } else if (fieldType === 'created_at') {
-        // For date, we need to get the ISO string from the entry data
-        try {
-            const entry = await dbOperations.getEntry(parseInt(entryId));
-            if (entry && entry.created_at) {
-                const date = new Date(entry.created_at);
-                // Convert to datetime-local format (YYYY-MM-DDTHH:mm)
-                currentValue = date.toISOString().slice(0, 16);
-            }
-        } catch (error) {
-            console.error('Failed to get entry data for date editing:', error);
-            return;
+    } else if (fieldType === 'client_code' || fieldType === 'matter_number') {
+        // Extract text content excluding the SVG
+        // First try to find text nodes
+        const textNodes = Array.from(field.childNodes).filter(node => node.nodeType === Node.TEXT_NODE);
+        if (textNodes.length > 0) {
+            currentValue = textNodes.map(node => node.textContent).join('').trim();
+        } else {
+            // If no text nodes, get all text content and remove any SVG content
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = field.innerHTML;
+            // Remove SVG elements
+            tempDiv.querySelectorAll('svg').forEach(svg => svg.remove());
+            currentValue = tempDiv.textContent.trim();
         }
-    } else if (fieldType === 'client_code') {
-        // Extract text content excluding the SVG
-        const textNode = Array.from(field.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
-        currentValue = textNode ? textNode.textContent.trim() : field.textContent.trim();
-    } else if (fieldType === 'matter_number') {
-        // Extract text content excluding the SVG
-        const textNode = Array.from(field.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
-        currentValue = textNode ? textNode.textContent.trim() : field.textContent.trim();
     }
     
     // Store original value for comparison
@@ -1229,12 +1212,10 @@ async function startInlineEdit(field) {
         inputElement = document.createElement('input');
         inputElement.className = 'inline-input seamless';
         
-        if (fieldType === 'hours' || fieldType === 'total_hours') {
+        if (fieldType === 'hours') {
             inputElement.type = 'number';
             inputElement.step = '0.1';
             inputElement.min = '0';
-        } else if (fieldType === 'created_at') {
-            inputElement.type = 'datetime-local';
         } else {
             inputElement.type = 'text';
         }
@@ -1245,6 +1226,9 @@ async function startInlineEdit(field) {
     // Replace content (no action buttons)
     field.innerHTML = '';
     field.appendChild(inputElement);
+    
+    // Ensure value is set after DOM update
+    inputElement.value = currentValue;
     
     // Focus and select input
     inputElement.focus();
@@ -1333,9 +1317,6 @@ async function saveInlineEdit(field, inputElement, entryId, fieldType, narrative
         let currentValue = '';
         if (fieldType === 'total_hours') {
             currentValue = entry.total_hours?.toString() || '0';
-        } else if (fieldType === 'created_at') {
-            const date = new Date(entry.created_at);
-            currentValue = date.toISOString().slice(0, 16);
         } else if (narrativeIndex !== undefined && entry.narratives && entry.narratives[narrativeIndex]) {
             const narrative = entry.narratives[narrativeIndex];
             if (fieldType === 'hours') {
@@ -1362,8 +1343,6 @@ async function saveInlineEdit(field, inputElement, entryId, fieldType, narrative
         
         if (fieldType === 'total_hours') {
             updates.total_hours = parseFloat(newValue) || 0;
-        } else if (fieldType === 'created_at') {
-            updates.created_at = new Date(newValue).toISOString();
         } else if (narrativeIndex !== undefined) {
             // For narrative fields, we need to update the entire narratives array
             if (!entry.narratives) entry.narratives = [];
@@ -1392,11 +1371,25 @@ async function saveInlineEdit(field, inputElement, entryId, fieldType, narrative
         field.classList.remove('editing', 'saving');
         delete field.dataset.originalValue;
         
-        // Show success feedback
-        field.classList.add('saved');
-        setTimeout(() => {
-            field.classList.remove('saved');
-        }, 1500);
+        // If we updated narrative hours, recalculate and update total hours display
+        if (fieldType === 'hours' && narrativeIndex !== undefined) {
+            const updatedEntry = await dbOperations.getEntry(parseInt(entryId));
+            if (updatedEntry && updatedEntry.narratives) {
+                const newTotalHours = updatedEntry.narratives.reduce((sum, n) => sum + (n.hours || 0), 0);
+                
+                // Find the card element
+                const card = field.closest('.entry-card');
+                if (card) {
+                    const totalHoursDisplay = card.querySelector('.total-hours-display');
+                    if (totalHoursDisplay) {
+                        totalHoursDisplay.textContent = `${newTotalHours} hours`;
+                    }
+                }
+                
+                // Also update the entry's total_hours in the database
+                await dbOperations.updateEntry(parseInt(entryId), { total_hours: newTotalHours });
+            }
+        }
         
         // Sync with server
         try {
@@ -1455,19 +1448,9 @@ function updateFieldDisplay(field, fieldType, newValue) {
         const date = new Date(newValue);
         const dateStr = date.toLocaleDateString();
         const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        field.innerHTML = `
-            ${dateStr} ${timeStr}
-            <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
-            </svg>
-        `;
+        field.innerHTML = `${dateStr} ${timeStr}`;
     } else if (fieldType === 'hours') {
-        field.innerHTML = `
-            ${newValue}
-            <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
-            </svg>
-        `;
+        field.innerHTML = `${newValue} hours`;
     } else if (fieldType === 'total_hours') {
         field.innerHTML = `
             ${newValue}
@@ -1483,16 +1466,18 @@ function updateFieldDisplay(field, fieldType, newValue) {
             </svg>
         `;
     } else if (fieldType === 'client_code') {
-        // Check if we're in condensed (list) view
-        if (viewMode === 'condensed') {
-            // In list view, don't add any icons
-            field.textContent = newValue;
-        } else {
-            // In expanded view, add icons as before
+        // Check if this is a card view field (has narrative-client class)
+        if (field.classList.contains('editable-client')) {
+            // Card view - include person icon, no edit icon
             field.innerHTML = `
                 <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
                     <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/>
                 </svg>
+                ${newValue}
+            `;
+        } else {
+            // List view - include edit icon
+            field.innerHTML = `
                 ${newValue}
                 <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
@@ -1500,22 +1485,27 @@ function updateFieldDisplay(field, fieldType, newValue) {
             `;
         }
     } else if (fieldType === 'matter_number') {
-        // Check if we're in condensed (list) view
-        if (viewMode === 'condensed') {
-            // In list view, don't add any icons
-            field.textContent = newValue || '-';
-        } else {
-            // In expanded view, add icons as before
+        // Check if this is a card view field (has narrative-matter class)
+        if (field.classList.contains('editable-matter')) {
+            // Card view - include document icon, no edit icon
             field.innerHTML = `
                 <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
                     <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
                 </svg>
+                ${newValue}
+            `;
+        } else {
+            // List view - include edit icon
+            field.innerHTML = `
                 ${newValue}
                 <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
                 </svg>
             `;
         }
+    } else {
+        // For other field types, just set the text content
+        field.textContent = newValue;
     }
     
     // Re-setup inline editing for this field
@@ -1743,6 +1733,9 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
                       data-entry-id="${entry.id}"
                       ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}>
                     ${clientCode}
+                    <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+                    </svg>
                 </span>
                 <div class="matter-subtext">
                     <span class="editable-field matter-field" 
@@ -1750,6 +1743,9 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
                           data-entry-id="${entry.id}"
                           ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}>
                         ${matterNumber || '-'}
+                        <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+                        </svg>
                     </span>
                 </div>
             </div>
@@ -1760,6 +1756,9 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
                   data-entry-id="${entry.id}"
                   ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}>
                 ${matterNumber || '-'}
+                <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+                </svg>
             </span>
         </td>
         <td class="condensed-time">
