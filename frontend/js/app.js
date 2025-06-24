@@ -2241,9 +2241,9 @@ function generatePreviewTable(entries) {
                 <td>${dateTime}</td>
                 <td><span class="export-description" title="${description.replace(/"/g, '&quot;')}">${description}</span></td>
                 <td style="text-align: center;">${hours.toFixed(1)}</td>
-                <td>${clientCode}</td>
-                <td>${matterNumber}</td>
-                <td><span class="status-badge ${effectiveStatus}">${effectiveStatus.toUpperCase()}</span></td>
+                <td style="text-align: center;">${clientCode}</td>
+                <td style="text-align: center;">${matterNumber}</td>
+                <td style="text-align: center;"><span class="status-badge ${effectiveStatus}">${effectiveStatus.toUpperCase()}</span></td>
             </tr>
         `;
     }).join('');
@@ -2252,7 +2252,7 @@ function generatePreviewTable(entries) {
         <table>
             <thead>
                 <tr>
-                    <th>Date/Time</th>
+                    <th>Date</th>
                     <th>Description</th>
                     <th>Hours</th>
                     <th>Client</th>

@@ -135,16 +135,8 @@
             <!-- Export View -->
             <div id="export-view" class="view">
                 <div class="export-container">
-                    <div class="export-header">
-                        <h2>Export Time Entries</h2>
-                        <p class="export-subtitle">Export Narratives to IntApp Time</p>
-                    </div>
-                    
                     <!-- Export Controls Card -->
                     <div class="export-card">
-                        <div class="card-header">
-                            <h3>Export Settings</h3>
-                        </div>
                         <div class="card-body">
                             <!-- Date Selection Section -->
                             <div class="date-selection-section">
@@ -173,21 +165,21 @@
                             <!-- File Name Section -->
                             <div class="filename-section">
                                 <label for="export-filename" class="section-label">File Name</label>
-                                <div class="filename-input-wrapper">
-                                    <input type="text" id="export-filename" placeholder="time-entries" class="filename-input">
-                                    <span class="filename-extension">.csv</span>
+                                <div class="filename-content">
+                                    <div>
+                                        <div class="filename-input-wrapper">
+                                            <input type="text" id="export-filename" placeholder="time-entries" class="filename-input">
+                                            <span class="filename-extension">.csv</span>
+                                        </div>
+                                        <p class="field-hint">Leave blank for auto-generated filename with date</p>
+                                    </div>
+                                    <button id="export-btn" class="export-button">
+                                        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M16,11L12,15L8,11L10.17,9L11,9.83V7H13V9.83L13.83,9L16,11Z"/>
+                                        </svg>
+                                        Export to CSV
+                                    </button>
                                 </div>
-                                <p class="field-hint">Leave blank for auto-generated filename with date</p>
-                            </div>
-                            
-                            <!-- Export Button -->
-                            <div class="export-action-section">
-                                <button id="export-btn" class="export-button">
-                                    <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-                                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M16,11L12,15L8,11L10.17,9L11,9.83V7H13V9.83L13.83,9L16,11Z"/>
-                                    </svg>
-                                    Export to CSV
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -197,7 +189,7 @@
                     <div class="stat-item">
                         <div class="stat-icon">
                             <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                                <path d="M9,11H7V13H9V11M13,11H11V13H13V11M17,11H15V13H17V11M19,4H18V2H16V4H8V2H6V4H5C3.89,4 3,4.9 3,6V20A2,2 0 0,0 5,22H19A2,2 0 0,0 21,20V6A2,2 0 0,0 19,4M19,20H5V9H19V20Z"/>
+                                <path d="M16,15H9V13H16M19,11H9V9H19M19,7H9V5H19M6,17V3H21V17C21,18.1 20.1,19 19,19H8L6,17M21,1H6C4.89,1 4,1.89 4,3V17L8,21H19C21.1,21 23,19.1 23,17V3C23,1.89 22.1,1 21,1Z"/>
                             </svg>
                         </div>
                         <div class="stat-details">
