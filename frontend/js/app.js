@@ -1483,25 +1483,39 @@ function updateFieldDisplay(field, fieldType, newValue) {
             </svg>
         `;
     } else if (fieldType === 'client_code') {
-        field.innerHTML = `
-            <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
-                <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/>
-            </svg>
-            ${newValue}
-            <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
-            </svg>
-        `;
+        // Check if we're in condensed (list) view
+        if (viewMode === 'condensed') {
+            // In list view, don't add any icons
+            field.textContent = newValue;
+        } else {
+            // In expanded view, add icons as before
+            field.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
+                    <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/>
+                </svg>
+                ${newValue}
+                <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+                </svg>
+            `;
+        }
     } else if (fieldType === 'matter_number') {
-        field.innerHTML = `
-            <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
-                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-            </svg>
-            ${newValue}
-            <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
-            </svg>
-        `;
+        // Check if we're in condensed (list) view
+        if (viewMode === 'condensed') {
+            // In list view, don't add any icons
+            field.textContent = newValue || '-';
+        } else {
+            // In expanded view, add icons as before
+            field.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
+                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                </svg>
+                ${newValue}
+                <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+                </svg>
+            `;
+        }
     }
     
     // Re-setup inline editing for this field
