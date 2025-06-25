@@ -16,6 +16,11 @@ let datePickerVisible = false;
 let bulkSelectionMode = false;
 let selectedEntries = new Set();
 
+// Helper function to round floating point numbers to avoid precision issues
+function roundToOneDecimal(num) {
+    return Math.round(num * 10) / 10;
+}
+
 // Helper function to determine entry status based on narratives
 function determineEntryStatus(entry) {
     if (entry.narratives && entry.narratives.length > 0) {
@@ -895,7 +900,7 @@ function updateDashboardStats(entries) {
     
     if (totalHours) {
         const hours = entries.reduce((sum, entry) => sum + (entry.total_hours || 0), 0);
-        totalHours.textContent = hours.toFixed(1);
+        totalHours.textContent = roundToOneDecimal(hours).toFixed(1);
     }
 }
 
@@ -1398,7 +1403,7 @@ async function saveInlineEdit(field, inputElement, entryId, fieldType, narrative
         if (fieldType === 'hours' && narrativeIndex !== undefined) {
             const updatedEntry = await dbOperations.getEntry(parseInt(entryId));
             if (updatedEntry && updatedEntry.narratives) {
-                const newTotalHours = updatedEntry.narratives.reduce((sum, n) => sum + (n.hours || 0), 0);
+                const newTotalHours = roundToOneDecimal(updatedEntry.narratives.reduce((sum, n) => sum + (n.hours || 0), 0));
                 
                 // Find the card element
                 const card = field.closest('.entry-card');
@@ -2723,7 +2728,7 @@ function updateExportStats(entries, startDate, endDate) {
     const statHours = document.getElementById('stat-hours');
     if (statHours) {
         const totalHours = entries.reduce((sum, e) => sum + (e.total_hours || 0), 0);
-        statHours.textContent = totalHours.toFixed(1);
+        statHours.textContent = roundToOneDecimal(totalHours).toFixed(1);
     }
     
     // Update date range
@@ -3534,7 +3539,7 @@ async function saveEditChanges() {
         });
         
         // Recalculate total hours
-        updatedEntry.total_hours = updatedEntry.narratives.reduce((sum, n) => sum + n.hours, 0);
+        updatedEntry.total_hours = roundToOneDecimal(updatedEntry.narratives.reduce((sum, n) => sum + n.hours, 0));
         
         // Determine entry-level status based on individual narrative statuses
         // Use the least advanced status (draft < exported)
