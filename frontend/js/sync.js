@@ -48,7 +48,8 @@ const syncManager = {
                             attorney_email: entry.attorney_email,
                             attorney_name: entry.attorney_name,
                             task_codes: entry.task_codes,
-                            tags: entry.tags
+                            tags: entry.tags,
+                            created_at: entry.created_at
                         });
                         
                         await dbOperations.markSynced(entry.id);

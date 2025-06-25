@@ -3177,6 +3177,15 @@ function closeEditModal() {
 
 function populateEditModal(entry) {
     
+    // Populate date field
+    const dateInput = document.getElementById('edit-entry-date');
+    if (entry.created_at) {
+        // Convert ISO string to YYYY-MM-DD format for date input
+        const date = new Date(entry.created_at);
+        const formattedDate = date.toISOString().split('T')[0];
+        dateInput.value = formattedDate;
+    }
+    
     // Populate narratives
     const container = document.getElementById('edit-narratives-container');
     container.innerHTML = '';
@@ -3433,6 +3442,16 @@ async function saveEditChanges() {
             ...currentEditingEntry,
             narratives: []
         };
+        
+        // Update the date if changed
+        const dateInput = document.getElementById('edit-entry-date');
+        if (dateInput.value) {
+            // Convert YYYY-MM-DD to ISO string, preserving the time from the original
+            const newDate = new Date(dateInput.value);
+            const originalDate = new Date(currentEditingEntry.created_at);
+            newDate.setHours(originalDate.getHours(), originalDate.getMinutes(), originalDate.getSeconds(), originalDate.getMilliseconds());
+            updatedEntry.created_at = newDate.toISOString();
+        }
         
         // Collect narratives data
         const narrativeItems = document.querySelectorAll('.edit-narrative-item');

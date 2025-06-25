@@ -176,6 +176,9 @@ def update_entry(entry_id):
             entry.original_text = data['original_text']
         if 'cleaned_text' in data:
             entry.cleaned_text = data['cleaned_text']
+        if 'created_at' in data:
+            # Parse the ISO format datetime string
+            entry.created_at = datetime.fromisoformat(data['created_at'].replace('Z', '+00:00'))
         
         entry.updated_at = datetime.utcnow()
         
