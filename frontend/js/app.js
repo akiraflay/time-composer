@@ -972,7 +972,24 @@ function createEntryCard(entry) {
     card.appendChild(checkbox);
     
     const totalHours = entry.total_hours || 0;
-    const date = new Date(entry.created_at);
+    
+    // Find the earliest narrative date if narratives have dates
+    let earliestDate = entry.created_at;
+    if (entry.narratives && entry.narratives.length > 0) {
+        entry.narratives.forEach(narrative => {
+            if (narrative.date) {
+                const narrativeDate = new Date(narrative.date);
+                const currentEarliest = new Date(earliestDate);
+                if (narrativeDate < currentEarliest) {
+                    earliestDate = narrative.date;
+                }
+            }
+        });
+    }
+    
+    // Parse the date - if it's from backend it's in UTC
+    const date = new Date(earliestDate);
+    // The Date constructor automatically converts UTC to local time
     const dateStr = date.toLocaleDateString();
     const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     
@@ -3546,9 +3563,15 @@ async function saveEditChanges() {
             await dbOperations.updateEntry(updatedEntry.id, updatedEntry);
         }
         
-        // Close modal and refresh dashboard
+        // Close modal and refresh current view
         closeEditModal();
-        loadDashboard();
+        
+        // Refresh the appropriate view
+        if (currentView === 'dashboard') {
+            loadDashboard();
+        } else if (currentView === 'calendar') {
+            loadCalendar();
+        }
         
         showNotification('Entry updated successfully', 'success');
         
