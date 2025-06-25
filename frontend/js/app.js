@@ -1629,8 +1629,12 @@ function renderCondensedView(entries, container) {
         }
     });
     
-    // Sort by date (newest first)
-    flatRows.sort((a, b) => new Date(b.entry.created_at) - new Date(a.entry.created_at));
+    // Sort by date (newest first) - use narrative date if available
+    flatRows.sort((a, b) => {
+        const dateA = a.narrative?.date ? new Date(a.narrative.date) : new Date(a.entry.created_at);
+        const dateB = b.narrative?.date ? new Date(b.narrative.date) : new Date(b.entry.created_at);
+        return dateB - dateA;
+    });
     
     // Group by day for separators
     let lastDate = null;
@@ -1643,7 +1647,9 @@ function renderCondensedView(entries, container) {
     });
     
     flatRows.forEach(row => {
-        const entryDate = new Date(row.entry.created_at);
+        // Use narrative date if available, otherwise entry date
+        const dateToUse = row.narrative?.date ? row.narrative.date : row.entry.created_at;
+        const entryDate = new Date(dateToUse);
         const dateStr = entryDate.toLocaleDateString('en-US', { 
             weekday: 'long',
             year: 'numeric',
@@ -1704,7 +1710,9 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
         row.dataset.narrativeIndex = narrativeIndex;
     }
     
-    const date = new Date(entry.created_at);
+    // Use narrative date if available, otherwise use entry date
+    const dateToUse = narrative?.date ? narrative.date : entry.created_at;
+    const date = new Date(dateToUse);
     const dateStr = date.toLocaleDateString('en-US', { 
         month: '2-digit', 
         day: '2-digit', 
@@ -2042,20 +2050,60 @@ async function loadCalendar() {
             dayCell.classList.add('today');
         }
         
-        // Get entries for this day
-        const dayEntries = entries.filter(entry => {
-            const entryDate = new Date(entry.created_at);
-            return entryDate.getDate() === day && 
-                   entryDate.getMonth() === month && 
-                   entryDate.getFullYear() === year;
+        // Get entries for this day - check both entry date and individual narrative dates
+        const dayEntries = [];
+        entries.forEach(entry => {
+            // Check if any narrative has this date
+            let hasNarrativeOnDate = false;
+            if (entry.narratives && entry.narratives.length > 0) {
+                for (const narrative of entry.narratives) {
+                    const narrativeDate = narrative.date ? new Date(narrative.date) : new Date(entry.created_at);
+                    if (narrativeDate.getDate() === day && 
+                        narrativeDate.getMonth() === month && 
+                        narrativeDate.getFullYear() === year) {
+                        hasNarrativeOnDate = true;
+                        break;
+                    }
+                }
+            } else {
+                // If no narratives, use entry date
+                const entryDate = new Date(entry.created_at);
+                hasNarrativeOnDate = entryDate.getDate() === day && 
+                                   entryDate.getMonth() === month && 
+                                   entryDate.getFullYear() === year;
+            }
+            
+            if (hasNarrativeOnDate) {
+                dayEntries.push(entry);
+            }
         });
         
         // Add day content container
         const dayContent = document.createElement('div');
         dayContent.className = 'calendar-day-content';
         
-        // Calculate total hours for the day
-        const dayTotalHours = dayEntries.reduce((sum, entry) => sum + (entry.total_hours || 0), 0);
+        // Calculate total hours for the day - only count narratives on this date
+        let dayTotalHours = 0;
+        dayEntries.forEach(entry => {
+            if (entry.narratives && entry.narratives.length > 0) {
+                entry.narratives.forEach(narrative => {
+                    const narrativeDate = narrative.date ? new Date(narrative.date) : new Date(entry.created_at);
+                    if (narrativeDate.getDate() === day && 
+                        narrativeDate.getMonth() === month && 
+                        narrativeDate.getFullYear() === year) {
+                        dayTotalHours += narrative.hours || 0;
+                    }
+                });
+            } else {
+                // If no narratives, add total hours if entry is on this date
+                const entryDate = new Date(entry.created_at);
+                if (entryDate.getDate() === day && 
+                    entryDate.getMonth() === month && 
+                    entryDate.getFullYear() === year) {
+                    dayTotalHours += entry.total_hours || 0;
+                }
+            }
+        });
         
         dayContent.innerHTML = `
             <div class="calendar-day-header-row">
@@ -3177,14 +3225,8 @@ function closeEditModal() {
 
 function populateEditModal(entry) {
     
-    // Populate date field
-    const dateInput = document.getElementById('edit-entry-date');
-    if (entry.created_at) {
-        // Convert ISO string to YYYY-MM-DD format for date input
-        const date = new Date(entry.created_at);
-        const formattedDate = date.toISOString().split('T')[0];
-        dateInput.value = formattedDate;
-    }
+    // Remove the global date field logic as we'll have per-activity dates
+    // The entry date will be inherited by activities that don't have their own date
     
     // Populate narratives
     const container = document.getElementById('edit-narratives-container');
@@ -3196,6 +3238,7 @@ function populateEditModal(entry) {
         narrativeItem.innerHTML = `
             <div class="edit-narrative-header">
                 <span class="activity-title">Activity ${index + 1}</span>
+                <input type="date" class="narrative-date-input narrative-date-header" data-index="${index}" value="${narrative.date ? new Date(narrative.date).toISOString().split('T')[0] : new Date(entry.created_at).toISOString().split('T')[0]}">
                 <span class="activity-hours">${narrative.hours} hours</span>
             </div>
             <div class="edit-form-grid">
@@ -3443,19 +3486,15 @@ async function saveEditChanges() {
             narratives: []
         };
         
-        // Update the date if changed
-        const dateInput = document.getElementById('edit-entry-date');
-        if (dateInput.value) {
-            // Convert YYYY-MM-DD to ISO string, preserving the time from the original
-            const newDate = new Date(dateInput.value);
-            const originalDate = new Date(currentEditingEntry.created_at);
-            newDate.setHours(originalDate.getHours(), originalDate.getMinutes(), originalDate.getSeconds(), originalDate.getMilliseconds());
-            updatedEntry.created_at = newDate.toISOString();
-        }
+        // Keep the original created_at for the entry
+        // Individual narrative dates will be handled separately
         
         // Collect narratives data
         const narrativeItems = document.querySelectorAll('.edit-narrative-item');
         narrativeItems.forEach((item, index) => {
+            const dateInput = item.querySelector('.narrative-date-input');
+            const dateValue = dateInput.value;
+            
             const narrative = {
                 hours: parseFloat(item.querySelector('.narrative-hours-input').value) || 0,
                 task_code: item.querySelector('.narrative-task-input').value,
@@ -3464,6 +3503,16 @@ async function saveEditChanges() {
                 text: item.querySelector('.narrative-text-input').value,
                 status: item.querySelector('.narrative-status-input').value
             };
+            
+            // Add date to narrative if specified
+            if (dateValue) {
+                // Convert YYYY-MM-DD to ISO string
+                const date = new Date(dateValue);
+                // Set to noon to avoid timezone issues
+                date.setHours(12, 0, 0, 0);
+                narrative.date = date.toISOString();
+            }
+            
             updatedEntry.narratives.push(narrative);
         });
         
@@ -3479,8 +3528,23 @@ async function saveEditChanges() {
             updatedEntry.status = 'exported';
         }
         
-        // Save to database
+        // Save to local database first
         await dbOperations.updateEntry(updatedEntry.id, updatedEntry);
+        
+        // Sync with backend immediately
+        try {
+            const response = await api.updateEntry(updatedEntry.id, updatedEntry);
+            if (response) {
+                // Update local entry with server response to ensure consistency
+                response.sync_status = 'synced';
+                await dbOperations.saveEntry(response);
+            }
+        } catch (error) {
+            console.error('Failed to sync with backend:', error);
+            // Entry remains in 'pending' status for later sync
+            updatedEntry.sync_status = 'pending';
+            await dbOperations.updateEntry(updatedEntry.id, updatedEntry);
+        }
         
         // Close modal and refresh dashboard
         closeEditModal();

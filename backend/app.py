@@ -159,6 +159,11 @@ def update_entry(entry_id):
         if 'matter_number' in data:
             entry.matter_number = data['matter_number']
         if 'narratives' in data:
+            # Ensure each narrative can have its own date
+            for narrative in data['narratives']:
+                if 'date' not in narrative and 'created_at' in data:
+                    # If no date is specified for narrative, inherit from entry
+                    narrative['date'] = data['created_at']
             entry.narratives = data['narratives']
         if 'total_hours' in data:
             entry.total_hours = data['total_hours']
@@ -341,14 +346,20 @@ def export_entries():
         # Write data
         for entry in entries:
             for narrative in (entry.narratives or []):
+                # Use narrative date if available, otherwise use entry date
+                if 'date' in narrative:
+                    date_str = datetime.fromisoformat(narrative['date'].replace('Z', '+00:00')).strftime('%Y-%m-%d')
+                else:
+                    date_str = entry.created_at.strftime('%Y-%m-%d')
+                    
                 writer.writerow([
-                    entry.created_at.strftime('%Y-%m-%d'),
-                    entry.client_code or '',
-                    entry.matter_number or '',
+                    date_str,
+                    narrative.get('client_code', entry.client_code) or '',
+                    narrative.get('matter_number', entry.matter_number) or '',
                     narrative.get('hours', 0.0),
                     narrative.get('text', ''),
                     narrative.get('task_code', ''),
-                    entry.status,
+                    narrative.get('status', entry.status),
                     entry.attorney_name or entry.attorney_email or ''
                 ])
         
