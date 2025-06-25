@@ -1,0 +1,128 @@
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+*.manifest
+*.spec
+
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv/
+.python-version
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+data/*.db
+!data/.gitkeep
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Testing
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+.classpath
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Temporary Files
+*.tmp
+*.temp
+*.bak
+*.backup
+tmp/
+temp/
+
+# Test HTML Files
+frontend/test-*.html
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Flask
+instance/
+.webassets-cache
+
+# Documentation builds
+docs/_build/
+site/
+
+# Distribution / packaging
+.Python
+*.pyo
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+.nox/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Local development
+*.local
+.local/
