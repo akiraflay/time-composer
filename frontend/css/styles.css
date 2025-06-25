@@ -1130,6 +1130,10 @@ main {
     align-items: center;
     flex-shrink: 0;
     white-space: nowrap;
+    position: relative;
+    z-index: 1;
+    overflow: visible;
+    contain: layout;
 }
 
 .date-separator {
@@ -1173,6 +1177,17 @@ main {
     transition: all 0.15s ease;
     min-width: 140px;
     font-weight: 500;
+    position: relative;
+    z-index: 2;
+}
+
+/* Prevent date input calendar from expanding beyond container */
+.date-input::-webkit-calendar-picker-indicator {
+    position: absolute;
+    right: 0.5rem;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
 }
 
 .date-input.compact {
@@ -1316,6 +1331,8 @@ main {
     transition: all 0.15s ease;
     box-shadow: 0 1px 3px rgba(37, 99, 235, 0.15);
     flex-shrink: 0;
+    position: relative;
+    z-index: 10;
 }
 
 .export-button.header-action {

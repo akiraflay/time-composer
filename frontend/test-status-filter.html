@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Status Filter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .controls {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+        }
+        button {
+            margin: 5px;
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+        .entry {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .exported {
+            background-color: #e7f5e7;
+        }
+        .draft {
+            background-color: #fff3cd;
+        }
+        .log {
+            background: #f8f9fa;
+            padding: 10px;
+            margin-top: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Status Filter Test</h1>
+    
+    <div class="controls">
+        <h3>Filter Controls</h3>
+        <button onclick="testFilter('')">All</button>
+        <button onclick="testFilter('draft')">Draft</button>
+        <button onclick="testFilter('exported')">Exported</button>
+        <button onclick="window.location.reload()">Reload Page</button>
+    </div>
+    
+    <div id="results"></div>
+    
+    <div class="log" id="log">
+        <h3>Debug Log</h3>
+    </div>
+
+    <script>
+        let logDiv = document.getElementById('log');
+        let resultsDiv = document.getElementById('results');
+        
+        function log(message) {
+            logDiv.innerHTML += message + '<br>';
+            console.log(message);
+        }
+        
+        // Copy of determineEntryStatus function
+        function determineEntryStatus(entry) {
+            if (entry.narratives && entry.narratives.length > 0) {
+                const narrativeStatuses = entry.narratives.map(n => n.status || 'draft');
+                const hasExported = narrativeStatuses.some(status => status === 'exported');
+                const determinedStatus = hasExported ? 'exported' : 'draft';
+                
+                log(`Entry ${entry.id}: narratives=${JSON.stringify(narrativeStatuses)}, hasExported=${hasExported}, determined=${determinedStatus}`);
+                
+                return determinedStatus;
+            }
+            return entry.status || 'draft';
+        }
+        
+        async function testFilter(statusFilter) {
+            log(`\n=== Testing filter: "${statusFilter}" ===`);
+            
+            try {
+                // Fetch entries from the API
+                const response = await fetch('http://localhost:5001/api/entries');
+                let entries = await response.json();
+                
+                log(`Fetched ${entries.length} total entries`);
+                
+                // Apply the filter
+                if (statusFilter && statusFilter !== 'all') {
+                    log(`Applying status filter: ${statusFilter}`);
+                    
+                    entries = entries.filter(entry => {
+                        const effectiveStatus = determineEntryStatus(entry);
+                        const normalizedStatus = effectiveStatus === 'ready' ? 'draft' : effectiveStatus;
+                        const matches = normalizedStatus === statusFilter;
+                        
+                        if (!matches && statusFilter === 'draft') {
+                            log(`FILTERED OUT: Entry ${entry.id} (status=${normalizedStatus})`);
+                        }
+                        
+                        return matches;
+                    });
+                    
+                    log(`After filter: ${entries.length} entries`);
+                }
+                
+                // Display results
+                resultsDiv.innerHTML = `<h3>Results (${entries.length} entries)</h3>`;
+                
+                entries.forEach(entry => {
+                    const status = determineEntryStatus(entry);
+                    resultsDiv.innerHTML += `
+                        <div class="entry ${status}">
+                            <strong>Entry ID:</strong> ${entry.id}<br>
+                            <strong>Top-level Status:</strong> ${entry.status}<br>
+                            <strong>Determined Status:</strong> ${status}<br>
+                            <strong>Narratives:</strong> ${entry.narratives ? entry.narratives.length : 0}
+                        </div>
+                    `;
+                });
+                
+            } catch (error) {
+                log(`ERROR: ${error.message}`);
+            }
+        }
+        
+        // Test on page load
+        testFilter('');
+    </script>
+</body>
+</html>

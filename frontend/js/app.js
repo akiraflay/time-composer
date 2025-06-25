@@ -27,7 +27,17 @@ function determineEntryStatus(entry) {
         const narrativeStatuses = entry.narratives.map(n => n.status || 'draft');
         // If any narrative is exported, the entry is exported
         const hasExported = narrativeStatuses.some(status => status === 'exported');
-        return hasExported ? 'exported' : 'draft';
+        const determinedStatus = hasExported ? 'exported' : 'draft';
+        
+        // Debug logging
+        console.log('DetermineEntryStatus - Entry ID:', entry.id, 
+                   'Top-level status:', entry.status,
+                   'Narratives:', entry.narratives.length,
+                   'Narrative statuses:', narrativeStatuses,
+                   'Has exported:', hasExported,
+                   'Determined status:', determinedStatus);
+        
+        return determinedStatus;
     }
     return entry.status || 'draft';
 }
@@ -197,12 +207,19 @@ function setupEventListeners() {
                 }
                 
                 // Update filter and reload
-                statusFilter = e.target.dataset.status;
+                statusFilter = e.target.dataset.status || '';
+                console.log('Status filter clicked:', statusFilter, 'from dataset:', e.target.dataset.status);
+                console.log('Dataset status value:', e.target.dataset.status);
+                console.log('Button text:', e.target.textContent);
+                
                 // Update the hidden status filter element if it exists
                 const statusFilterElement = document.getElementById('status-filter');
                 if (statusFilterElement) {
                     statusFilterElement.value = statusFilter;
                 }
+                
+                // Force immediate dashboard reload with the new filter
+                console.log('Calling loadDashboard with statusFilter:', statusFilter);
                 loadDashboard();
                 
                 // Hide dropdown
@@ -768,9 +785,47 @@ async function loadDashboard() {
         // Get search and status from streamlined inputs
         const search = document.getElementById('search')?.value || '';
         const status = statusFilter || document.getElementById('status-filter')?.value || '';
+        console.log('LoadDashboard - statusFilter:', statusFilter, 'status:', status);
         
         // Get entries from IndexedDB
-        let entries = await dbOperations.getEntries({ search, status });
+        let entries = await dbOperations.getEntries({ search });
+        
+        // Apply status filter using determineEntryStatus
+        if (status && status !== 'all' && status !== '') {
+            console.log('=== STATUS FILTER DEBUG ===');
+            console.log('Applying status filter:', status);
+            console.log('Entries before filter:', entries.length);
+            
+            // Enable detailed debug logging
+            window.debugStatusFilter = true;
+            
+            entries = entries.filter(entry => {
+                const effectiveStatus = determineEntryStatus(entry);
+                // Convert 'ready' to 'draft' for consistency
+                const normalizedStatus = effectiveStatus === 'ready' ? 'draft' : effectiveStatus;
+                const matches = normalizedStatus === status;
+                
+                // Log mismatches to understand why entries aren't being filtered
+                if (!matches && status === 'draft') {
+                    console.log('MISMATCH - Entry not shown in draft filter:', {
+                        id: entry.id,
+                        topLevelStatus: entry.status,
+                        effectiveStatus: effectiveStatus,
+                        normalizedStatus: normalizedStatus,
+                        filterValue: status,
+                        narratives: entry.narratives
+                    });
+                }
+                
+                return matches;
+            });
+            
+            // Disable debug logging
+            window.debugStatusFilter = false;
+            
+            console.log('Entries after filter:', entries.length);
+            console.log('=== END STATUS FILTER DEBUG ===');
+        }
         
         // Apply client filter
         if (clientFilter) {
@@ -2527,8 +2582,33 @@ function loadExport() {
     if (exportBtn) {
         const newExportBtn = exportBtn.cloneNode(true);
         exportBtn.parentNode.replaceChild(newExportBtn, exportBtn);
-        newExportBtn.addEventListener('click', exportEntries);
+        newExportBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            exportEntries();
+        });
     }
+    
+    // Prevent date inputs from expanding their click area
+    [startInput, endInput].forEach(input => {
+        if (input) {
+            input.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
+    });
+    
+    // Prevent date range container from interfering with other elements
+    const dateRangeInputs = document.querySelector('.date-range-inputs');
+    if (dateRangeInputs) {
+        dateRangeInputs.addEventListener('click', (e) => {
+            // Only allow clicks on actual input elements
+            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'LABEL') {
+                e.stopPropagation();
+            }
+        });
+    }
+    
     
     // Initialize date presets
     initializeDatePresets();
@@ -4673,3 +4753,38 @@ function toggleMobileMenu(btn, entryId) {
         });
     }, 0);
 }
+
+// Debug helper functions - can be called from console
+window.debugStatusFilter = false;
+window.testStatusFilter = async function(filterValue) {
+    console.log('=== MANUAL STATUS FILTER TEST ===');
+    console.log('Setting statusFilter to:', filterValue);
+    statusFilter = filterValue;
+    
+    // Update the UI to reflect the filter
+    const statusText = document.getElementById('status-filter-text');
+    if (statusText) {
+        statusText.textContent = filterValue === 'draft' ? 'Draft' : 
+                                filterValue === 'exported' ? 'Exported' : 'All';
+    }
+    
+    const statusFilterElement = document.getElementById('status-filter');
+    if (statusFilterElement) {
+        statusFilterElement.value = filterValue;
+    }
+    
+    // Enable debug mode and reload
+    window.debugStatusFilter = true;
+    await loadDashboard();
+    window.debugStatusFilter = false;
+    
+    console.log('=== END MANUAL TEST ===');
+};
+
+// Helper to check current filter state
+window.checkFilterState = function() {
+    console.log('Current filter state:');
+    console.log('- Global statusFilter:', statusFilter);
+    console.log('- status-filter element value:', document.getElementById('status-filter')?.value);
+    console.log('- status-filter-text content:', document.getElementById('status-filter-text')?.textContent);
+};

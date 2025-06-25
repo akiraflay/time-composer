@@ -67,9 +67,7 @@ const dbOperations = {
                 let entries = request.result;
                 
                 // Apply filters
-                if (filters.status) {
-                    entries = entries.filter(e => e.status === filters.status);
-                }
+                // Note: Status filtering is now handled in app.js using determineEntryStatus()
                 if (filters.client_code) {
                     entries = entries.filter(e => e.client_code === filters.client_code);
                 }
