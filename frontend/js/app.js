@@ -60,6 +60,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         await initDB();
         console.log('Database initialized');
+        
+        // Clean up any entries with invalid IDs on startup
+        const cleanedCount = await dbOperations.cleanupInvalidEntries();
+        if (cleanedCount > 0) {
+            console.log(`Cleaned up ${cleanedCount} entries with invalid IDs`);
+        }
     } catch (err) {
         console.error('Failed to initialize database:', err);
     }

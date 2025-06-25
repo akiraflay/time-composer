@@ -18,6 +18,14 @@ const syncManager = {
             
             for (const entry of pendingEntries) {
                 try {
+                    // Skip entries with invalid IDs (non-integers or timestamp-based)
+                    if (typeof entry.id !== 'number' || !Number.isInteger(entry.id) || entry.id > 1000000) {
+                        console.warn(`Skipping entry with invalid ID: ${entry.id}`);
+                        // Delete the invalid entry from local storage
+                        await dbOperations.deleteEntry(entry.id);
+                        continue;
+                    }
+                    
                     if (entry.id && typeof entry.id === 'string' && entry.id.startsWith('local_')) {
                         // New entry created offline
                         const response = await api.enhance(entry.original_text);
@@ -26,7 +34,7 @@ const syncManager = {
                         await dbOperations.deleteEntry(entry.id);
                         await dbOperations.saveEntry({
                             ...entry,
-                            id: response.id,
+                            id: response.entry.id,
                             sync_status: 'synced'
                         });
                     } else {

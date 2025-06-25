@@ -166,6 +166,36 @@ const dbOperations = {
             request.onsuccess = () => resolve();
             request.onerror = () => reject(request.error);
         });
+    },
+    
+    async cleanupInvalidEntries() {
+        // Remove entries with non-integer IDs (timestamp-based IDs)
+        const transaction = db.transaction([STORE_NAME], 'readwrite');
+        const store = transaction.objectStore(STORE_NAME);
+        
+        return new Promise((resolve, reject) => {
+            const request = store.openCursor();
+            let deletedCount = 0;
+            
+            request.onsuccess = (event) => {
+                const cursor = event.target.result;
+                if (cursor) {
+                    const entry = cursor.value;
+                    // Check if ID is not a valid integer
+                    if (typeof entry.id !== 'number' || !Number.isInteger(entry.id) || entry.id > 1000000) {
+                        cursor.delete();
+                        deletedCount++;
+                        console.log(`Deleting invalid entry with ID: ${entry.id}`);
+                    }
+                    cursor.continue();
+                } else {
+                    console.log(`Cleaned up ${deletedCount} entries with invalid IDs`);
+                    resolve(deletedCount);
+                }
+            };
+            
+            request.onerror = () => reject(request.error);
+        });
     }
 };
 

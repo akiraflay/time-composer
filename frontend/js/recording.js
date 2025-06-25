@@ -363,24 +363,30 @@ const processRecording = async (audioBlob) => {
         // Delay before hiding to show completion
         await new Promise(resolve => setTimeout(resolve, 500));
         
-        // Save each entry to IndexedDB separately
-        for (const entry of response.entries) {
-            await dbOperations.saveEntry({
-                id: entry.id,
-                original_text: response.original_text,
-                cleaned_text: response.cleaned_text,
-                narratives: [entry.narrative],
-                total_hours: entry.hours,
-                status: 'draft',
-                created_at: new Date().toISOString()
-            });
-        }
+        // Save the entry to IndexedDB
+        const entryData = response.entry;
+        await dbOperations.saveEntry({
+            id: entryData.id,
+            original_text: entryData.original_text,
+            cleaned_text: entryData.cleaned_text,
+            narratives: entryData.narratives,
+            total_hours: entryData.total_hours,
+            status: entryData.status || 'draft',
+            created_at: entryData.created_at,
+            updated_at: entryData.updated_at,
+            client_code: entryData.client_code,
+            matter_number: entryData.matter_number,
+            attorney_email: entryData.attorney_email,
+            attorney_name: entryData.attorney_name,
+            task_codes: entryData.task_codes || [],
+            tags: entryData.tags || []
+        });
         
         // Display results
         displayEnhancedResults({
-            narratives: response.entries.map(e => e.narrative),
-            total_hours: response.total_hours,
-            total_entries: response.total_entries
+            narratives: entryData.narratives,
+            total_hours: entryData.total_hours,
+            total_entries: response.total_narratives || entryData.narratives.length
         });
         
         // Reset button

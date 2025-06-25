@@ -7326,6 +7326,46 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
     }
 }
 
+/* Whisper Processing Indicator */
+.whisper-processing-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+    animation: whisperProcessing 1.5s ease-in-out infinite;
+}
+
+@keyframes whisperProcessing {
+    0%, 100% { 
+        opacity: 0.3;
+        transform: scale(0.8);
+    }
+    50% { 
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}
+
+/* Smooth transitions for text state changes */
+.whisper-confirmed,
+.browser-pending {
+    transition: all 0.5s ease;
+}
+
+/* Flash effect when text gets confirmed */
+@keyframes confirmFlash {
+    0% { background-color: transparent; }
+    50% { background-color: rgba(37, 99, 235, 0.1); }
+    100% { background-color: transparent; }
+}
+
+.whisper-confirmed {
+    animation: confirmFlash 0.6s ease;
+}
+
 /* AI Processing States */
 .thinking-indicator {
     display: flex;
@@ -8734,7 +8774,7 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
     background: #ddd6fe;
     color: #7c3aed;
 }
-EOF < /dev/null
+
 /* Bulk Assignment Controls */
 .bulk-assignment-controls {
     background: var(--surface);

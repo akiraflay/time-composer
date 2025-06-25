@@ -17,6 +17,7 @@ class AIAssistant {
         this.lastSpeechTime = Date.now(); // Track silence detection
         this.lastProcessedChunkIndex = 0; // Track which audio chunks have been processed
         this.isProcessingChunk = false; // Prevent concurrent chunk processing
+        this.isStopping = false; // Prevent concurrent stop operations
         this.currentMode = 'initial'; // initial, voice, text, processing, confirmation
         this.messages = [];
         
@@ -135,10 +136,10 @@ class AIAssistant {
         }
     }
 
-    close() {
+    async close() {
         const assistant = document.getElementById('ai-assistant');
         assistant.classList.remove('active');
-        this.stopRecording();
+        await this.stopRecording();
         this.resetInterface();
         this.selectedDate = null;
     }
@@ -255,7 +256,7 @@ class AIAssistant {
 
     async toggleRecording() {
         if (this.isRecording) {
-            this.stopRecording();
+            await this.stopRecording();
         } else {
             await this.startRecording();
         }
@@ -265,7 +266,12 @@ class AIAssistant {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             
-            this.mediaRecorder = new MediaRecorder(stream);
+            // Try to use webm/opus format which is widely supported
+            const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') 
+                ? 'audio/webm;codecs=opus' 
+                : 'audio/webm';
+            
+            this.mediaRecorder = new MediaRecorder(stream, { mimeType });
             this.audioChunks = [];
             
             this.mediaRecorder.ondataavailable = (event) => {
@@ -290,6 +296,8 @@ class AIAssistant {
             this.transcriptChunks = [];
             this.lastSpeechTime = Date.now();
             this.lastProcessedChunkIndex = 0;
+            this.lastChunkProcessTime = Date.now();
+            this.lastConfirmedLength = 0;
             
             // Start speech recognition for live transcription
             if (this.recognition) {
@@ -423,41 +431,64 @@ class AIAssistant {
         }
     }
 
-    stopRecording() {
+    async stopRecording() {
+        // Prevent concurrent stop operations
+        if (this.isStopping) {
+            console.log('Already stopping recording, ignoring duplicate call');
+            return;
+        }
+        
         if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+            this.isStopping = true;
             this.isRecording = false;
             this.isPaused = false;
             
-            // Clear chunk processing timer
-            if (this.chunkTimer) {
-                clearTimeout(this.chunkTimer);
-                this.chunkTimer = null;
+            try {
+                // Clear chunk processing timer
+                if (this.chunkTimer) {
+                    clearTimeout(this.chunkTimer);
+                    this.chunkTimer = null;
+                }
+                
+                // Process any remaining chunks in dual mode before stopping
+                if (this.transcriptionMode === 'dual' && this.audioChunks.length > this.lastProcessedChunkIndex) {
+                    // Process final chunks before stopping
+                    await this.processAudioChunk();
+                }
+                
+                // Sync any edited text before processing
+                this.syncEditedTranscription();
+                
+                this.mediaRecorder.stop();
+                this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                
+                if (this.recognition) {
+                    this.recognition.stop();
+                }
+                
+                // Clean up audio context
+                if (this.audioContext) {
+                    this.audioContext.close();
+                    this.audioContext = null;
+                    this.analyser = null;
+                    this.microphone = null;
+                }
+                
+                this.clearTimer();
+                this.updateRecordingUI();
+                this.updateStatus('Processing your recording...');
+                
+                // Hide live transcription and show processing
+                this.hideLiveTranscription();
+            } catch (error) {
+                console.error('Error during stopRecording:', error);
+                // Ensure UI is updated even if there's an error
+                this.updateRecordingUI();
+                this.updateStatus('Error occurred while stopping recording');
+            } finally {
+                // Always reset the stopping flag
+                this.isStopping = false;
             }
-            
-            // Sync any edited text before processing
-            this.syncEditedTranscription();
-            
-            this.mediaRecorder.stop();
-            this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
-            
-            if (this.recognition) {
-                this.recognition.stop();
-            }
-            
-            // Clean up audio context
-            if (this.audioContext) {
-                this.audioContext.close();
-                this.audioContext = null;
-                this.analyser = null;
-                this.microphone = null;
-            }
-            
-            this.clearTimer();
-            this.updateRecordingUI();
-            this.updateStatus('Processing your recording...');
-            
-            // Hide live transcription and show processing
-            this.hideLiveTranscription();
         }
     }
     
@@ -586,7 +617,7 @@ class AIAssistant {
         
         return {
             entry: {
-                id: Date.now(),
+                id: `local_${Date.now()}`, // Temporary local ID
                 narratives: narratives,
                 total_hours: totalHours,
                 created_at: this.selectedDate ? this.selectedDate.toISOString() : new Date().toISOString()
@@ -1038,6 +1069,11 @@ class AIAssistant {
             }
         }
         
+        // Add processing indicator if actively processing in dual mode
+        if (this.transcriptionMode === 'dual' && this.isProcessingChunk) {
+            displayHtml += ' <span class="whisper-processing-indicator"></span>';
+        }
+        
         // Only update if we have content
         if (displayHtml) {
             userLiveText.innerHTML = displayHtml;
@@ -1065,29 +1101,23 @@ class AIAssistant {
         
         // Check if we have new chunks to process
         const hasNewChunks = this.audioChunks.length > this.lastProcessedChunkIndex;
-        if (!hasNewChunks) {
-            // No new chunks, check again later
-            this.chunkTimer = setTimeout(() => this.checkChunkProcessing(), 200);
-            return;
+        const newChunksCount = hasNewChunks ? this.audioChunks.length - this.lastProcessedChunkIndex : 0;
+        const timeSinceLastProcess = Date.now() - this.lastChunkProcessTime;
+        
+        // Process chunks if:
+        // 1. We have at least 15 chunks (1.5 seconds) of new audio
+        // 2. OR 3 seconds have passed since last processing (and we have any new chunks)
+        const shouldProcessByChunkCount = hasNewChunks && newChunksCount >= 15;
+        const shouldProcessByTime = hasNewChunks && timeSinceLastProcess >= 3000;
+        
+        if (shouldProcessByChunkCount || shouldProcessByTime) {
+            this.processAudioChunk();
         }
         
-        // Process chunks more aggressively:
-        // 1. We have more than 1 second of new audio
-        // 2. OR there's been a pause in speech (>0.5 seconds)
-        // 3. OR we have any chunks and browser has new text
-        const newChunksCount = this.audioChunks.length - this.lastProcessedChunkIndex;
-        const timeSinceLastSpeech = Date.now() - this.lastSpeechTime;
-        const browserHasNewText = this.browserTranscript.length > this.whisperTranscript.length;
-        
-        const shouldProcessPause = timeSinceLastSpeech > 500;
-        const shouldProcessTime = newChunksCount > 10; // ~1 second
-        const shouldProcessNewText = browserHasNewText && newChunksCount > 5; // ~0.5 seconds
-        
-        if (shouldProcessPause || shouldProcessTime || shouldProcessNewText) {
-            this.processAudioChunk();
-        } else {
-            // Set timer to check again more frequently
-            this.chunkTimer = setTimeout(() => this.checkChunkProcessing(), 100);
+        // Always schedule the next check while recording
+        // Check every 1.5 seconds for more responsive processing
+        if (this.isRecording && !this.isPaused) {
+            this.chunkTimer = setTimeout(() => this.checkChunkProcessing(), 1500);
         }
     }
     
@@ -1108,15 +1138,14 @@ class AIAssistant {
         this.isProcessingChunk = true;
         
         try {
-            // Create a blob from only the new audio chunks
-            const newChunks = this.audioChunks.slice(this.lastProcessedChunkIndex);
-            const audioBlob = new Blob(newChunks, { type: 'audio/webm' });
+            // Create a blob from ALL audio chunks to ensure valid file
+            const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
             
-            console.log(`Processing chunks ${this.lastProcessedChunkIndex} to ${this.audioChunks.length}`);
+            console.log(`Processing complete audio, expecting new content after character ${this.whisperTranscript.length}`);
             
             // Add timeout for Whisper API call
             const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Whisper API timeout')), 3000)
+                setTimeout(() => reject(new Error('Whisper API timeout')), 5000)
             );
             
             // Race between API call and timeout
@@ -1127,43 +1156,82 @@ class AIAssistant {
             
             // Update Whisper transcript
             if (text && text.trim()) {
-                console.log('Whisper returned:', text);
+                const newFullText = text.trim();
+                console.log('Whisper returned:', newFullText);
+                console.log('Current transcript:', this.whisperTranscript);
+                console.log('Browser transcript:', this.browserTranscript);
                 
-                // For the first chunk, just set it
-                if (this.lastProcessedChunkIndex === 0) {
-                    this.whisperTranscript = text;
+                // If this is the first transcription, use it as-is
+                if (!this.whisperTranscript) {
+                    this.whisperTranscript = newFullText;
+                    this.lastConfirmedLength = newFullText.length;
                 } else {
-                    // For subsequent chunks, try to match with browser text
-                    // This helps align Whisper output with what's already shown
-                    const browserPending = this.browserTranscript.substring(this.whisperTranscript.length).trim();
-                    const whisperNew = text.trim();
+                    // Use browser transcript to detect and filter hallucinations
+                    const filteredText = this.filterWhisperHallucinations(newFullText, this.whisperTranscript, this.browserTranscript);
+                    console.log('Filtered text:', filteredText);
                     
-                    // Check if Whisper's new text matches the beginning of pending browser text
-                    if (browserPending && whisperNew && browserPending.toLowerCase().startsWith(whisperNew.toLowerCase())) {
-                        // Whisper matches browser, just extend the confirmed portion
-                        this.whisperTranscript = this.browserTranscript.substring(0, this.whisperTranscript.length + whisperNew.length);
+                    // Special check: if filtered text contains our current transcript in the middle
+                    // (like "Whoa, this is a test" when we already have "this is a test")
+                    // extract only the truly new parts
+                    const currentIndex = filteredText.toLowerCase().indexOf(this.whisperTranscript.toLowerCase());
+                    if (currentIndex > 0) {
+                        // New content was prepended
+                        const prepended = filteredText.substring(0, currentIndex).trim();
+                        const afterCurrent = filteredText.substring(currentIndex + this.whisperTranscript.length).trim();
+                        
+                        if (prepended) {
+                            console.log('Prepended content detected:', prepended);
+                            this.whisperTranscript = prepended + ' ' + this.whisperTranscript;
+                        }
+                        if (afterCurrent) {
+                            console.log('Appended content detected:', afterCurrent);
+                            this.whisperTranscript = this.whisperTranscript + ' ' + afterCurrent;
+                        }
                     } else {
-                        // Otherwise append with space
-                        this.whisperTranscript = this.whisperTranscript.trim() + ' ' + whisperNew;
+                        // Find overlap between existing and filtered transcription
+                        const overlap = this.findTranscriptOverlap(this.whisperTranscript, filteredText);
+                        
+                        if (overlap > 0) {
+                            // Extract only the new part after the overlap
+                            const newContent = filteredText.substring(overlap);
+                            if (newContent.trim()) {
+                                console.log('Adding new content:', newContent);
+                                this.whisperTranscript = this.whisperTranscript + ' ' + newContent.trim();
+                            }
+                        } else if (filteredText.length > this.whisperTranscript.length) {
+                            // Check if the filtered text is genuinely longer and not just duplicated
+                            const browserWords = this.browserTranscript.toLowerCase().split(/\s+/).length;
+                            const whisperWords = filteredText.toLowerCase().split(/\s+/).length;
+                            
+                            // Only replace if the word count is reasonable compared to browser
+                            if (whisperWords <= browserWords * 1.2) { // Allow 20% more words for corrections
+                                console.log('Replacing with filtered transcription');
+                                this.whisperTranscript = filteredText;
+                            } else {
+                                console.log('Filtered text seems to have too many duplicates, keeping current');
+                            }
+                        }
                     }
+                    
+                    this.lastConfirmedLength = this.whisperTranscript.length;
                 }
                 
                 // Update the index to mark these chunks as processed
                 this.lastProcessedChunkIndex = this.audioChunks.length;
+                this.lastChunkProcessTime = Date.now();
                 
                 // Force update display
                 this.updateTranscriptionDisplay();
             }
         } catch (error) {
             console.error('Whisper chunk processing failed:', error);
-            // On error, skip these chunks to avoid getting stuck
-            this.lastProcessedChunkIndex = this.audioChunks.length;
+            // Don't update lastProcessedChunkIndex on error
+            // This allows retry on next cycle
+            // But update the time to prevent immediate retry
+            this.lastChunkProcessTime = Date.now();
         } finally {
             this.isProcessingChunk = false;
-            // Always schedule next check if still recording
-            if (this.isRecording && !this.chunkTimer) {
-                this.chunkTimer = setTimeout(() => this.checkChunkProcessing(), 300);
-            }
+            // Let checkChunkProcessing handle all scheduling
         }
     }
     
@@ -1179,6 +1247,132 @@ class AIAssistant {
         }
         return 0;
     }
+    
+    // Find where new transcript overlaps with existing transcript
+    findTranscriptOverlap(existing, newText) {
+        // Convert to lowercase for comparison
+        const existingLower = existing.toLowerCase();
+        const newLower = newText.toLowerCase();
+        
+        // Try to find the last 30-50 characters of existing in the new text
+        const searchLength = Math.min(50, existing.length);
+        const searchStart = Math.max(0, existing.length - searchLength);
+        
+        for (let i = searchStart; i < existing.length; i++) {
+            const suffix = existingLower.substring(i);
+            const suffixIndex = newLower.indexOf(suffix);
+            
+            if (suffixIndex === 0) {
+                // Found where the new text continues from the existing
+                return existing.length - i + suffixIndex;
+            }
+        }
+        
+        // Try word-based matching for better accuracy
+        const existingWords = existing.split(/\s+/);
+        const newWords = newText.split(/\s+/);
+        
+        // Look for the last few words of existing in new
+        for (let i = Math.max(0, existingWords.length - 5); i < existingWords.length; i++) {
+            const phrase = existingWords.slice(i).join(' ').toLowerCase();
+            const phraseIndex = newLower.indexOf(phrase);
+            
+            if (phraseIndex >= 0) {
+                // Found the phrase, return where new content starts
+                return phraseIndex + phrase.length;
+            }
+        }
+        
+        return 0; // No overlap found
+    }
+    
+    // Filter out Whisper hallucinations by comparing with browser transcript
+    filterWhisperHallucinations(whisperText, currentWhisper, browserText) {
+        // First, check if we already have content that shouldn't be duplicated
+        if (!currentWhisper) return whisperText;
+        
+        // Look for suspicious patterns where Whisper duplicates existing content
+        const whisperLower = whisperText.toLowerCase();
+        const currentLower = currentWhisper.toLowerCase();
+        const browserLower = browserText.toLowerCase();
+        
+        // Find segments that appear to be duplicated
+        const segments = this.findDuplicatedSegments(whisperText, currentWhisper);
+        
+        let filteredText = whisperText;
+        for (const segment of segments) {
+            const segmentLower = segment.toLowerCase();
+            
+            // Check how many times this segment appears in each transcript
+            const whisperOccurrences = this.countOccurrences(whisperLower, segmentLower);
+            const browserOccurrences = this.countOccurrences(browserLower, segmentLower);
+            const currentOccurrences = this.countOccurrences(currentLower, segmentLower);
+            
+            // If Whisper has more occurrences than browser, it's likely hallucinating
+            if (whisperOccurrences > browserOccurrences && currentOccurrences > 0) {
+                console.log(`Detected hallucinated duplicate: "${segment}"`);
+                // Remove the extra occurrence(s)
+                const excessCount = whisperOccurrences - Math.max(browserOccurrences - currentOccurrences, 0);
+                filteredText = this.removeExcessOccurrences(filteredText, segment, excessCount);
+            }
+        }
+        
+        return filteredText;
+    }
+    
+    // Find segments that might be duplicated
+    findDuplicatedSegments(whisperText, currentWhisper) {
+        const segments = new Set();
+        const words = currentWhisper.split(/\s+/);
+        
+        // Look for multi-word segments (3-10 words) that might be duplicated
+        for (let len = 3; len <= Math.min(10, words.length); len++) {
+            for (let i = 0; i <= words.length - len; i++) {
+                const segment = words.slice(i, i + len).join(' ');
+                const segmentLower = segment.toLowerCase();
+                
+                // Check if this segment appears multiple times in whisper text
+                if (this.countOccurrences(whisperText.toLowerCase(), segmentLower) > 1) {
+                    segments.add(segment);
+                }
+            }
+        }
+        
+        return Array.from(segments);
+    }
+    
+    // Count occurrences of a substring
+    countOccurrences(text, substring) {
+        let count = 0;
+        let pos = 0;
+        while ((pos = text.indexOf(substring, pos)) !== -1) {
+            count++;
+            pos += substring.length;
+        }
+        return count;
+    }
+    
+    // Remove excess occurrences of a segment
+    removeExcessOccurrences(text, segment, excessCount) {
+        if (excessCount <= 0) return text;
+        
+        let result = text;
+        let removed = 0;
+        
+        // Remove from the end backwards to avoid affecting indices
+        const regex = new RegExp(segment.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+        const matches = [...result.matchAll(regex)];
+        
+        // Remove the last N occurrences
+        for (let i = matches.length - 1; i >= 0 && removed < excessCount; i--) {
+            const match = matches[i];
+            result = result.substring(0, match.index) + result.substring(match.index + match[0].length);
+            removed++;
+        }
+        
+        return result.trim();
+    }
+    
     
     updateTranscriptionDisplay() {
         // Call the unified display update method
@@ -1427,16 +1621,22 @@ class AIAssistant {
             
             // Save the single entry with all narratives
             if (this.lastResponse && this.lastResponse.entry) {
+                const entryData = this.lastResponse.entry;
                 await dbOperations.saveEntry({
-                    id: Date.now() + Math.random(), // Generate unique ID
-                    original_text: this.lastResponse.original_text || this.finalTranscript,
-                    cleaned_text: this.lastResponse.cleaned_text || this.finalTranscript,
+                    id: entryData.id, // Use the ID from backend
+                    original_text: entryData.original_text,
+                    cleaned_text: entryData.cleaned_text,
                     narratives: narrativesToSave,
-                    total_hours: this.lastResponse.entry.total_hours,
-                    status: 'draft',
-                    created_at: new Date().toISOString(),
-                    client_code: '', // Entry-level codes are now per-narrative
-                    matter_number: ''
+                    total_hours: entryData.total_hours,
+                    status: entryData.status || 'draft',
+                    created_at: entryData.created_at,
+                    updated_at: entryData.updated_at,
+                    client_code: entryData.client_code || '',
+                    matter_number: entryData.matter_number || '',
+                    attorney_email: entryData.attorney_email,
+                    attorney_name: entryData.attorney_name,
+                    task_codes: entryData.task_codes || [],
+                    tags: entryData.tags || []
                 });
             }
             
