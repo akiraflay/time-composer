@@ -1100,7 +1100,7 @@ function createEntryCard(entry) {
     // Add click handler for card interaction
     card.addEventListener('click', (e) => {
         // Check if clicked element is interactive
-        const isInteractive = e.target.matches('button, input, select, textarea, .editable-field, .editable-field *, .dropdown-trigger, .dropdown-menu, .dropdown-menu *, .bulk-checkbox, .status-dropdown, .status-dropdown *');
+        const isInteractive = e.target.matches('button, input, select, textarea, .editable-field, .editable-field *, .dropdown-trigger, .dropdown-menu, .dropdown-menu *, .bulk-checkbox, .status-dropdown, .status-dropdown *, .context-mic-btn, .context-mic-btn *');
         
         if (!isInteractive) {
             if (viewMode === 'compact' || viewMode === 'ultra-compact') {
@@ -3098,7 +3098,29 @@ async function deleteEntry(id) {
     if (!confirm('Are you sure you want to delete this entry?')) return;
     
     try {
+        // Try to delete from server first if online
+        if (navigator.onLine) {
+            try {
+                await api.deleteEntry(id);
+                console.log(`Entry ${id} deleted from server`);
+            } catch (serverErr) {
+                console.error('Error deleting from server:', serverErr);
+                // If server deletion fails, ask user if they want to continue with local deletion
+                if (!confirm('Failed to delete from server. Delete locally anyway?')) {
+                    return;
+                }
+            }
+        } else {
+            console.log('Offline - will delete locally and sync later');
+            // TODO: In future, mark entry as deleted for sync
+        }
+        
+        // Delete from IndexedDB
         await dbOperations.deleteEntry(id);
+        
+        // Remove the entry from currentEntries array to keep in-memory state in sync
+        currentEntries = currentEntries.filter(entry => entry.id !== id);
+        
         loadDashboard();
         showNotification('Entry deleted', 'success');
     } catch (err) {
@@ -3192,13 +3214,49 @@ async function bulkDeleteEntries() {
     if (!confirm(`Are you sure you want to delete ${count} entries?`)) return;
     
     try {
-        const promises = Array.from(selectedEntries).map(id => dbOperations.deleteEntry(parseInt(id)));
+        let successCount = 0;
+        let failedCount = 0;
+        
+        // Process deletions
+        const promises = Array.from(selectedEntries).map(async (id) => {
+            try {
+                const entryId = parseInt(id);
+                
+                // Try to delete from server first if online
+                if (navigator.onLine) {
+                    try {
+                        await api.deleteEntry(entryId);
+                        console.log(`Entry ${entryId} deleted from server`);
+                    } catch (serverErr) {
+                        console.error(`Error deleting ${entryId} from server:`, serverErr);
+                        // Continue with local deletion even if server fails
+                    }
+                }
+                
+                // Delete from IndexedDB
+                await dbOperations.deleteEntry(entryId);
+                
+                // Remove from currentEntries array
+                currentEntries = currentEntries.filter(entry => entry.id !== entryId);
+                
+                successCount++;
+            } catch (err) {
+                console.error(`Failed to delete entry ${id}:`, err);
+                failedCount++;
+            }
+        });
+        
         await Promise.all(promises);
         
         selectedEntries.clear();
         updateBulkActionsDisplay();
         loadDashboard();
-        showNotification(`${count} entries deleted successfully`, 'success');
+        
+        if (failedCount > 0) {
+            showNotification(`Deleted ${successCount} entries. ${failedCount} failed.`, 'warning');
+        } else {
+            showNotification(`${count} entries deleted successfully`, 'success');
+        }
     } catch (err) {
         console.error('Error deleting entries:', err);
         showNotification('Failed to delete some entries', 'error');
@@ -3854,6 +3912,11 @@ let currentContextEntry = null;
 let currentContextNarrativeIndex = null;
 
 function openContextRecordingModal(entryId, narrativeIndex) {
+    // Stop event propagation to prevent card click handler from firing
+    if (event) {
+        event.stopPropagation();
+    }
+    
     // Find the entry
     const entry = currentEntries.find(e => e.id === entryId);
     if (!entry || !entry.narratives || !entry.narratives[narrativeIndex]) {
