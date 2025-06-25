@@ -126,3 +126,7 @@ dmypy.json
 # Local development
 *.local
 .local/
+
+# AI Assistant Instructions
+CLAUDE.md
+*/CLAUDE.md
