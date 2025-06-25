@@ -1110,7 +1110,6 @@ main {
     background: #f8fafc;
     border-color: rgba(37, 99, 235, 0.3);
     color: var(--primary-color);
-    transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
