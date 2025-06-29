@@ -16,28 +16,13 @@ let datePickerVisible = false;
 let bulkSelectionMode = false;
 let selectedEntries = new Set();
 
-// Helper function to round floating point numbers to avoid precision issues
-function roundToOneDecimal(num) {
-    return Math.round(num * 10) / 10;
-}
-
 // Helper function to determine entry status based on narratives
 function determineEntryStatus(entry) {
     if (entry.narratives && entry.narratives.length > 0) {
         const narrativeStatuses = entry.narratives.map(n => n.status || 'draft');
         // If any narrative is exported, the entry is exported
         const hasExported = narrativeStatuses.some(status => status === 'exported');
-        const determinedStatus = hasExported ? 'exported' : 'draft';
-        
-        // Debug logging
-        console.log('DetermineEntryStatus - Entry ID:', entry.id, 
-                   'Top-level status:', entry.status,
-                   'Narratives:', entry.narratives.length,
-                   'Narrative statuses:', narrativeStatuses,
-                   'Has exported:', hasExported,
-                   'Determined status:', determinedStatus);
-        
-        return determinedStatus;
+        return hasExported ? 'exported' : 'draft';
     }
     return entry.status || 'draft';
 }
@@ -66,8 +51,6 @@ function createStatusDropdown(entryId, currentStatus, entry = null) {
         </div>
     `;
 }
-
-// Removed narrative status dropdown - status is now automatic
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
@@ -207,19 +190,12 @@ function setupEventListeners() {
                 }
                 
                 // Update filter and reload
-                statusFilter = e.target.dataset.status || '';
-                console.log('Status filter clicked:', statusFilter, 'from dataset:', e.target.dataset.status);
-                console.log('Dataset status value:', e.target.dataset.status);
-                console.log('Button text:', e.target.textContent);
-                
+                statusFilter = e.target.dataset.status;
                 // Update the hidden status filter element if it exists
                 const statusFilterElement = document.getElementById('status-filter');
                 if (statusFilterElement) {
                     statusFilterElement.value = statusFilter;
                 }
-                
-                // Force immediate dashboard reload with the new filter
-                console.log('Calling loadDashboard with statusFilter:', statusFilter);
                 loadDashboard();
                 
                 // Hide dropdown
@@ -785,47 +761,9 @@ async function loadDashboard() {
         // Get search and status from streamlined inputs
         const search = document.getElementById('search')?.value || '';
         const status = statusFilter || document.getElementById('status-filter')?.value || '';
-        console.log('LoadDashboard - statusFilter:', statusFilter, 'status:', status);
         
         // Get entries from IndexedDB
-        let entries = await dbOperations.getEntries({ search });
-        
-        // Apply status filter using determineEntryStatus
-        if (status && status !== 'all' && status !== '') {
-            console.log('=== STATUS FILTER DEBUG ===');
-            console.log('Applying status filter:', status);
-            console.log('Entries before filter:', entries.length);
-            
-            // Enable detailed debug logging
-            window.debugStatusFilter = true;
-            
-            entries = entries.filter(entry => {
-                const effectiveStatus = determineEntryStatus(entry);
-                // Convert 'ready' to 'draft' for consistency
-                const normalizedStatus = effectiveStatus === 'ready' ? 'draft' : effectiveStatus;
-                const matches = normalizedStatus === status;
-                
-                // Log mismatches to understand why entries aren't being filtered
-                if (!matches && status === 'draft') {
-                    console.log('MISMATCH - Entry not shown in draft filter:', {
-                        id: entry.id,
-                        topLevelStatus: entry.status,
-                        effectiveStatus: effectiveStatus,
-                        normalizedStatus: normalizedStatus,
-                        filterValue: status,
-                        narratives: entry.narratives
-                    });
-                }
-                
-                return matches;
-            });
-            
-            // Disable debug logging
-            window.debugStatusFilter = false;
-            
-            console.log('Entries after filter:', entries.length);
-            console.log('=== END STATUS FILTER DEBUG ===');
-        }
+        let entries = await dbOperations.getEntries({ search, status });
         
         // Apply client filter
         if (clientFilter) {
@@ -955,7 +893,7 @@ function updateDashboardStats(entries) {
     
     if (totalHours) {
         const hours = entries.reduce((sum, entry) => sum + (entry.total_hours || 0), 0);
-        totalHours.textContent = roundToOneDecimal(hours).toFixed(1);
+        totalHours.textContent = hours.toFixed(1);
     }
 }
 
@@ -1032,24 +970,7 @@ function createEntryCard(entry) {
     card.appendChild(checkbox);
     
     const totalHours = entry.total_hours || 0;
-    
-    // Find the earliest narrative date if narratives have dates
-    let earliestDate = entry.created_at;
-    if (entry.narratives && entry.narratives.length > 0) {
-        entry.narratives.forEach(narrative => {
-            if (narrative.date) {
-                const narrativeDate = new Date(narrative.date);
-                const currentEarliest = new Date(earliestDate);
-                if (narrativeDate < currentEarliest) {
-                    earliestDate = narrative.date;
-                }
-            }
-        });
-    }
-    
-    // Parse the date - if it's from backend it's in UTC
-    const date = new Date(earliestDate);
-    // The Date constructor automatically converts UTC to local time
+    const date = new Date(entry.created_at);
     const dateStr = date.toLocaleDateString();
     const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     
@@ -1100,7 +1021,7 @@ function createEntryCard(entry) {
     // Add click handler for card interaction
     card.addEventListener('click', (e) => {
         // Check if clicked element is interactive
-        const isInteractive = e.target.matches('button, input, select, textarea, .editable-field, .editable-field *, .dropdown-trigger, .dropdown-menu, .dropdown-menu *, .bulk-checkbox, .status-dropdown, .status-dropdown *, .context-mic-btn, .context-mic-btn *');
+        const isInteractive = e.target.matches('button, input, select, textarea, .editable-field, .editable-field *, .dropdown-trigger, .dropdown-menu, .dropdown-menu *, .bulk-checkbox, .status-dropdown, .status-dropdown *');
         
         if (!isInteractive) {
             if (viewMode === 'compact' || viewMode === 'ultra-compact') {
@@ -1458,7 +1379,7 @@ async function saveInlineEdit(field, inputElement, entryId, fieldType, narrative
         if (fieldType === 'hours' && narrativeIndex !== undefined) {
             const updatedEntry = await dbOperations.getEntry(parseInt(entryId));
             if (updatedEntry && updatedEntry.narratives) {
-                const newTotalHours = roundToOneDecimal(updatedEntry.narratives.reduce((sum, n) => sum + (n.hours || 0), 0));
+                const newTotalHours = updatedEntry.narratives.reduce((sum, n) => sum + (n.hours || 0), 0);
                 
                 // Find the card element
                 const card = field.closest('.entry-card');
@@ -1706,12 +1627,8 @@ function renderCondensedView(entries, container) {
         }
     });
     
-    // Sort by date (newest first) - use narrative date if available
-    flatRows.sort((a, b) => {
-        const dateA = a.narrative?.date ? new Date(a.narrative.date) : new Date(a.entry.created_at);
-        const dateB = b.narrative?.date ? new Date(b.narrative.date) : new Date(b.entry.created_at);
-        return dateB - dateA;
-    });
+    // Sort by date (newest first)
+    flatRows.sort((a, b) => new Date(b.entry.created_at) - new Date(a.entry.created_at));
     
     // Group by day for separators
     let lastDate = null;
@@ -1724,9 +1641,7 @@ function renderCondensedView(entries, container) {
     });
     
     flatRows.forEach(row => {
-        // Use narrative date if available, otherwise entry date
-        const dateToUse = row.narrative?.date ? row.narrative.date : row.entry.created_at;
-        const entryDate = new Date(dateToUse);
+        const entryDate = new Date(row.entry.created_at);
         const dateStr = entryDate.toLocaleDateString('en-US', { 
             weekday: 'long',
             year: 'numeric',
@@ -1787,9 +1702,7 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
         row.dataset.narrativeIndex = narrativeIndex;
     }
     
-    // Use narrative date if available, otherwise use entry date
-    const dateToUse = narrative?.date ? narrative.date : entry.created_at;
-    const date = new Date(dateToUse);
+    const date = new Date(entry.created_at);
     const dateStr = date.toLocaleDateString('en-US', { 
         month: '2-digit', 
         day: '2-digit', 
@@ -2127,60 +2040,20 @@ async function loadCalendar() {
             dayCell.classList.add('today');
         }
         
-        // Get entries for this day - check both entry date and individual narrative dates
-        const dayEntries = [];
-        entries.forEach(entry => {
-            // Check if any narrative has this date
-            let hasNarrativeOnDate = false;
-            if (entry.narratives && entry.narratives.length > 0) {
-                for (const narrative of entry.narratives) {
-                    const narrativeDate = narrative.date ? new Date(narrative.date) : new Date(entry.created_at);
-                    if (narrativeDate.getDate() === day && 
-                        narrativeDate.getMonth() === month && 
-                        narrativeDate.getFullYear() === year) {
-                        hasNarrativeOnDate = true;
-                        break;
-                    }
-                }
-            } else {
-                // If no narratives, use entry date
-                const entryDate = new Date(entry.created_at);
-                hasNarrativeOnDate = entryDate.getDate() === day && 
-                                   entryDate.getMonth() === month && 
-                                   entryDate.getFullYear() === year;
-            }
-            
-            if (hasNarrativeOnDate) {
-                dayEntries.push(entry);
-            }
+        // Get entries for this day
+        const dayEntries = entries.filter(entry => {
+            const entryDate = new Date(entry.created_at);
+            return entryDate.getDate() === day && 
+                   entryDate.getMonth() === month && 
+                   entryDate.getFullYear() === year;
         });
         
         // Add day content container
         const dayContent = document.createElement('div');
         dayContent.className = 'calendar-day-content';
         
-        // Calculate total hours for the day - only count narratives on this date
-        let dayTotalHours = 0;
-        dayEntries.forEach(entry => {
-            if (entry.narratives && entry.narratives.length > 0) {
-                entry.narratives.forEach(narrative => {
-                    const narrativeDate = narrative.date ? new Date(narrative.date) : new Date(entry.created_at);
-                    if (narrativeDate.getDate() === day && 
-                        narrativeDate.getMonth() === month && 
-                        narrativeDate.getFullYear() === year) {
-                        dayTotalHours += narrative.hours || 0;
-                    }
-                });
-            } else {
-                // If no narratives, add total hours if entry is on this date
-                const entryDate = new Date(entry.created_at);
-                if (entryDate.getDate() === day && 
-                    entryDate.getMonth() === month && 
-                    entryDate.getFullYear() === year) {
-                    dayTotalHours += entry.total_hours || 0;
-                }
-            }
-        });
+        // Calculate total hours for the day
+        const dayTotalHours = dayEntries.reduce((sum, entry) => sum + (entry.total_hours || 0), 0);
         
         dayContent.innerHTML = `
             <div class="calendar-day-header-row">
@@ -2582,33 +2455,8 @@ function loadExport() {
     if (exportBtn) {
         const newExportBtn = exportBtn.cloneNode(true);
         exportBtn.parentNode.replaceChild(newExportBtn, exportBtn);
-        newExportBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            exportEntries();
-        });
+        newExportBtn.addEventListener('click', exportEntries);
     }
-    
-    // Prevent date inputs from expanding their click area
-    [startInput, endInput].forEach(input => {
-        if (input) {
-            input.addEventListener('click', (e) => {
-                e.stopPropagation();
-            });
-        }
-    });
-    
-    // Prevent date range container from interfering with other elements
-    const dateRangeInputs = document.querySelector('.date-range-inputs');
-    if (dateRangeInputs) {
-        dateRangeInputs.addEventListener('click', (e) => {
-            // Only allow clicks on actual input elements
-            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'LABEL') {
-                e.stopPropagation();
-            }
-        });
-    }
-    
     
     // Initialize date presets
     initializeDatePresets();
@@ -2808,7 +2656,7 @@ function updateExportStats(entries, startDate, endDate) {
     const statHours = document.getElementById('stat-hours');
     if (statHours) {
         const totalHours = entries.reduce((sum, e) => sum + (e.total_hours || 0), 0);
-        statHours.textContent = roundToOneDecimal(totalHours).toFixed(1);
+        statHours.textContent = totalHours.toFixed(1);
     }
     
     // Update date range
@@ -3098,29 +2946,7 @@ async function deleteEntry(id) {
     if (!confirm('Are you sure you want to delete this entry?')) return;
     
     try {
-        // Try to delete from server first if online
-        if (navigator.onLine) {
-            try {
-                await api.deleteEntry(id);
-                console.log(`Entry ${id} deleted from server`);
-            } catch (serverErr) {
-                console.error('Error deleting from server:', serverErr);
-                // If server deletion fails, ask user if they want to continue with local deletion
-                if (!confirm('Failed to delete from server. Delete locally anyway?')) {
-                    return;
-                }
-            }
-        } else {
-            console.log('Offline - will delete locally and sync later');
-            // TODO: In future, mark entry as deleted for sync
-        }
-        
-        // Delete from IndexedDB
         await dbOperations.deleteEntry(id);
-        
-        // Remove the entry from currentEntries array to keep in-memory state in sync
-        currentEntries = currentEntries.filter(entry => entry.id !== id);
-        
         loadDashboard();
         showNotification('Entry deleted', 'success');
     } catch (err) {
@@ -3214,49 +3040,13 @@ async function bulkDeleteEntries() {
     if (!confirm(`Are you sure you want to delete ${count} entries?`)) return;
     
     try {
-        let successCount = 0;
-        let failedCount = 0;
-        
-        // Process deletions
-        const promises = Array.from(selectedEntries).map(async (id) => {
-            try {
-                const entryId = parseInt(id);
-                
-                // Try to delete from server first if online
-                if (navigator.onLine) {
-                    try {
-                        await api.deleteEntry(entryId);
-                        console.log(`Entry ${entryId} deleted from server`);
-                    } catch (serverErr) {
-                        console.error(`Error deleting ${entryId} from server:`, serverErr);
-                        // Continue with local deletion even if server fails
-                    }
-                }
-                
-                // Delete from IndexedDB
-                await dbOperations.deleteEntry(entryId);
-                
-                // Remove from currentEntries array
-                currentEntries = currentEntries.filter(entry => entry.id !== entryId);
-                
-                successCount++;
-            } catch (err) {
-                console.error(`Failed to delete entry ${id}:`, err);
-                failedCount++;
-            }
-        });
-        
+        const promises = Array.from(selectedEntries).map(id => dbOperations.deleteEntry(parseInt(id)));
         await Promise.all(promises);
         
         selectedEntries.clear();
         updateBulkActionsDisplay();
         loadDashboard();
-        
-        if (failedCount > 0) {
-            showNotification(`Deleted ${successCount} entries. ${failedCount} failed.`, 'warning');
-        } else {
-            showNotification(`${count} entries deleted successfully`, 'success');
-        }
+        showNotification(`${count} entries deleted successfully`, 'success');
     } catch (err) {
         console.error('Error deleting entries:', err);
         showNotification('Failed to delete some entries', 'error');
@@ -3385,9 +3175,6 @@ function closeEditModal() {
 
 function populateEditModal(entry) {
     
-    // Remove the global date field logic as we'll have per-activity dates
-    // The entry date will be inherited by activities that don't have their own date
-    
     // Populate narratives
     const container = document.getElementById('edit-narratives-container');
     container.innerHTML = '';
@@ -3398,7 +3185,6 @@ function populateEditModal(entry) {
         narrativeItem.innerHTML = `
             <div class="edit-narrative-header">
                 <span class="activity-title">Activity ${index + 1}</span>
-                <input type="date" class="narrative-date-input narrative-date-header" data-index="${index}" value="${narrative.date ? new Date(narrative.date).toISOString().split('T')[0] : new Date(entry.created_at).toISOString().split('T')[0]}">
                 <span class="activity-hours">${narrative.hours} hours</span>
             </div>
             <div class="edit-form-grid">
@@ -3646,15 +3432,9 @@ async function saveEditChanges() {
             narratives: []
         };
         
-        // Keep the original created_at for the entry
-        // Individual narrative dates will be handled separately
-        
         // Collect narratives data
         const narrativeItems = document.querySelectorAll('.edit-narrative-item');
         narrativeItems.forEach((item, index) => {
-            const dateInput = item.querySelector('.narrative-date-input');
-            const dateValue = dateInput.value;
-            
             const narrative = {
                 hours: parseFloat(item.querySelector('.narrative-hours-input').value) || 0,
                 task_code: item.querySelector('.narrative-task-input').value,
@@ -3663,21 +3443,11 @@ async function saveEditChanges() {
                 text: item.querySelector('.narrative-text-input').value,
                 status: item.querySelector('.narrative-status-input').value
             };
-            
-            // Add date to narrative if specified
-            if (dateValue) {
-                // Convert YYYY-MM-DD to ISO string
-                const date = new Date(dateValue);
-                // Set to noon to avoid timezone issues
-                date.setHours(12, 0, 0, 0);
-                narrative.date = date.toISOString();
-            }
-            
             updatedEntry.narratives.push(narrative);
         });
         
         // Recalculate total hours
-        updatedEntry.total_hours = roundToOneDecimal(updatedEntry.narratives.reduce((sum, n) => sum + n.hours, 0));
+        updatedEntry.total_hours = updatedEntry.narratives.reduce((sum, n) => sum + n.hours, 0);
         
         // Determine entry-level status based on individual narrative statuses
         // Use the least advanced status (draft < exported)
@@ -3688,33 +3458,12 @@ async function saveEditChanges() {
             updatedEntry.status = 'exported';
         }
         
-        // Save to local database first
+        // Save to database
         await dbOperations.updateEntry(updatedEntry.id, updatedEntry);
         
-        // Sync with backend immediately
-        try {
-            const response = await api.updateEntry(updatedEntry.id, updatedEntry);
-            if (response) {
-                // Update local entry with server response to ensure consistency
-                response.sync_status = 'synced';
-                await dbOperations.saveEntry(response);
-            }
-        } catch (error) {
-            console.error('Failed to sync with backend:', error);
-            // Entry remains in 'pending' status for later sync
-            updatedEntry.sync_status = 'pending';
-            await dbOperations.updateEntry(updatedEntry.id, updatedEntry);
-        }
-        
-        // Close modal and refresh current view
+        // Close modal and refresh dashboard
         closeEditModal();
-        
-        // Refresh the appropriate view
-        if (currentView === 'dashboard') {
-            loadDashboard();
-        } else if (currentView === 'calendar') {
-            loadCalendar();
-        }
+        loadDashboard();
         
         showNotification('Entry updated successfully', 'success');
         
@@ -3912,11 +3661,6 @@ let currentContextEntry = null;
 let currentContextNarrativeIndex = null;
 
 function openContextRecordingModal(entryId, narrativeIndex) {
-    // Stop event propagation to prevent card click handler from firing
-    if (event) {
-        event.stopPropagation();
-    }
-    
     // Find the entry
     const entry = currentEntries.find(e => e.id === entryId);
     if (!entry || !entry.narratives || !entry.narratives[narrativeIndex]) {
@@ -4816,38 +4560,3 @@ function toggleMobileMenu(btn, entryId) {
         });
     }, 0);
 }
-
-// Debug helper functions - can be called from console
-window.debugStatusFilter = false;
-window.testStatusFilter = async function(filterValue) {
-    console.log('=== MANUAL STATUS FILTER TEST ===');
-    console.log('Setting statusFilter to:', filterValue);
-    statusFilter = filterValue;
-    
-    // Update the UI to reflect the filter
-    const statusText = document.getElementById('status-filter-text');
-    if (statusText) {
-        statusText.textContent = filterValue === 'draft' ? 'Draft' : 
-                                filterValue === 'exported' ? 'Exported' : 'All';
-    }
-    
-    const statusFilterElement = document.getElementById('status-filter');
-    if (statusFilterElement) {
-        statusFilterElement.value = filterValue;
-    }
-    
-    // Enable debug mode and reload
-    window.debugStatusFilter = true;
-    await loadDashboard();
-    window.debugStatusFilter = false;
-    
-    console.log('=== END MANUAL TEST ===');
-};
-
-// Helper to check current filter state
-window.checkFilterState = function() {
-    console.log('Current filter state:');
-    console.log('- Global statusFilter:', statusFilter);
-    console.log('- status-filter element value:', document.getElementById('status-filter')?.value);
-    console.log('- status-filter-text content:', document.getElementById('status-filter-text')?.textContent);
-};

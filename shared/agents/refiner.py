@@ -14,7 +14,7 @@ STRICT REQUIREMENTS:
 - MUST start with a present tense verb (e.g., "Review", "Draft", "Analyze", "Prepare", "Attend")
 - Uses active voice throughout
 - Uses professional legal terminology
-- Is 1-2 sentences long
+- Is 1-4 sentences long, preferably 2-3 sentences
 - CRITICAL: Only use information from the activity description - DO NOT add details, names, specifics, or context not stated
 - Keep it general and factual based only on what was provided
 
