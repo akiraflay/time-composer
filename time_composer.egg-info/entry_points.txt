@@ -1,2 +1,0 @@
-[console_scripts]
-time-composer = cli.time_composer_cli:cli

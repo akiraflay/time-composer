@@ -27,7 +27,8 @@
       "mcp__puppeteer__puppeteer_screenshot",
       "Bash(git checkout:*)",
       "Bash(git check-ignore:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(true)"
     ],
     "deny": []
   }
