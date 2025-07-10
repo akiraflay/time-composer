@@ -32,7 +32,8 @@
       "Bash(test:*)",
       "Bash(cat:*)",
       "Bash(python test:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(chmod:*)"
     ],
     "deny": []
   }

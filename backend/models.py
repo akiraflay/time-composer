@@ -28,14 +28,6 @@ class TimeEntry(db.Model):
     # Status tracking
     status = db.Column(db.String(20), default='draft')  # draft, ready, billed
     
-    # User information
-    attorney_email = db.Column(db.String(100))
-    attorney_name = db.Column(db.String(100))
-    
-    # Additional metadata
-    task_codes = db.Column(db.JSON, default=list)
-    tags = db.Column(db.JSON, default=list)
-    
     def to_dict(self):
         """Convert model to dictionary for JSON serialization"""
         return {
@@ -48,9 +40,5 @@ class TimeEntry(db.Model):
             'matter_number': self.matter_number,
             'narratives': self.narratives or [],
             'total_hours': self.total_hours,
-            'status': self.status,
-            'attorney_email': self.attorney_email,
-            'attorney_name': self.attorney_name,
-            'task_codes': self.task_codes or [],
-            'tags': self.tags or []
+            'status': self.status
         }

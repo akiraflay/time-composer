@@ -174,21 +174,6 @@ Currently, the API does not require authentication for local use. For production
 
 ### Endpoints
 
-#### `POST /api/transcribe`
-Transcribe audio file to text using OpenAI Whisper.
-
-**Request:**
-- Method: `POST`
-- Content-Type: `multipart/form-data`
-- Body: Audio file (webm, mp3, wav)
-
-**Response:**
-```json
-{
-  "text": "Transcribed text content"
-}
-```
-
 #### `POST /api/enhance`
 Process text through the AI agent pipeline.
 

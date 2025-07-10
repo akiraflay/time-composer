@@ -130,14 +130,6 @@ def update_entry(entry_id):
             entry.total_hours = data['total_hours']
         if 'status' in data:
             entry.status = data['status']
-        if 'attorney_email' in data:
-            entry.attorney_email = data['attorney_email']
-        if 'attorney_name' in data:
-            entry.attorney_name = data['attorney_name']
-        if 'task_codes' in data:
-            entry.task_codes = data['task_codes']
-        if 'tags' in data:
-            entry.tags = data['tags']
         if 'original_text' in data:
             entry.original_text = data['original_text']
         if 'cleaned_text' in data:
@@ -301,7 +293,7 @@ def export_entries():
         # Write header
         writer.writerow([
             'Date', 'Client Code', 'Matter Number', 'Hours', 
-            'Narrative', 'Task Code', 'Status', 'Attorney'
+            'Narrative', 'Task Code', 'Status'
         ])
         
         # Write data
@@ -320,8 +312,7 @@ def export_entries():
                     narrative.get('hours', 0.0),
                     narrative.get('text', ''),
                     narrative.get('task_code', ''),
-                    narrative.get('status', entry.status),
-                    entry.attorney_name or entry.attorney_email or ''
+                    narrative.get('status', entry.status)
                 ])
         
         # Return CSV content

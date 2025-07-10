@@ -1148,11 +1148,7 @@ class AIAssistant {
                     created_at: entryData.created_at,
                     updated_at: entryData.updated_at,
                     client_code: entryData.client_code || '',
-                    matter_number: entryData.matter_number || '',
-                    attorney_email: entryData.attorney_email,
-                    attorney_name: entryData.attorney_name,
-                    task_codes: entryData.task_codes || [],
-                    tags: entryData.tags || []
+                    matter_number: entryData.matter_number || ''
                 });
             }
             
