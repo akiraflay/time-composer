@@ -38,7 +38,8 @@
       "Bash(python -m http.server:*)",
       "Bash(chmod:*)",
       "Bash(mkdir:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": []
   }

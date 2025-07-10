@@ -151,16 +151,14 @@ class AIAssistant {
         document.getElementById('voice-interface').classList.remove('hidden');
         this.updateStatus('Voice mode active');
         
-        // Add assistant message indicating recording has started
-        this.addAssistantMessage('Recording started! Tell me about your billable activities.');
-        
-        // Automatically start recording with error handling
         try {
+            // Automatically start recording
             await this.startRecording();
-        } catch (error) {
-            console.error('Failed to start recording:', error);
-            this.addAssistantMessage(`Unable to start recording: ${error.message || 'Unknown error'}. Please check your microphone permissions and try again.`);
-            this.updateStatus('Recording failed');
+            // Add assistant message only if recording started successfully
+            this.addAssistantMessage('Recording started! Tell me about your billable activities.');
+        } catch (err) {
+            console.error('Failed to start recording:', err);
+            this.showError('Unable to start recording. Please check your microphone permissions.');
         }
     }
 
