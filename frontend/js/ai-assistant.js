@@ -16,22 +16,6 @@ class AIAssistant {
         this.currentMode = 'initial'; // initial, voice, text, processing, confirmation
         this.messages = [];
         
-        // Voice mode messages for variety
-        this.voiceModeMessages = [
-            // Professional with Personality
-            "Let's capture today's billables.",
-            "Speaking my time into existence.",
-            "Narrating today's accomplishments.",
-            "Voice memo for billing activated.",
-            "Dictating time entry details.",
-            // Friendly & Engaging
-            "Here's what I accomplished today.",
-            "Recording my work highlights.",
-            "Let me walk you through my day.",
-            "Capturing today's achievements.",
-            "Time to document my progress."
-        ];
-        
         // Always use browser-only mode for transcription
         
         this.initializeSpeechRecognition();
@@ -166,12 +150,6 @@ class AIAssistant {
         this.hideAllInterfaces();
         document.getElementById('voice-interface').classList.remove('hidden');
         this.updateStatus('Voice mode active');
-        
-        // Select a random voice mode message
-        const randomMessage = this.voiceModeMessages[Math.floor(Math.random() * this.voiceModeMessages.length)];
-        
-        // Add message to conversation
-        this.addUserMessage(randomMessage);
         
         // Add assistant message indicating recording has started
         this.addAssistantMessage('Recording started! Tell me about your billable activities.');
