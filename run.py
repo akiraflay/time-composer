@@ -27,16 +27,16 @@ def check_env_file():
     env_file = Path(".env")
     if not env_file.exists():
         print("✗ .env file not found")
-        print("Please create .env file with your OpenAI API key")
+        print("Please create .env file with your Azure OpenAI API key")
         return False
     
     with open(env_file) as f:
         content = f.read()
-        if "OPENAI_API_KEY=" in content and "your-openai-api-key-here" not in content:
+        if "AZURE_OPENAI_API_KEY=" in content and "your-api-key-here" not in content:
             print("✓ Environment file configured")
             return True
         else:
-            print("✗ Please set your OpenAI API key in .env file")
+            print("✗ Please set your Azure OpenAI API key in .env file")
             return False
 
 def start_backend():

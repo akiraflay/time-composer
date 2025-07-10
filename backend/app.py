@@ -1,10 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from datetime import datetime
-import openai
 import sys
 import os
-import tempfile
 import csv
 import io
 import traceback
@@ -23,47 +21,10 @@ app.config.from_object(Config)
 db.init_app(app)
 CORS(app, origins=Config.CORS_ORIGINS)
 
-# Initialize OpenAI
-openai.api_key = Config.OPENAI_API_KEY
-
 @app.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
     return jsonify({'status': 'healthy', 'timestamp': datetime.utcnow().isoformat()})
-
-@app.route('/api/transcribe', methods=['POST'])
-def transcribe():
-    """Transcribe audio using OpenAI Whisper"""
-    try:
-        if 'audio' not in request.files:
-            return jsonify({'error': 'No audio file provided'}), 400
-        
-        audio_file = request.files['audio']
-        
-        # Save temporarily
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.webm') as tmp_file:
-            audio_file.save(tmp_file.name)
-            temp_path = tmp_file.name
-        
-        try:
-            # Transcribe with Whisper
-            client = openai.OpenAI(api_key=Config.OPENAI_API_KEY)
-            with open(temp_path, 'rb') as audio:
-                transcript = client.audio.transcriptions.create(
-                    model="whisper-1",
-                    file=audio
-                )
-            
-            return jsonify({'text': transcript.text})
-        
-        finally:
-            # Clean up temp file
-            if os.path.exists(temp_path):
-                os.remove(temp_path)
-    
-    except Exception as e:
-        app.logger.error(f"Transcription error: {str(e)}")
-        return jsonify({'error': 'Transcription failed'}), 500
 
 @app.route('/api/enhance', methods=['POST'])
 def enhance():

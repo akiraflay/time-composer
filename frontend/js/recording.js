@@ -328,13 +328,13 @@ const processRecording = async (audioBlob) => {
         // Delay for dramatic effect
         await new Promise(resolve => setTimeout(resolve, 800));
         
-        // Get final transcription from Whisper API
-        const { text } = await api.transcribe(audioBlob);
+        // Get final transcription from Web Speech API
+        const text = finalTranscript.trim() || '';
         
         // Complete transcription step
         setAgentStepCompleted('transcription');
         
-        // Display the Whisper transcription (more accurate than live)
+        // Display the final transcription from Web Speech API
         document.getElementById('transcription').classList.remove('hidden');
         document.getElementById('transcription-text').textContent = text;
         

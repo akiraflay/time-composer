@@ -91,10 +91,10 @@ def validate_project_structure():
     if Path(".env").exists():
         with open(".env") as f:
             content = f.read()
-            if "OPENAI_API_KEY=" in content and "sk-proj-" in content:
-                print("✓ .env contains OpenAI API key")
+            if "AZURE_OPENAI_API_KEY=" in content and len(content.split("AZURE_OPENAI_API_KEY=")[1].split("\n")[0].strip()) > 10:
+                print("✓ .env contains Azure OpenAI API key")
             else:
-                print("✗ .env missing valid OpenAI API key")
+                print("✗ .env missing valid Azure OpenAI API key")
                 all_good = False
     
     # Check requirements.txt has key dependencies
