@@ -11,19 +11,13 @@ class AIAssistant {
         this.recognition = null;
         this.finalTranscript = '';
         this.browserTranscript = ''; // Keep track of browser transcription
-        this.whisperTranscript = ''; // Keep track of Whisper transcription
-        this.transcriptChunks = []; // Track chunks for processing
-        this.chunkTimer = null; // Timer for periodic Whisper processing
         this.lastSpeechTime = Date.now(); // Track silence detection
-        this.lastProcessedChunkIndex = 0; // Track which audio chunks have been processed
-        this.isProcessingChunk = false; // Prevent concurrent chunk processing
         this.isStopping = false; // Prevent concurrent stop operations
         this.currentMode = 'initial'; // initial, voice, text, processing, confirmation
         this.messages = [];
         
-        // Transcription mode: 'dual' (both Browser + Whisper), 'browser' (Browser only), 'whisper' (Whisper only)
-        // Browser-only mode provides instant feedback without API delays
-        this.transcriptionMode = 'browser'; // Default to browser-only for best responsiveness
+        // Always use browser-only mode for transcription
+        this.transcriptionMode = 'browser';
         
         this.initializeSpeechRecognition();
         this.bindEvents();
@@ -57,11 +51,6 @@ class AIAssistant {
             this.recognition.onend = () => {
                 if (this.isRecording && !this.isPaused) {
                     this.restartRecognition();
-                }
-                
-                // Check for any pending chunk processing
-                if (this.isRecording && this.audioChunks.length > 0) {
-                    this.checkChunkProcessing();
                 }
             };
         }
@@ -166,59 +155,8 @@ class AIAssistant {
         // Add message to conversation
         this.addUserMessage('I\'ll tell you about my work using voice');
         
-        // Add assistant message with transcription mode info
-        const modeInfo = this.transcriptionMode === 'browser' 
-            ? 'using browser speech recognition' 
-            : this.transcriptionMode === 'dual' 
-                ? 'using dual transcription (browser + Whisper)' 
-                : 'using Whisper AI transcription';
-                
-        this.addAssistantMessage(`Perfect! Click the microphone to start recording your billable activities. Currently ${modeInfo}.`);
-        
-        // Add transcription mode selector
-        this.addTranscriptionModeSelector();
-    }
-    
-    addTranscriptionModeSelector() {
-        const selectorHtml = `
-            <div class="transcription-mode-selector">
-                <label>Transcription Mode:</label>
-                <div class="mode-options">
-                    <button class="mode-option ${this.transcriptionMode === 'browser' ? 'active' : ''}" 
-                            onclick="window.aiAssistant.setTranscriptionModeUI('browser')">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                            <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4Z"/>
-                        </svg>
-                        Browser Only
-                        <span class="mode-desc">Low latency • Moderate accuracy</span>
-                    </button>
-                    <button class="mode-option ${this.transcriptionMode === 'dual' ? 'active' : ''}" 
-                            onclick="window.aiAssistant.setTranscriptionModeUI('dual')">
-                        <span class="experimental-tag">Experimental</span>
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                            <path d="M8,2A6,6 0 0,0 2,8A6,6 0 0,0 8,14A6,6 0 0,0 14,8A6,6 0 0,0 8,2M8,4A4,4 0 0,1 12,8A4,4 0 0,1 8,12A4,4 0 0,1 4,8A4,4 0 0,1 8,4M16,10A6,6 0 0,0 10,16A6,6 0 0,0 16,22A6,6 0 0,0 22,16A6,6 0 0,0 16,10M16,12A4,4 0 0,1 20,16A4,4 0 0,1 16,20A4,4 0 0,1 12,16A4,4 0 0,1 16,12Z"/>
-                        </svg>
-                        Dual Mode
-                        <span class="mode-desc">Higher accuracy for legal terms</span>
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        this.addAssistantMessage(selectorHtml, true);
-    }
-    
-    setTranscriptionModeUI(mode) {
-        this.setTranscriptionMode(mode);
-        
-        // Update UI
-        document.querySelectorAll('.mode-option').forEach(btn => {
-            btn.classList.toggle('active', btn.textContent.toLowerCase().includes(mode));
-        });
-        
-        // Show confirmation
-        const modeText = mode === 'browser' ? 'Browser-only' : 'Dual (Browser + Whisper)';
-        this.updateStatus(`Switched to ${modeText} transcription mode`);
+        // Add assistant message with browser speech recognition info
+        this.addAssistantMessage('Perfect! Click the microphone to start recording your billable activities. Currently using browser speech recognition.');
     }
 
     switchToTextMode() {
@@ -292,12 +230,7 @@ class AIAssistant {
             this.isPaused = false;
             this.finalTranscript = '';
             this.browserTranscript = '';
-            this.whisperTranscript = '';
-            this.transcriptChunks = [];
             this.lastSpeechTime = Date.now();
-            this.lastProcessedChunkIndex = 0;
-            this.lastChunkProcessTime = Date.now();
-            this.lastConfirmedLength = 0;
             
             // Start speech recognition for live transcription
             if (this.recognition) {
@@ -311,11 +244,6 @@ class AIAssistant {
             this.updateRecordingUI();
             this.startTimer();
             this.updateStatus('Recording... Tell me about your billable work');
-            
-            // Start continuous chunk processing for dual mode
-            if (this.transcriptionMode === 'dual') {
-                this.checkChunkProcessing();
-            }
             
         } catch (err) {
             console.error('Error accessing microphone:', err);
@@ -398,12 +326,6 @@ class AIAssistant {
                 this.recognition.stop();
             }
             
-            // Clear chunk timer when paused
-            if (this.chunkTimer) {
-                clearTimeout(this.chunkTimer);
-                this.chunkTimer = null;
-            }
-            
             this.updateRecordingUI();
             this.updateStatus('Recording paused');
         }
@@ -444,17 +366,6 @@ class AIAssistant {
             this.isPaused = false;
             
             try {
-                // Clear chunk processing timer
-                if (this.chunkTimer) {
-                    clearTimeout(this.chunkTimer);
-                    this.chunkTimer = null;
-                }
-                
-                // Process any remaining chunks in dual mode before stopping
-                if (this.transcriptionMode === 'dual' && this.audioChunks.length > this.lastProcessedChunkIndex) {
-                    // Process final chunks before stopping
-                    await this.processAudioChunk();
-                }
                 
                 // Sync any edited text before processing
                 this.syncEditedTranscription();
@@ -514,37 +425,11 @@ class AIAssistant {
             // Sync any final edits
             this.syncEditedTranscription();
             
-            // If browser-only mode, use browser transcript as final
-            if (this.transcriptionMode === 'browser') {
-                this.finalTranscript = this.browserTranscript;
-                
-                // Show what we heard
-                this.addAssistantThinking('I heard you say: "' + this.finalTranscript.trim() + '"');
-            } else {
-                // Get final Whisper transcription
-                const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
-                this.addAssistantThinking('Getting final transcription...');
-                
-                try {
-                    const { text } = await api.transcribe(audioBlob);
-                    
-                    // Update final transcript with Whisper result
-                    this.whisperTranscript = text || this.browserTranscript;
-                    this.finalTranscript = this.whisperTranscript;
-                } catch (whisperError) {
-                    console.error('Whisper API failed, falling back to browser transcript:', whisperError);
-                    // Fall back to browser transcript if Whisper fails
-                    this.finalTranscript = this.browserTranscript;
-                }
-                
-                // Update the display with final text
-                this.updateTranscriptionDisplay();
-                
-                // Show what we heard
-                this.clearThinking();
-                this.addAssistantThinking('I heard you say: "' + this.finalTranscript.trim() + '"');
-                this.addAssistantThinking('Let me process this and extract the billable activities...');
-            }
+            // Use browser transcript as final
+            this.finalTranscript = this.browserTranscript;
+            
+            // Show what we heard
+            this.addAssistantThinking('I heard you say: "' + this.finalTranscript.trim() + '"');
             
             // Check if we have any transcript to process
             if (!this.finalTranscript || this.finalTranscript.trim() === '') {
@@ -630,31 +515,16 @@ class AIAssistant {
     }
 
     async simulateAIProcessing() {
-        const steps = this.transcriptionMode === 'browser' 
-            ? [
-                { message: 'Processing your transcribed speech...', delay: 600 },
-                { message: 'Grammar Agent: Cleaning up the text and expanding abbreviations...', delay: 600 },
-                { message: 'Separator Agent: Identifying distinct billable activities...', delay: 700 },
-                { message: 'Refiner Agent: Crafting professional billing narratives...', delay: 800 }
-              ]
-            : [
-                { message: 'Transcribing your speech with Whisper AI...', delay: 800 },
-                { message: 'Grammar Agent: Cleaning up the text and expanding abbreviations...', delay: 600 },
-                { message: 'Separator Agent: Identifying distinct billable activities...', delay: 700 },
-                { message: 'Refiner Agent: Crafting professional billing narratives...', delay: 800 }
-              ];
+        const steps = [
+            { message: 'Processing your transcribed speech...', delay: 600 },
+            { message: 'Grammar Agent: Cleaning up the text and expanding abbreviations...', delay: 600 },
+            { message: 'Separator Agent: Identifying distinct billable activities...', delay: 700 },
+            { message: 'Refiner Agent: Crafting professional billing narratives...', delay: 800 }
+        ];
         
         for (const step of steps) {
             this.updateThinkingMessage(step.message);
             await new Promise(resolve => setTimeout(resolve, step.delay));
-        }
-    }
-    
-    // Method to switch transcription modes
-    setTranscriptionMode(mode) {
-        if (['dual', 'browser', 'whisper'].includes(mode)) {
-            this.transcriptionMode = mode;
-            console.log(`Transcription mode set to: ${mode}`);
         }
     }
 
@@ -989,12 +859,6 @@ class AIAssistant {
         // Update speech timestamp for silence detection
         this.lastSpeechTime = Date.now();
         
-        // Trigger chunk processing immediately on new final transcript
-        if (newFinalTranscript && this.transcriptionMode === 'dual') {
-            // Always trigger check, which will handle processing
-            this.checkChunkProcessing();
-        }
-        
         // Update the display immediately with browser results
         this.updateBrowserTranscriptionDisplay(interimTranscript);
     }
@@ -1008,70 +872,12 @@ class AIAssistant {
         
         let displayHtml = '';
         
-        // In browser-only mode, show all text as confirmed
-        if (this.transcriptionMode === 'browser') {
-            if (this.browserTranscript) {
-                displayHtml += `<span class="whisper-confirmed">${this.browserTranscript}</span>`;
-            }
-            if (interimTranscript) {
-                displayHtml += `<span class="interim">${interimTranscript}</span>`;
-            }
-        } else {
-            // Dual mode - smart display
-            if (this.whisperTranscript) {
-                // Show Whisper-confirmed text
-                displayHtml += `<span class="whisper-confirmed">${this.whisperTranscript}</span>`;
-                
-                // Calculate what browser text hasn't been confirmed by Whisper yet
-                // Use fuzzy matching to handle slight differences
-                const whisperWords = this.whisperTranscript.trim().split(/\s+/);
-                const browserWords = this.browserTranscript.trim().split(/\s+/);
-                
-                // Find where Whisper transcript ends in browser transcript
-                let matchIndex = -1;
-                for (let i = browserWords.length - 1; i >= whisperWords.length - 1; i--) {
-                    let matches = true;
-                    for (let j = 0; j < whisperWords.length && (i - whisperWords.length + 1 + j) >= 0; j++) {
-                        if (browserWords[i - whisperWords.length + 1 + j].toLowerCase() !== whisperWords[j].toLowerCase()) {
-                            matches = false;
-                            break;
-                        }
-                    }
-                    if (matches) {
-                        matchIndex = i + 1;
-                        break;
-                    }
-                }
-                
-                // Show unconfirmed browser text
-                if (matchIndex > 0 && matchIndex < browserWords.length) {
-                    const pendingText = browserWords.slice(matchIndex).join(' ');
-                    if (pendingText) {
-                        displayHtml += ` <span class="browser-pending">${pendingText}</span>`;
-                    }
-                } else if (matchIndex === -1) {
-                    // No match found, show all browser text after Whisper length
-                    const pendingText = this.browserTranscript.substring(this.whisperTranscript.length);
-                    if (pendingText.trim()) {
-                        displayHtml += ` <span class="browser-pending">${pendingText}</span>`;
-                    }
-                }
-            } else {
-                // No Whisper text yet, show all browser text as pending
-                if (this.browserTranscript) {
-                    displayHtml += `<span class="browser-pending">${this.browserTranscript}</span>`;
-                }
-            }
-            
-            // Add interim text
-            if (interimTranscript) {
-                displayHtml += ` <span class="interim">${interimTranscript}</span>`;
-            }
+        // Show all browser text as confirmed
+        if (this.browserTranscript) {
+            displayHtml += `<span class="whisper-confirmed">${this.browserTranscript}</span>`;
         }
-        
-        // Add processing indicator if actively processing in dual mode
-        if (this.transcriptionMode === 'dual' && this.isProcessingChunk) {
-            displayHtml += ' <span class="whisper-processing-indicator"></span>';
+        if (interimTranscript) {
+            displayHtml += `<span class="interim">${interimTranscript}</span>`;
         }
         
         // Only update if we have content
@@ -1086,292 +892,6 @@ class AIAssistant {
         }
     }
     
-    checkChunkProcessing() {
-        // Clear existing timer
-        if (this.chunkTimer) {
-            clearTimeout(this.chunkTimer);
-            this.chunkTimer = null;
-        }
-        
-        // Don't process if paused or not recording
-        if (this.isPaused || !this.isRecording) return;
-        
-        // Skip chunk processing if using browser-only mode
-        if (this.transcriptionMode === 'browser') return;
-        
-        // Check if we have new chunks to process
-        const hasNewChunks = this.audioChunks.length > this.lastProcessedChunkIndex;
-        const newChunksCount = hasNewChunks ? this.audioChunks.length - this.lastProcessedChunkIndex : 0;
-        const timeSinceLastProcess = Date.now() - this.lastChunkProcessTime;
-        
-        // Process chunks if:
-        // 1. We have at least 15 chunks (1.5 seconds) of new audio
-        // 2. OR 3 seconds have passed since last processing (and we have any new chunks)
-        const shouldProcessByChunkCount = hasNewChunks && newChunksCount >= 15;
-        const shouldProcessByTime = hasNewChunks && timeSinceLastProcess >= 3000;
-        
-        if (shouldProcessByChunkCount || shouldProcessByTime) {
-            this.processAudioChunk();
-        }
-        
-        // Always schedule the next check while recording
-        // Check every 1.5 seconds for more responsive processing
-        if (this.isRecording && !this.isPaused) {
-            this.chunkTimer = setTimeout(() => this.checkChunkProcessing(), 1500);
-        }
-    }
-    
-    async processAudioChunk() {
-        // Don't process if we're not recording or if no new chunks available
-        if (!this.isRecording || this.audioChunks.length <= this.lastProcessedChunkIndex) {
-            return;
-        }
-        
-        // Prevent concurrent chunk processing
-        if (this.isProcessingChunk) {
-            // If already processing, schedule another check soon
-            if (!this.chunkTimer && this.isRecording) {
-                this.chunkTimer = setTimeout(() => this.checkChunkProcessing(), 200);
-            }
-            return;
-        }
-        this.isProcessingChunk = true;
-        
-        try {
-            // Create a blob from ALL audio chunks to ensure valid file
-            const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
-            
-            console.log(`Processing complete audio, expecting new content after character ${this.whisperTranscript.length}`);
-            
-            // Add timeout for Whisper API call
-            const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Whisper API timeout')), 5000)
-            );
-            
-            // Race between API call and timeout
-            const { text } = await Promise.race([
-                api.transcribe(audioBlob),
-                timeoutPromise
-            ]);
-            
-            // Update Whisper transcript
-            if (text && text.trim()) {
-                const newFullText = text.trim();
-                console.log('Whisper returned:', newFullText);
-                console.log('Current transcript:', this.whisperTranscript);
-                console.log('Browser transcript:', this.browserTranscript);
-                
-                // If this is the first transcription, use it as-is
-                if (!this.whisperTranscript) {
-                    this.whisperTranscript = newFullText;
-                    this.lastConfirmedLength = newFullText.length;
-                } else {
-                    // Use browser transcript to detect and filter hallucinations
-                    const filteredText = this.filterWhisperHallucinations(newFullText, this.whisperTranscript, this.browserTranscript);
-                    console.log('Filtered text:', filteredText);
-                    
-                    // Special check: if filtered text contains our current transcript in the middle
-                    // (like "Whoa, this is a test" when we already have "this is a test")
-                    // extract only the truly new parts
-                    const currentIndex = filteredText.toLowerCase().indexOf(this.whisperTranscript.toLowerCase());
-                    if (currentIndex > 0) {
-                        // New content was prepended
-                        const prepended = filteredText.substring(0, currentIndex).trim();
-                        const afterCurrent = filteredText.substring(currentIndex + this.whisperTranscript.length).trim();
-                        
-                        if (prepended) {
-                            console.log('Prepended content detected:', prepended);
-                            this.whisperTranscript = prepended + ' ' + this.whisperTranscript;
-                        }
-                        if (afterCurrent) {
-                            console.log('Appended content detected:', afterCurrent);
-                            this.whisperTranscript = this.whisperTranscript + ' ' + afterCurrent;
-                        }
-                    } else {
-                        // Find overlap between existing and filtered transcription
-                        const overlap = this.findTranscriptOverlap(this.whisperTranscript, filteredText);
-                        
-                        if (overlap > 0) {
-                            // Extract only the new part after the overlap
-                            const newContent = filteredText.substring(overlap);
-                            if (newContent.trim()) {
-                                console.log('Adding new content:', newContent);
-                                this.whisperTranscript = this.whisperTranscript + ' ' + newContent.trim();
-                            }
-                        } else if (filteredText.length > this.whisperTranscript.length) {
-                            // Check if the filtered text is genuinely longer and not just duplicated
-                            const browserWords = this.browserTranscript.toLowerCase().split(/\s+/).length;
-                            const whisperWords = filteredText.toLowerCase().split(/\s+/).length;
-                            
-                            // Only replace if the word count is reasonable compared to browser
-                            if (whisperWords <= browserWords * 1.2) { // Allow 20% more words for corrections
-                                console.log('Replacing with filtered transcription');
-                                this.whisperTranscript = filteredText;
-                            } else {
-                                console.log('Filtered text seems to have too many duplicates, keeping current');
-                            }
-                        }
-                    }
-                    
-                    this.lastConfirmedLength = this.whisperTranscript.length;
-                }
-                
-                // Update the index to mark these chunks as processed
-                this.lastProcessedChunkIndex = this.audioChunks.length;
-                this.lastChunkProcessTime = Date.now();
-                
-                // Force update display
-                this.updateTranscriptionDisplay();
-            }
-        } catch (error) {
-            console.error('Whisper chunk processing failed:', error);
-            // Don't update lastProcessedChunkIndex on error
-            // This allows retry on next cycle
-            // But update the time to prevent immediate retry
-            this.lastChunkProcessTime = Date.now();
-        } finally {
-            this.isProcessingChunk = false;
-            // Let checkChunkProcessing handle all scheduling
-        }
-    }
-    
-    // Helper method to find overlap between two strings
-    findOverlap(str1, str2) {
-        const minOverlap = 10; // Minimum characters to consider overlap
-        const maxCheck = Math.min(str1.length, str2.length, 50); // Check up to 50 chars
-        
-        for (let i = minOverlap; i <= maxCheck; i++) {
-            if (str1.endsWith(str2.substring(0, i))) {
-                return i;
-            }
-        }
-        return 0;
-    }
-    
-    // Find where new transcript overlaps with existing transcript
-    findTranscriptOverlap(existing, newText) {
-        // Convert to lowercase for comparison
-        const existingLower = existing.toLowerCase();
-        const newLower = newText.toLowerCase();
-        
-        // Try to find the last 30-50 characters of existing in the new text
-        const searchLength = Math.min(50, existing.length);
-        const searchStart = Math.max(0, existing.length - searchLength);
-        
-        for (let i = searchStart; i < existing.length; i++) {
-            const suffix = existingLower.substring(i);
-            const suffixIndex = newLower.indexOf(suffix);
-            
-            if (suffixIndex === 0) {
-                // Found where the new text continues from the existing
-                return existing.length - i + suffixIndex;
-            }
-        }
-        
-        // Try word-based matching for better accuracy
-        const existingWords = existing.split(/\s+/);
-        const newWords = newText.split(/\s+/);
-        
-        // Look for the last few words of existing in new
-        for (let i = Math.max(0, existingWords.length - 5); i < existingWords.length; i++) {
-            const phrase = existingWords.slice(i).join(' ').toLowerCase();
-            const phraseIndex = newLower.indexOf(phrase);
-            
-            if (phraseIndex >= 0) {
-                // Found the phrase, return where new content starts
-                return phraseIndex + phrase.length;
-            }
-        }
-        
-        return 0; // No overlap found
-    }
-    
-    // Filter out Whisper hallucinations by comparing with browser transcript
-    filterWhisperHallucinations(whisperText, currentWhisper, browserText) {
-        // First, check if we already have content that shouldn't be duplicated
-        if (!currentWhisper) return whisperText;
-        
-        // Look for suspicious patterns where Whisper duplicates existing content
-        const whisperLower = whisperText.toLowerCase();
-        const currentLower = currentWhisper.toLowerCase();
-        const browserLower = browserText.toLowerCase();
-        
-        // Find segments that appear to be duplicated
-        const segments = this.findDuplicatedSegments(whisperText, currentWhisper);
-        
-        let filteredText = whisperText;
-        for (const segment of segments) {
-            const segmentLower = segment.toLowerCase();
-            
-            // Check how many times this segment appears in each transcript
-            const whisperOccurrences = this.countOccurrences(whisperLower, segmentLower);
-            const browserOccurrences = this.countOccurrences(browserLower, segmentLower);
-            const currentOccurrences = this.countOccurrences(currentLower, segmentLower);
-            
-            // If Whisper has more occurrences than browser, it's likely hallucinating
-            if (whisperOccurrences > browserOccurrences && currentOccurrences > 0) {
-                console.log(`Detected hallucinated duplicate: "${segment}"`);
-                // Remove the extra occurrence(s)
-                const excessCount = whisperOccurrences - Math.max(browserOccurrences - currentOccurrences, 0);
-                filteredText = this.removeExcessOccurrences(filteredText, segment, excessCount);
-            }
-        }
-        
-        return filteredText;
-    }
-    
-    // Find segments that might be duplicated
-    findDuplicatedSegments(whisperText, currentWhisper) {
-        const segments = new Set();
-        const words = currentWhisper.split(/\s+/);
-        
-        // Look for multi-word segments (3-10 words) that might be duplicated
-        for (let len = 3; len <= Math.min(10, words.length); len++) {
-            for (let i = 0; i <= words.length - len; i++) {
-                const segment = words.slice(i, i + len).join(' ');
-                const segmentLower = segment.toLowerCase();
-                
-                // Check if this segment appears multiple times in whisper text
-                if (this.countOccurrences(whisperText.toLowerCase(), segmentLower) > 1) {
-                    segments.add(segment);
-                }
-            }
-        }
-        
-        return Array.from(segments);
-    }
-    
-    // Count occurrences of a substring
-    countOccurrences(text, substring) {
-        let count = 0;
-        let pos = 0;
-        while ((pos = text.indexOf(substring, pos)) !== -1) {
-            count++;
-            pos += substring.length;
-        }
-        return count;
-    }
-    
-    // Remove excess occurrences of a segment
-    removeExcessOccurrences(text, segment, excessCount) {
-        if (excessCount <= 0) return text;
-        
-        let result = text;
-        let removed = 0;
-        
-        // Remove from the end backwards to avoid affecting indices
-        const regex = new RegExp(segment.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-        const matches = [...result.matchAll(regex)];
-        
-        // Remove the last N occurrences
-        for (let i = matches.length - 1; i >= 0 && removed < excessCount; i--) {
-            const match = matches[i];
-            result = result.substring(0, match.index) + result.substring(match.index + match[0].length);
-            removed++;
-        }
-        
-        return result.trim();
-    }
     
     
     updateTranscriptionDisplay() {
@@ -1894,10 +1414,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Make it globally available
     window.aiAssistant = aiAssistant;
     
-    // Log transcription mode info
+    // Log initialization info
     console.log('Time Composer Assistant initialized');
-    console.log('Current transcription mode:', aiAssistant.transcriptionMode);
-    console.log('To switch modes, use: window.aiAssistant.setTranscriptionMode("dual" | "browser" | "whisper")');
+    console.log('Using browser speech recognition for transcription');
     
     // Check backend status
     fetch('http://localhost:5002/api/entries')
