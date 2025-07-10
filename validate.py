@@ -46,14 +46,14 @@ def validate_project_structure():
         ("frontend/js/sync.js", "- Data synchronization"),
         ("frontend/assets/favicon.svg", "- Website icon"),
         
-        # Shared agent architecture
-        ("shared/__init__.py", "- Shared package"),
-        ("shared/agents/__init__.py", "- Agents package"),
-        ("shared/agents/base.py", "- Base agent class"),
-        ("shared/agents/grammar.py", "- Grammar correction agent"),
-        ("shared/agents/separator.py", "- Entry separation agent"),
-        ("shared/agents/refiner.py", "- Narrative refinement agent"),
-        ("shared/agents/pipeline.py", "- Agent orchestration"),
+        # Agent architecture (now in backend)
+        ("backend/agents/__init__.py", "- Agents package"),
+        ("backend/agents/base.py", "- Base agent class"),
+        ("backend/agents/grammar.py", "- Grammar correction agent"),
+        ("backend/agents/separator.py", "- Entry separation agent"),
+        ("backend/agents/refiner.py", "- Narrative refinement agent"),
+        ("backend/agents/pipeline.py", "- Agent orchestration"),
+        ("backend/agents/context_enhancer.py", "- Context enhancement agent"),
         
         # Tests
         ("tests/__init__.py", "- Test package"),
@@ -66,8 +66,8 @@ def validate_project_structure():
     
     # Check directories
     directories = [
-        "backend", "frontend", "shared", "tests", "data",
-        "frontend/css", "frontend/js", "frontend/assets", "shared/agents"
+        "backend", "frontend", "tests", "data",
+        "frontend/css", "frontend/js", "frontend/assets", "backend/agents"
     ]
     
     print("\n📁 Checking directories:")

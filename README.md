@@ -140,7 +140,14 @@ time-composer/
 │   ├── app.py            # Main Flask application
 │   ├── models.py         # SQLAlchemy database models
 │   ├── config.py         # Configuration settings
-│   └── utils.py          # Utility functions
+│   ├── utils.py          # Utility functions
+│   └── agents/           # AI agent pipeline
+│       ├── base.py       # Base agent class
+│       ├── grammar.py    # Grammar correction agent
+│       ├── separator.py  # Activity separation agent
+│       ├── refiner.py    # Narrative refinement agent
+│       ├── pipeline.py   # Agent orchestration
+│       └── context_enhancer.py  # Context enhancement agent
 ├── frontend/             # Web interface
 │   ├── index.html        # Main application page
 │   ├── js/
@@ -148,13 +155,6 @@ time-composer/
 │   │   ├── database.js   # IndexedDB management
 │   │   └── sync.js       # Offline sync logic
 │   └── css/              # Stylesheets
-├── shared/               # Shared components
-│   └── agents/           # AI agent pipeline
-│       ├── base.py       # Base agent class
-│       ├── grammar.py    # Grammar correction agent
-│       ├── separator.py  # Activity separation agent
-│       ├── refiner.py    # Narrative refinement agent
-│       └── pipeline.py   # Agent orchestration
 ├── data/                 # Database storage
 │   └── time_composer.db  # SQLite database (auto-created)
 ├── tests/                # Test suite
@@ -292,7 +292,7 @@ pytest tests/
 pytest tests/test_agents.py -v
 
 # Run with coverage
-pytest --cov=backend --cov=shared tests/
+pytest --cov=backend tests/
 ```
 
 ## Troubleshooting

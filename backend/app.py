@@ -7,9 +7,7 @@ import csv
 import io
 import traceback
 
-# Add shared modules to path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from shared.agents import AgentPipeline
+from agents import AgentPipeline
 
 from config import Config
 from models import db, TimeEntry
@@ -189,7 +187,7 @@ def enhance_context(entry_id):
             return jsonify({'error': f'Invalid narrative index: {narrative_index}, entry has {len(entry.narratives) if entry.narratives else 0} narratives'}), 400
         
         # Import context enhancer
-        from shared.agents.context_enhancer import ContextEnhancerAgent
+        from agents.context_enhancer import ContextEnhancerAgent
         
         # Validate inputs
         if not original_narrative:

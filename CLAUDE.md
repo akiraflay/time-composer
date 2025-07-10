@@ -49,14 +49,14 @@ Time Composer is a speech-first AI agent for legal billing narratives with three
 - **Database**: SQLite with TimeEntry model storing original text, cleaned text, narratives, and metadata
 - **OpenAI integration**: Whisper for transcription, GPT for text processing
 
-### 2. Three-Agent Processing Pipeline (`shared/agents/`)
+### 2. Three-Agent Processing Pipeline (`backend/agents/`)
 The AI processing uses a sequential three-agent architecture:
 
 1. **GrammarAgent**: Fixes spelling, grammar, expands abbreviations
 2. **SeparatorAgent**: Identifies distinct billable activities and time allocations  
 3. **RefinerAgent**: Transforms activities into professional billing narratives
 
-Pipeline orchestrated by `AgentPipeline` class in `shared/agents/pipeline.py`.
+Pipeline orchestrated by `AgentPipeline` class in `backend/agents/pipeline.py`.
 
 ### 3. Frontend
 - **Web Interface**: Vanilla JavaScript with Web Speech API, IndexedDB offline storage
@@ -79,5 +79,5 @@ Pipeline orchestrated by `AgentPipeline` class in `shared/agents/pipeline.py`.
 - **Database**: Uses SQLAlchemy with JSON fields for complex data (narratives, task_codes, tags)
 - **CORS**: Configured for local development (frontend on :8080, backend on :5001)
 - **Offline-first**: Frontend uses IndexedDB for local storage with sync capabilities
-- **Agent Base Class**: All agents inherit from `shared/agents/base.py`
+- **Agent Base Class**: All agents inherit from `backend/agents/base.py`
 - **Error Handling**: Comprehensive error handling with proper HTTP status codes and logging
