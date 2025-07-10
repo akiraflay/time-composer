@@ -154,8 +154,14 @@ class AIAssistant {
         // Add assistant message indicating recording has started
         this.addAssistantMessage('Recording started! Tell me about your billable activities.');
         
-        // Automatically start recording
-        await this.startRecording();
+        // Automatically start recording with error handling
+        try {
+            await this.startRecording();
+        } catch (error) {
+            console.error('Failed to start recording:', error);
+            this.addAssistantMessage(`Unable to start recording: ${error.message || 'Unknown error'}. Please check your microphone permissions and try again.`);
+            this.updateStatus('Recording failed');
+        }
     }
 
     switchToTextMode() {
