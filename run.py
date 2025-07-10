@@ -13,8 +13,6 @@ def check_requirements():
     try:
         import flask
         import openai
-        import click
-        import rich
         print("✓ All Python dependencies are installed")
         return True
     except ImportError as e:
@@ -57,7 +55,7 @@ def start_frontend():
     """Start the frontend server"""
     print("Starting frontend server...")
     process = subprocess.Popen([
-        sys.executable, "-m", "http.server", "8081", 
+        sys.executable, "-m", "http.server", "8080", 
         "--directory", "frontend"
     ])
     return process
@@ -88,13 +86,12 @@ def main():
         time.sleep(2)  # Give frontend time to start
         
         print("\n🚀 Time Composer is running!")
-        print("Backend API: http://localhost:5002")
-        print("Frontend: http://localhost:8081")
-        print("CLI: time-composer --help")
+        print("Backend API: http://localhost:5001")
+        print("Frontend: http://localhost:8080")
         print("\nPress Ctrl+C to stop all services")
         
         # Open browser
-        webbrowser.open("http://localhost:8081")
+        webbrowser.open("http://localhost:8080")
         
         # Wait for interrupt
         try:

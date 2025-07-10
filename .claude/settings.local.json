@@ -31,7 +31,8 @@
       "Bash(true)",
       "Bash(test:*)",
       "Bash(cat:*)",
-      "Bash(python test:*)"
+      "Bash(python test:*)",
+      "Bash(python:*)"
     ],
     "deny": []
   }

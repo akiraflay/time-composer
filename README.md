@@ -9,14 +9,14 @@ Time Composer is an innovative AI-powered tool designed specifically for legal p
 ### Key Benefits
 - **Time Savings**: Reduces billing narrative creation time by up to 70%
 - **Accuracy**: AI-enhanced grammar and formatting ensures professional quality
-- **Flexibility**: Multiple interfaces (web, CLI) to suit different workflows
+- **Flexibility**: Web interface with modern UI for easy access
 - **Compliance**: Generates detailed, client-ready billing descriptions
 
 ## Features
 
 - **Voice Recording**: Record billing narratives using your microphone with real-time transcription
 - **AI Enhancement**: Three-agent pipeline (Grammar, Separator, Refiner) processes raw notes into professional narratives
-- **Multi-Platform**: Web interface, CLI tool, and API all sharing the same backend
+- **Multi-Platform**: Web interface and API sharing the same backend
 - **Offline-First**: IndexedDB local storage with SQLite sync
 - **Export Options**: CSV export compatible with major billing systems
 - **Time Tracking**: Automatic time allocation parsing from voice notes
@@ -33,10 +33,9 @@ Time Composer uses a microservices-inspired architecture with three main compone
    - SQLite database for persistent storage
    - CORS-enabled for cross-origin requests
 
-2. **Frontend Applications**
+2. **Frontend Application**
    - **Web Interface**: Single-page application with offline capabilities
-   - **CLI Tool**: Terminal-based interface for power users
-   - Both interfaces communicate with the same backend API
+   - Communicates with the backend API via REST
 
 3. **AI Agent Pipeline**
    - Sequential processing through three specialized agents
@@ -52,7 +51,6 @@ Voice Input → Whisper API → Grammar Agent → Separator Agent → Refiner Ag
 
 - **Backend**: Flask 3.0+, SQLAlchemy 2.0+, OpenAI API
 - **Frontend**: Vanilla JavaScript (ES6+), Web Speech API, IndexedDB
-- **CLI**: Click 8.0+, Rich terminal UI
 - **Database**: SQLite with JSON field support
 - **AI/ML**: OpenAI Whisper (transcription), GPT-4 (text processing)
 
@@ -95,12 +93,6 @@ python --version  # Should be 3.8+
 ```bash
 # Install Python packages
 pip install -r requirements.txt
-
-# Install CLI tool in development mode
-pip install -e .
-
-# Verify installation
-time-composer --version
 ```
 
 ### 4. Configure Environment
@@ -139,21 +131,6 @@ python -m http.server 8080 --directory frontend
 # Open http://localhost:8080 in your browser
 ```
 
-### Using the CLI
-
-```bash
-# Record a new entry with voice
-time-composer record
-
-# Record with text input
-time-composer record "Met with client regarding contract negotiations - 2.5 hours"
-
-# View recent entries
-time-composer dashboard
-
-# Export entries for date range
-time-composer export --start 2024-01-01 --end 2024-01-31 --output january_billing.csv
-```
 
 ## Project Structure
 
@@ -171,10 +148,6 @@ time-composer/
 │   │   ├── database.js   # IndexedDB management
 │   │   └── sync.js       # Offline sync logic
 │   └── css/              # Stylesheets
-├── cli/                  # Command-line interface
-│   ├── __init__.py
-│   ├── commands.py       # CLI command definitions
-│   └── utils.py          # CLI utilities
 ├── shared/               # Shared components
 │   └── agents/           # AI agent pipeline
 │       ├── base.py       # Base agent class
@@ -186,10 +159,9 @@ time-composer/
 │   └── time_composer.db  # SQLite database (auto-created)
 ├── tests/                # Test suite
 │   ├── test_agents.py    # Agent pipeline tests
-│   ├── test_api.py       # API endpoint tests
-│   └── test_cli.py       # CLI command tests
+│   └── test_api.py       # API endpoint tests
 ├── requirements.txt      # Python dependencies
-├── setup.py             # CLI tool installation
+├── setup.py             # Package setup
 ├── .env.example         # Environment template
 ├── CLAUDE.md            # AI assistant instructions
 └── README.md            # This file

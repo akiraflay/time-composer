@@ -1415,7 +1415,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Using browser speech recognition for transcription');
     
     // Check backend status
-    fetch('http://localhost:5002/api/entries')
+    fetch('http://localhost:5001/api/entries')
         .then(() => console.log('✅ Backend server is running'))
         .catch(() => {
             console.warn('⚠️ Backend server is not running. Start it with: python run.py');

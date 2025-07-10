@@ -46,12 +46,6 @@ def validate_project_structure():
         ("frontend/js/sync.js", "- Data synchronization"),
         ("frontend/assets/favicon.svg", "- Website icon"),
         
-        # CLI files
-        ("cli/__init__.py", "- CLI package"),
-        ("cli/time_composer_cli.py", "- CLI entry point"),
-        ("cli/commands.py", "- CLI commands"),
-        ("cli/display.py", "- CLI display utilities"),
-        
         # Shared agent architecture
         ("shared/__init__.py", "- Shared package"),
         ("shared/agents/__init__.py", "- Agents package"),
@@ -72,7 +66,7 @@ def validate_project_structure():
     
     # Check directories
     directories = [
-        "backend", "frontend", "cli", "shared", "tests", "data",
+        "backend", "frontend", "shared", "tests", "data",
         "frontend/css", "frontend/js", "frontend/assets", "shared/agents"
     ]
     
@@ -101,7 +95,7 @@ def validate_project_structure():
     if Path("requirements.txt").exists():
         with open("requirements.txt") as f:
             content = f.read()
-            required_deps = ["flask", "openai", "click", "rich"]
+            required_deps = ["flask", "openai"]
             missing_deps = [dep for dep in required_deps if dep not in content.lower()]
             if not missing_deps:
                 print("✓ requirements.txt contains all key dependencies")

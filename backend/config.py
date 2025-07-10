@@ -31,7 +31,7 @@ class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key')
     
     # CORS settings
-    CORS_ORIGINS = ['http://localhost:8081', 'http://localhost:3000', 'http://127.0.0.1:8081']
+    CORS_ORIGINS = ['http://localhost:8080', 'http://localhost:3000', 'http://127.0.0.1:8080']
     
     # File upload settings
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size

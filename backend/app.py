@@ -361,5 +361,5 @@ if __name__ == '__main__':
     # Initialize database
     init_db()
     
-    # Run the app on port 5002 to avoid conflicts
-    app.run(debug=True, host='0.0.0.0', port=5002)
+    # Run the app on port 5001 (avoids macOS AirPlay conflict)
+    app.run(debug=True, host='0.0.0.0', port=5001)
