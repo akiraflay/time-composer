@@ -26,7 +26,7 @@ python run.py
 python backend/app.py
 
 # Manual start - Frontend only (separate terminal)
-python -m http.server 8080 --directory frontend
+python -m http.server 8081 --directory frontend
 ```
 
 ### Testing
@@ -58,17 +58,24 @@ time-composer export --output billing.csv
 Time Composer is a speech-first AI agent for legal billing narratives with three main components:
 
 ### 1. Backend (Flask API)
-- **Flask server** (`backend/app.py`) with SQLAlchemy models
-- **Core endpoints**: `/api/transcribe`, `/api/enhance`, `/api/entries`, `/api/export`
+- **Flask server** (`backend/app.py`) runs on port 5002 with SQLAlchemy models
+- **Core endpoints**: 
+  - `/api/transcribe` - Audio transcription via Whisper
+  - `/api/enhance` - Text enhancement pipeline
+  - `/api/entries` - CRUD operations (GET, POST)
+  - `/api/entries/<id>` - Individual entry operations (GET, PUT, DELETE)
+  - `/api/entries/<id>/enhance-context` - Context-aware enhancement
+  - `/api/export` - Export entries to CSV
 - **Database**: SQLite with TimeEntry model storing original text, cleaned text, narratives, and metadata
 - **OpenAI integration**: Whisper for transcription, GPT for text processing
 
-### 2. Three-Agent Processing Pipeline (`shared/agents/`)
-The AI processing uses a sequential three-agent architecture:
+### 2. AI Agent Processing Pipeline (`shared/agents/`)
+The AI processing uses a sequential three-agent architecture with an optional context enhancer:
 
 1. **GrammarAgent**: Fixes spelling, grammar, expands abbreviations
 2. **SeparatorAgent**: Identifies distinct billable activities and time allocations  
 3. **RefinerAgent**: Transforms activities into professional billing narratives
+4. **ContextEnhancer** (optional): Adds client/matter context when available
 
 Pipeline orchestrated by `AgentPipeline` class in `shared/agents/pipeline.py`.
 
@@ -92,8 +99,9 @@ Pipeline orchestrated by `AgentPipeline` class in `shared/agents/pipeline.py`.
 ## Development Notes
 
 - **Database**: Uses SQLAlchemy with JSON fields for complex data (narratives, task_codes, tags)
-- **CORS**: Configured for local development (frontend on :8080, backend on :5001)
+- **CORS**: Configured for local development (frontend on :8081, backend on :5002)
 - **Offline-first**: Frontend uses IndexedDB for local storage with sync capabilities
 - **CLI Entry Point**: `time-composer` command defined in setup.py
 - **Agent Base Class**: All agents inherit from `shared/agents/base.py`
 - **Error Handling**: Comprehensive error handling with proper HTTP status codes and logging
+- **Default Ports**: Backend API runs on port 5002, Frontend on port 8081
