@@ -422,16 +422,17 @@ class AIAssistant {
             // Sync any final edits
             this.syncEditedTranscription();
             
+            // Validate browser transcript before using it
+            if (!this.browserTranscript || typeof this.browserTranscript !== 'string' || this.browserTranscript.trim() === '') {
+                this.finalTranscript = '';
+                throw new Error('No transcription available. Please try recording again.');
+            }
+            
             // Use browser transcript as final
             this.finalTranscript = this.browserTranscript;
             
             // Show what we heard
             this.addAssistantThinking('I heard you say: "' + this.finalTranscript.trim() + '"');
-            
-            // Check if we have any transcript to process
-            if (!this.finalTranscript || this.finalTranscript.trim() === '') {
-                throw new Error('No transcription available. Please try recording again.');
-            }
             
             // Simulate AI processing steps
             await this.simulateAIProcessing();
