@@ -6605,7 +6605,7 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
 }
 
 /* Ensure all text in user messages is white */
-.user-message .whisper-confirmed,
+.user-message .transcription-confirmed,
 .user-message .browser-pending,
 .user-message .interim {
     color: white !important;
@@ -7162,7 +7162,7 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     opacity: 0.8;
 }
 
-.whisper-confirmed {
+.transcription-confirmed {
     font-style: normal;
     opacity: 1;
     transition: all 0.3s ease;
@@ -7331,7 +7331,7 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
 
 
 /* Whisper Processing Indicator */
-.whisper-processing-indicator {
+.transcription-processing-indicator {
     display: inline-block;
     width: 8px;
     height: 8px;
@@ -7339,10 +7339,10 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     border-radius: 50%;
     margin-left: 0.5rem;
     vertical-align: middle;
-    animation: whisperProcessing 1.5s ease-in-out infinite;
+    animation: transcriptionProcessing 1.5s ease-in-out infinite;
 }
 
-@keyframes whisperProcessing {
+@keyframes transcriptionProcessing {
     0%, 100% { 
         opacity: 0.3;
         transform: scale(0.8);
@@ -7354,7 +7354,7 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
 }
 
 /* Smooth transitions for text state changes */
-.whisper-confirmed,
+.transcription-confirmed,
 .browser-pending {
     transition: all 0.5s ease;
 }
@@ -7366,7 +7366,7 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     100% { background-color: transparent; }
 }
 
-.whisper-confirmed {
+.transcription-confirmed {
     animation: confirmFlash 0.6s ease;
 }
 

@@ -16,8 +16,23 @@ class AIAssistant {
         this.currentMode = 'initial'; // initial, voice, text, processing, confirmation
         this.messages = [];
         
+        // Voice mode messages for variety
+        this.voiceModeMessages = [
+            // Professional with Personality
+            "Let's capture today's billables.",
+            "Speaking my time into existence.",
+            "Narrating today's accomplishments.",
+            "Voice memo for billing activated.",
+            "Dictating time entry details.",
+            // Friendly & Engaging
+            "Here's what I accomplished today.",
+            "Recording my work highlights.",
+            "Let me walk you through my day.",
+            "Capturing today's achievements.",
+            "Time to document my progress."
+        ];
+        
         // Always use browser-only mode for transcription
-        this.transcriptionMode = 'browser';
         
         this.initializeSpeechRecognition();
         this.bindEvents();
@@ -146,17 +161,23 @@ class AIAssistant {
         }
     }
 
-    switchToVoiceMode() {
+    async switchToVoiceMode() {
         this.currentMode = 'voice';
         this.hideAllInterfaces();
         document.getElementById('voice-interface').classList.remove('hidden');
         this.updateStatus('Voice mode active');
         
-        // Add message to conversation
-        this.addUserMessage('I\'ll tell you about my work using voice');
+        // Select a random voice mode message
+        const randomMessage = this.voiceModeMessages[Math.floor(Math.random() * this.voiceModeMessages.length)];
         
-        // Add assistant message with browser speech recognition info
-        this.addAssistantMessage('Perfect! Click the microphone to start recording your billable activities. Currently using browser speech recognition.');
+        // Add message to conversation
+        this.addUserMessage(randomMessage);
+        
+        // Add assistant message indicating recording has started
+        this.addAssistantMessage('Recording started! Tell me about your billable activities.');
+        
+        // Automatically start recording
+        await this.startRecording();
     }
 
     switchToTextMode() {
@@ -410,9 +431,7 @@ class AIAssistant {
             if (currentText && currentText !== 'Start speaking...') {
                 // Update transcripts with the final edited version
                 this.browserTranscript = currentText;
-                if (this.transcriptionMode === 'browser') {
-                    this.finalTranscript = currentText;
-                }
+                this.finalTranscript = currentText;
             }
         }
     }
@@ -803,9 +822,7 @@ class AIAssistant {
             const editedText = userLiveText.textContent.trim();
             if (editedText !== lastContent) {
                 this.browserTranscript = editedText;
-                if (this.transcriptionMode === 'browser') {
-                    this.finalTranscript = editedText;
-                }
+                this.finalTranscript = editedText;
             }
         });
         
@@ -814,7 +831,7 @@ class AIAssistant {
             // Wrap plain text in proper span
             const text = userLiveText.textContent;
             if (text && !userLiveText.querySelector('span')) {
-                userLiveText.innerHTML = `<span class="whisper-confirmed">${text}</span>`;
+                userLiveText.innerHTML = `<span class="transcription-confirmed">${text}</span>`;
                 // Move cursor to end
                 const range = document.createRange();
                 const sel = window.getSelection();
@@ -874,7 +891,7 @@ class AIAssistant {
         
         // Show all browser text as confirmed
         if (this.browserTranscript) {
-            displayHtml += `<span class="whisper-confirmed">${this.browserTranscript}</span>`;
+            displayHtml += `<span class="transcription-confirmed">${this.browserTranscript}</span>`;
         }
         if (interimTranscript) {
             displayHtml += `<span class="interim">${interimTranscript}</span>`;
