@@ -45,10 +45,6 @@ const syncManager = {
                             narratives: entry.narratives,
                             total_hours: entry.total_hours,
                             status: entry.status,
-                            attorney_email: entry.attorney_email,
-                            attorney_name: entry.attorney_name,
-                            task_codes: entry.task_codes,
-                            tags: entry.tags,
                             created_at: entry.created_at
                         });
                         

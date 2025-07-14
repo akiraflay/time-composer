@@ -7,7 +7,7 @@ import os
 # Add parent directory to path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from shared.agents import GrammarAgent, SeparatorAgent, RefinerAgent, AgentPipeline
+from backend.agents import GrammarAgent, SeparatorAgent, RefinerAgent, AgentPipeline
 
 class TestGrammarAgent:
     """Test the Grammar Agent"""

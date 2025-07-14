@@ -4,7 +4,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Config:
-    OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+    # Azure OpenAI Configuration
+    AZURE_OPENAI_API_KEY = os.getenv('AZURE_OPENAI_API_KEY')
+    AZURE_OPENAI_ENDPOINT = os.getenv('AZURE_OPENAI_ENDPOINT')
+    AZURE_OPENAI_API_VERSION = os.getenv('AZURE_OPENAI_API_VERSION')
+    AZURE_OPENAI_GPT_DEPLOYMENT = os.getenv('AZURE_OPENAI_GPT_DEPLOYMENT')
     
     # Database configuration with absolute path - fixed for backend directory execution
     BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -27,7 +31,7 @@ class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key')
     
     # CORS settings
-    CORS_ORIGINS = ['http://localhost:8081', 'http://localhost:3000', 'http://127.0.0.1:8081']
+    CORS_ORIGINS = ['http://localhost:8080', 'http://localhost:3000', 'http://127.0.0.1:8080']
     
     # File upload settings
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size

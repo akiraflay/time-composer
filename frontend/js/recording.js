@@ -328,13 +328,13 @@ const processRecording = async (audioBlob) => {
         // Delay for dramatic effect
         await new Promise(resolve => setTimeout(resolve, 800));
         
-        // Get final transcription from Whisper API
-        const { text } = await api.transcribe(audioBlob);
+        // Get final transcription from Web Speech API
+        const text = finalTranscript.trim() || '';
         
         // Complete transcription step
         setAgentStepCompleted('transcription');
         
-        // Display the Whisper transcription (more accurate than live)
+        // Display the final transcription from Web Speech API
         document.getElementById('transcription').classList.remove('hidden');
         document.getElementById('transcription-text').textContent = text;
         
@@ -375,11 +375,7 @@ const processRecording = async (audioBlob) => {
             created_at: entryData.created_at,
             updated_at: entryData.updated_at,
             client_code: entryData.client_code,
-            matter_number: entryData.matter_number,
-            attorney_email: entryData.attorney_email,
-            attorney_name: entryData.attorney_name,
-            task_codes: entryData.task_codes || [],
-            tags: entryData.tags || []
+            matter_number: entryData.matter_number
         });
         
         // Display results

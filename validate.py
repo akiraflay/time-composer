@@ -46,20 +46,13 @@ def validate_project_structure():
         ("frontend/js/sync.js", "- Data synchronization"),
         ("frontend/assets/favicon.svg", "- Website icon"),
         
-        # CLI files
-        ("cli/__init__.py", "- CLI package"),
-        ("cli/time_composer_cli.py", "- CLI entry point"),
-        ("cli/commands.py", "- CLI commands"),
-        ("cli/display.py", "- CLI display utilities"),
-        
-        # Shared agent architecture
-        ("shared/__init__.py", "- Shared package"),
-        ("shared/agents/__init__.py", "- Agents package"),
-        ("shared/agents/base.py", "- Base agent class"),
-        ("shared/agents/grammar.py", "- Grammar correction agent"),
-        ("shared/agents/separator.py", "- Entry separation agent"),
-        ("shared/agents/refiner.py", "- Narrative refinement agent"),
-        ("shared/agents/pipeline.py", "- Agent orchestration"),
+        # Agent architecture (now in backend)
+        ("backend/agents/__init__.py", "- Agents package"),
+        ("backend/agents/base.py", "- Base agent class"),
+        ("backend/agents/grammar.py", "- Grammar correction agent"),
+        ("backend/agents/separator.py", "- Entry separation agent"),
+        ("backend/agents/refiner.py", "- Narrative refinement agent"),
+        ("backend/agents/pipeline.py", "- Agent orchestration"),
         
         # Tests
         ("tests/__init__.py", "- Test package"),
@@ -72,8 +65,8 @@ def validate_project_structure():
     
     # Check directories
     directories = [
-        "backend", "frontend", "cli", "shared", "tests", "data",
-        "frontend/css", "frontend/js", "frontend/assets", "shared/agents"
+        "backend", "frontend", "tests", "data",
+        "frontend/css", "frontend/js", "frontend/assets", "backend/agents"
     ]
     
     print("\n📁 Checking directories:")
@@ -91,17 +84,17 @@ def validate_project_structure():
     if Path(".env").exists():
         with open(".env") as f:
             content = f.read()
-            if "OPENAI_API_KEY=" in content and "sk-proj-" in content:
-                print("✓ .env contains OpenAI API key")
+            if "AZURE_OPENAI_API_KEY=" in content and len(content.split("AZURE_OPENAI_API_KEY=")[1].split("\n")[0].strip()) > 10:
+                print("✓ .env contains Azure OpenAI API key")
             else:
-                print("✗ .env missing valid OpenAI API key")
+                print("✗ .env missing valid Azure OpenAI API key")
                 all_good = False
     
     # Check requirements.txt has key dependencies
     if Path("requirements.txt").exists():
         with open("requirements.txt") as f:
             content = f.read()
-            required_deps = ["flask", "openai", "click", "rich"]
+            required_deps = ["flask", "openai"]
             missing_deps = [dep for dep in required_deps if dep not in content.lower()]
             if not missing_deps:
                 print("✓ requirements.txt contains all key dependencies")

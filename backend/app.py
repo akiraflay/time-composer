@@ -1,17 +1,13 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from datetime import datetime
-import openai
 import sys
 import os
-import tempfile
 import csv
 import io
 import traceback
 
-# Add shared modules to path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from shared.agents import AgentPipeline
+from agents import AgentPipeline
 
 from config import Config
 from models import db, TimeEntry
@@ -23,47 +19,10 @@ app.config.from_object(Config)
 db.init_app(app)
 CORS(app, origins=Config.CORS_ORIGINS)
 
-# Initialize OpenAI
-openai.api_key = Config.OPENAI_API_KEY
-
 @app.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
     return jsonify({'status': 'healthy', 'timestamp': datetime.utcnow().isoformat()})
-
-@app.route('/api/transcribe', methods=['POST'])
-def transcribe():
-    """Transcribe audio using OpenAI Whisper"""
-    try:
-        if 'audio' not in request.files:
-            return jsonify({'error': 'No audio file provided'}), 400
-        
-        audio_file = request.files['audio']
-        
-        # Save temporarily
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.webm') as tmp_file:
-            audio_file.save(tmp_file.name)
-            temp_path = tmp_file.name
-        
-        try:
-            # Transcribe with Whisper
-            client = openai.OpenAI(api_key=Config.OPENAI_API_KEY)
-            with open(temp_path, 'rb') as audio:
-                transcript = client.audio.transcriptions.create(
-                    model="whisper-1",
-                    file=audio
-                )
-            
-            return jsonify({'text': transcript.text})
-        
-        finally:
-            # Clean up temp file
-            if os.path.exists(temp_path):
-                os.remove(temp_path)
-    
-    except Exception as e:
-        app.logger.error(f"Transcription error: {str(e)}")
-        return jsonify({'error': 'Transcription failed'}), 500
 
 @app.route('/api/enhance', methods=['POST'])
 def enhance():
@@ -169,14 +128,6 @@ def update_entry(entry_id):
             entry.total_hours = data['total_hours']
         if 'status' in data:
             entry.status = data['status']
-        if 'attorney_email' in data:
-            entry.attorney_email = data['attorney_email']
-        if 'attorney_name' in data:
-            entry.attorney_name = data['attorney_name']
-        if 'task_codes' in data:
-            entry.task_codes = data['task_codes']
-        if 'tags' in data:
-            entry.tags = data['tags']
         if 'original_text' in data:
             entry.original_text = data['original_text']
         if 'cleaned_text' in data:
@@ -209,116 +160,6 @@ def delete_entry(entry_id):
         db.session.rollback()
         return jsonify({'error': 'Failed to delete entry'}), 500
 
-@app.route('/api/entries/<int:entry_id>/enhance-context', methods=['POST'])
-def enhance_context(entry_id):
-    """Enhance a specific narrative with additional context"""
-    try:
-        entry = TimeEntry.query.get_or_404(entry_id)
-        data = request.get_json()
-        
-        app.logger.info(f"Enhance context request for entry {entry_id}: {data}")
-        
-        narrative_index = data.get('narrative_index')
-        original_narrative = data.get('original_narrative')
-        additional_context = data.get('additional_context')
-        
-        if narrative_index is None or not additional_context:
-            return jsonify({'error': 'Missing narrative index or context'}), 400
-        
-        # Ensure narrative_index is an integer
-        narrative_index = int(narrative_index)
-        
-        # Log entry structure for debugging
-        app.logger.info(f"Entry narratives: {entry.narratives}")
-        app.logger.info(f"Narrative index: {narrative_index}, Type: {type(narrative_index)}")
-        
-        if not entry.narratives or narrative_index >= len(entry.narratives):
-            return jsonify({'error': f'Invalid narrative index: {narrative_index}, entry has {len(entry.narratives) if entry.narratives else 0} narratives'}), 400
-        
-        # Import context enhancer
-        from shared.agents.context_enhancer import ContextEnhancerAgent
-        
-        # Validate inputs
-        if not original_narrative:
-            return jsonify({'error': 'Original narrative is empty'}), 400
-        
-        if not additional_context.strip():
-            return jsonify({'error': 'Additional context is empty'}), 400
-        
-        # Format the input for the agent
-        input_text = f"""Original Narrative:
-{original_narrative}
-
-Additional Context:
-{additional_context}"""
-        
-        app.logger.info(f"Context enhancer input: {input_text}")
-        
-        # Process enhancement
-        try:
-            enhancer = ContextEnhancerAgent()
-            result = enhancer.process(input_text)
-        except Exception as agent_error:
-            app.logger.error(f"Agent processing error: {str(agent_error)}")
-            return jsonify({'error': f'AI processing failed: {str(agent_error)}'}), 500
-        
-        # Validate the result
-        if not result or 'enhanced_narrative' not in result:
-            app.logger.error("Agent returned invalid result")
-            return jsonify({'error': 'AI processing returned invalid result'}), 500
-        
-        # Log the enhancement for debugging
-        app.logger.info(f"Context Enhancement Debug:")
-        app.logger.info(f"  Original: {original_narrative}")
-        app.logger.info(f"  Context: {additional_context}")
-        app.logger.info(f"  Enhanced: {result.get('enhanced_narrative', 'NO RESULT')}")
-        
-        # Create a new list to ensure proper updating
-        updated_narratives = list(entry.narratives)
-        
-        # Update the specific narrative
-        enhanced_text = result.get('enhanced_narrative', original_narrative)
-        updated_narratives[narrative_index]['text'] = enhanced_text
-        
-        # Add metadata to track enhancement
-        if 'metadata' not in updated_narratives[narrative_index]:
-            updated_narratives[narrative_index]['metadata'] = {}
-        
-        updated_narratives[narrative_index]['metadata']['enhanced'] = True
-        updated_narratives[narrative_index]['metadata']['original_text'] = original_narrative
-        updated_narratives[narrative_index]['metadata']['enhancement_context'] = additional_context
-        updated_narratives[narrative_index]['metadata']['enhanced_at'] = datetime.utcnow().isoformat()
-        
-        # Assign back to entry
-        entry.narratives = updated_narratives
-        
-        # Mark entry as updated
-        entry.updated_at = datetime.utcnow()
-        
-        # Force SQLAlchemy to recognize the change
-        from sqlalchemy.orm.attributes import flag_modified
-        flag_modified(entry, 'narratives')
-        
-        # Save changes
-        db.session.commit()
-        
-        app.logger.info(f"Successfully enhanced narrative {narrative_index} for entry {entry_id}")
-        
-        return jsonify({
-            'success': True,
-            'entry': entry.to_dict(),
-            'enhanced_narrative': result['enhanced_narrative']
-        })
-    
-    except ValueError as e:
-        app.logger.error(f"Validation error: {str(e)}")
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 400
-    except Exception as e:
-        app.logger.error(f"Error enhancing context: {str(e)}")
-        app.logger.error(f"Traceback: {traceback.format_exc()}")
-        db.session.rollback()
-        return jsonify({'error': f'Server error: {str(e)}'}), 500
 
 @app.route('/api/export', methods=['POST'])
 def export_entries():
@@ -340,7 +181,7 @@ def export_entries():
         # Write header
         writer.writerow([
             'Date', 'Client Code', 'Matter Number', 'Hours', 
-            'Narrative', 'Task Code', 'Status', 'Attorney'
+            'Narrative', 'Task Code', 'Status'
         ])
         
         # Write data
@@ -359,8 +200,7 @@ def export_entries():
                     narrative.get('hours', 0.0),
                     narrative.get('text', ''),
                     narrative.get('task_code', ''),
-                    narrative.get('status', entry.status),
-                    entry.attorney_name or entry.attorney_email or ''
+                    narrative.get('status', entry.status)
                 ])
         
         # Return CSV content
@@ -400,5 +240,5 @@ if __name__ == '__main__':
     # Initialize database
     init_db()
     
-    # Run the app on port 5002 to avoid conflicts
-    app.run(debug=True, host='0.0.0.0', port=5002)
+    # Run the app on port 5001 (avoids macOS AirPlay conflict)
+    app.run(debug=True, host='0.0.0.0', port=5001)

@@ -431,39 +431,6 @@
             </div>
         </div>
 
-        <!-- Context Recording Inline Interface -->
-        <div id="context-recorder-inline" class="context-recorder-inline">
-            <div class="context-recorder-backdrop" onclick="closeContextRecorder()"></div>
-            <div class="context-recorder-content">
-                <div class="context-recorder-header">
-                    <div class="context-header-info">
-                        <span class="context-header-label">Adding context to:</span>
-                        <span class="context-header-narrative" id="inline-narrative-preview"></span>
-                    </div>
-                    <button class="close-btn" onclick="closeContextRecorder()">&times;</button>
-                </div>
-                
-                <div class="context-recorder-body">
-                    <div class="context-controls">
-                        <button id="context-record-btn" class="context-record-btn">
-                            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                                <path d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"/>
-                            </svg>
-                            <span class="btn-text">Start Recording</span>
-                        </button>
-                        
-                        <div class="context-status">
-                            <span id="context-status-text">Ready to record additional details</span>
-                            <span id="context-timer" class="context-timer"></span>
-                        </div>
-                    </div>
-                    
-                    <div id="context-transcription" class="context-transcription hidden">
-                        <div class="transcription-content" id="context-live-text"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- Processing Overlay -->
         <div id="loading-overlay" class="loading-overlay hidden">
