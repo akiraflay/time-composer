@@ -1,6 +1,6 @@
 # Time Composer
 
-A speech-first AI agent for legal billing narratives. Time Composer helps legal professionals create accurate, detailed billing entries through voice recording and AI-powered narrative enhancement.
+A speech-first AI agent for legal billing narratives. Time Composer helps legal professionals create accurate, detailed billing entries through voice recording and AI-powered narrative processing.
 
 ## Executive Summary
 
@@ -8,14 +8,14 @@ Time Composer is an innovative AI-powered tool designed specifically for legal p
 
 ### Key Benefits
 - **Time Savings**: Reduces billing narrative creation time by up to 70%
-- **Accuracy**: AI-enhanced grammar and formatting ensures professional quality
+- **Accuracy**: AI-processed grammar and formatting ensures professional quality
 - **Flexibility**: Web interface with modern UI for easy access
 - **Compliance**: Generates detailed, client-ready billing descriptions
 
 ## Features
 
 - **Voice Recording**: Record billing narratives using your microphone with real-time transcription
-- **AI Enhancement**: Three-agent pipeline (Grammar, Separator, Refiner) processes raw notes into professional narratives
+- **AI Processing**: Three-agent pipeline (Grammar, Separator, Refiner) processes raw notes into professional narratives
 - **Multi-Platform**: Web interface and API sharing the same backend
 - **Offline-First**: IndexedDB local storage with SQLite sync
 - **Export Options**: CSV export compatible with major billing systems
@@ -39,7 +39,7 @@ Time Composer uses a microservices-inspired architecture with three main compone
 
 3. **AI Agent Pipeline**
    - Sequential processing through three specialized agents
-   - Each agent focuses on a specific aspect of text enhancement
+   - Each agent focuses on a specific aspect of text processing
    - Modular design allows for easy updates and improvements
 
 ### Data Flow
@@ -146,8 +146,7 @@ time-composer/
 │       ├── grammar.py    # Grammar correction agent
 │       ├── separator.py  # Activity separation agent
 │       ├── refiner.py    # Narrative refinement agent
-│       ├── pipeline.py   # Agent orchestration
-│       └── context_enhancer.py  # Context enhancement agent
+│       └── pipeline.py   # Agent orchestration
 ├── frontend/             # Web interface
 │   ├── index.html        # Main application page
 │   ├── js/

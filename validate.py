@@ -53,7 +53,6 @@ def validate_project_structure():
         ("backend/agents/separator.py", "- Entry separation agent"),
         ("backend/agents/refiner.py", "- Narrative refinement agent"),
         ("backend/agents/pipeline.py", "- Agent orchestration"),
-        ("backend/agents/context_enhancer.py", "- Context enhancement agent"),
         
         # Tests
         ("tests/__init__.py", "- Test package"),

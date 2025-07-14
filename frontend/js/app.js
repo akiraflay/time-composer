@@ -77,8 +77,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Set up event listeners
     setupEventListeners();
     
-    // Make closeContextRecorder available globally for onclick handlers
-    window.closeContextRecorder = closeContextRecorder;
     
     // Initialize view toggle icon to show current state
     const listIcon = document.getElementById('list-view-icon');
@@ -975,21 +973,8 @@ function createEntryCard(entry) {
     const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     
     const narrativesHtml = (entry.narratives || []).map((n, index) => {
-        const isEnhanced = n.metadata && n.metadata.enhanced;
         return `
-        <div class="narrative-item ${n.status === 'exported' ? 'narrative-exported' : 'narrative-draft'} ${isEnhanced ? 'enhanced' : ''}" data-narrative-index="${index}">
-            <button class="context-mic-btn" onclick="openContextRecordingModal(${entry.id}, ${index})" title="Add context to this narrative">
-                <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                    <path d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"/>
-                </svg>
-            </button>
-            ${isEnhanced ? `
-            <button class="undo-enhance-btn" onclick="undoEnhancement(${entry.id}, ${index})" title="Undo enhancement">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12.5,8C9.85,8 7.45,9 5.6,10.6L2,7V16H11L7.38,12.38C8.77,11.22 10.54,10.5 12.5,10.5C16.04,10.5 19.05,12.81 20.1,16L22.47,15.22C21.08,11.03 17.15,8 12.5,8Z"/>
-                </svg>
-            </button>
-            ` : ''}
+        <div class="narrative-item ${n.status === 'exported' ? 'narrative-exported' : 'narrative-draft'}" data-narrative-index="${index}">
             <div class="narrative-header">
                 <span class="editable-field editable-hours" data-field="hours" data-entry-id="${entry.id}" data-narrative-index="${index}">
                     ${n.hours} hours
@@ -1785,12 +1770,6 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
             </div>
             <!-- Actions for mobile view -->
             <div class="description-actions">
-                ${narrativeIndex !== null ? `
-                <button class="table-action-btn context-btn" onclick="openContextRecordingModal(${entry.id}, ${narrativeIndex})" title="Add context">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                        <path d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"/>
-                    </svg>
-                </button>` : ''}
                 <button class="table-action-btn edit-btn" onclick="openEditModal(${entry.id})" title="Edit">
                     <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                         <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
@@ -1810,12 +1789,6 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
         </td>
         <td class="condensed-actions">
             <div class="table-actions">
-                ${narrativeIndex !== null ? `
-                <button class="table-action-btn context-btn" onclick="openContextRecordingModal(${entry.id}, ${narrativeIndex})" title="Add context to this narrative">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                        <path d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"/>
-                    </svg>
-                </button>` : ''}
                 <button class="table-action-btn edit-btn" onclick="openEditModal(${entry.id})" title="Edit">
                     <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                         <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
@@ -3655,361 +3628,7 @@ async function toggleEntryStatus(entryId) {
     }
 }
 
-// Context Recording Functions
-let contextRecorder = null;
-let currentContextEntry = null;
-let currentContextNarrativeIndex = null;
-
-function openContextRecordingModal(entryId, narrativeIndex) {
-    // Find the entry
-    const entry = currentEntries.find(e => e.id === entryId);
-    if (!entry || !entry.narratives || !entry.narratives[narrativeIndex]) {
-        console.error('Entry or narrative not found:', { entryId, narrativeIndex, entry });
-        showNotification('Narrative not found', 'error');
-        return;
-    }
-    
-    currentContextEntry = entry;
-    currentContextNarrativeIndex = narrativeIndex;
-    
-    // Display the narrative preview
-    const narrativePreview = document.getElementById('inline-narrative-preview');
-    if (narrativePreview) {
-        narrativePreview.textContent = entry.narratives[narrativeIndex].text;
-    }
-    
-    // Initialize context recorder if needed
-    if (!contextRecorder) {
-        contextRecorder = new ContextRecorder();
-    }
-    
-    // Show the inline recorder with animation
-    const recorder = document.getElementById('context-recorder-inline');
-    if (recorder) {
-        recorder.classList.add('active');
-        // Force reflow for animation
-        recorder.offsetHeight;
-        
-        // Auto-start recording after a brief delay to ensure modal is fully loaded
-        setTimeout(async () => {
-            if (contextRecorder && !contextRecorder.isRecording) {
-                await contextRecorder.startRecording();
-            }
-        }, 300);
-    }
-}
-
-function closeContextRecorder() {
-    const recorder = document.getElementById('context-recorder-inline');
-    if (recorder) {
-        recorder.classList.remove('active');
-    }
-    
-    // Stop recording if active
-    if (contextRecorder && contextRecorder.isRecording) {
-        contextRecorder.stopRecording();
-    }
-    
-    // Reset state after animation
-    setTimeout(() => {
-        currentContextEntry = null;
-        currentContextNarrativeIndex = null;
-        // Clear transcription
-        const transcription = document.getElementById('context-transcription');
-        if (transcription) {
-            transcription.classList.add('hidden');
-            document.getElementById('context-live-text').textContent = '';
-        }
-    }, 300);
-}
-
-// Context Recorder Class
-class ContextRecorder {
-    constructor() {
-        this.isRecording = false;
-        this.mediaRecorder = null;
-        this.audioChunks = [];
-        this.recognition = null;
-        this.finalTranscript = '';
-        this.startTime = null;
-        this.timerInterval = null;
-        
-        this.initializeSpeechRecognition();
-        this.bindEvents();
-    }
-    
-    initializeSpeechRecognition() {
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            this.recognition = new SpeechRecognition();
-            
-            this.recognition.continuous = true;
-            this.recognition.interimResults = true;
-            this.recognition.lang = 'en-US';
-            
-            this.recognition.onresult = (event) => {
-                let interimTranscript = '';
-                let finalTranscript = '';
-                
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    const transcript = event.results[i][0].transcript;
-                    if (event.results[i].isFinal) {
-                        finalTranscript += transcript + ' ';
-                    } else {
-                        interimTranscript += transcript;
-                    }
-                }
-                
-                this.finalTranscript += finalTranscript;
-                this.updateTranscriptionDisplay(this.finalTranscript + interimTranscript);
-            };
-            
-            this.recognition.onerror = (event) => {
-                console.error('Speech recognition error:', event.error);
-                if (event.error === 'no-speech' && this.isRecording) {
-                    // Restart recognition
-                    this.recognition.stop();
-                    setTimeout(() => {
-                        if (this.isRecording) {
-                            this.recognition.start();
-                        }
-                    }, 100);
-                }
-            };
-        }
-    }
-    
-    bindEvents() {
-        const recordBtn = document.getElementById('context-record-btn');
-        if (recordBtn) {
-            recordBtn.addEventListener('click', () => this.toggleRecording());
-        }
-    }
-    
-    async toggleRecording() {
-        if (this.isRecording) {
-            await this.stopRecording();
-        } else {
-            await this.startRecording();
-        }
-    }
-    
-    async startRecording() {
-        try {
-            // Get microphone permission
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            
-            // Initialize MediaRecorder
-            this.mediaRecorder = new MediaRecorder(stream);
-            this.audioChunks = [];
-            
-            this.mediaRecorder.ondataavailable = (event) => {
-                if (event.data.size > 0) {
-                    this.audioChunks.push(event.data);
-                }
-            };
-            
-            this.mediaRecorder.onstop = async () => {
-                const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
-                await this.processRecording(audioBlob);
-            };
-            
-            // Start recording
-            this.mediaRecorder.start();
-            this.isRecording = true;
-            this.startTime = Date.now();
-            this.finalTranscript = '';
-            
-            // Start speech recognition
-            if (this.recognition) {
-                this.recognition.start();
-            }
-            
-            // Update UI
-            this.updateRecordingUI(true);
-            this.startTimer();
-            
-            // Show transcription area
-            const transcriptionArea = document.getElementById('context-transcription');
-            if (transcriptionArea) {
-                transcriptionArea.classList.remove('hidden');
-            }
-            
-        } catch (error) {
-            console.error('Error starting recording:', error);
-            showNotification('Failed to start recording', 'error');
-        }
-    }
-    
-    async stopRecording() {
-        if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
-            this.mediaRecorder.stop();
-            this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
-        }
-        
-        if (this.recognition) {
-            this.recognition.stop();
-        }
-        
-        this.isRecording = false;
-        this.updateRecordingUI(false);
-        this.stopTimer();
-    }
-    
-    async processRecording(audioBlob) {
-        try {
-            // Update status
-            this.updateStatus('Processing your recording...');
-            
-            // If we have browser transcript, use it directly
-            if (this.finalTranscript.trim()) {
-                await this.enhanceNarrative(this.finalTranscript);
-            } else {
-                // Fall back to Whisper transcription
-                const transcription = await this.transcribeWithWhisper(audioBlob);
-                if (transcription) {
-                    await this.enhanceNarrative(transcription);
-                }
-            }
-            
-        } catch (error) {
-            console.error('Error processing recording:', error);
-            showNotification('Failed to process recording', 'error');
-            this.updateStatus('Failed to process recording');
-        }
-    }
-    
-    async transcribeWithWhisper(audioBlob) {
-        const formData = new FormData();
-        formData.append('audio', audioBlob, 'recording.webm');
-        
-        const response = await api.transcribeAudio(formData);
-        return response.text;
-    }
-    
-    async enhanceNarrative(contextText) {
-        if (!currentContextEntry || currentContextNarrativeIndex === null) {
-            showNotification('No narrative selected', 'error');
-            return;
-        }
-        
-        try {
-            this.updateStatus('Enhancing narrative with your context...');
-            
-            const originalNarrative = currentContextEntry.narratives[currentContextNarrativeIndex];
-            
-            // Log the data being sent for debugging
-            console.log('Enhancing narrative:', {
-                entryId: currentContextEntry.id,
-                narrativeIndex: currentContextNarrativeIndex,
-                originalText: originalNarrative.text,
-                contextText: contextText
-            });
-            
-            // Call backend to enhance the narrative
-            const response = await api.enhanceNarrativeContext(
-                currentContextEntry.id,
-                currentContextNarrativeIndex,
-                {
-                    original_narrative: originalNarrative.text,
-                    additional_context: contextText
-                }
-            );
-            
-            // Update local entry with enhanced narrative
-            if (response && response.entry) {
-                // Log the response for debugging
-                console.log('Enhancement response:', response);
-                console.log('Enhanced narrative:', response.enhanced_narrative);
-                console.log('Updated entry:', response.entry);
-                
-                await dbOperations.saveEntry(response.entry);
-                
-                // Update in-memory entries
-                const entryIndex = currentEntries.findIndex(e => e.id === currentContextEntry.id);
-                if (entryIndex !== -1) {
-                    currentEntries[entryIndex] = response.entry;
-                }
-                
-                // Close recorder and refresh
-                closeContextRecorder();
-                await loadDashboard();
-                showNotification('Narrative enhanced successfully', 'success');
-            } else {
-                console.error('No response or entry in enhancement response:', response);
-                showNotification('Failed to enhance narrative - no response', 'error');
-            }
-            
-        } catch (error) {
-            console.error('Error enhancing narrative - Full error:', error);
-            console.error('Error response:', error.response);
-            
-            // Show more specific error message
-            let errorMessage = 'Failed to enhance narrative';
-            if (error.response && error.response.data && error.response.data.error) {
-                errorMessage = error.response.data.error;
-            } else if (error.message) {
-                errorMessage = error.message;
-            }
-            
-            showNotification(errorMessage, 'error');
-            this.updateStatus('Failed to enhance narrative');
-        }
-    }
-    
-    updateRecordingUI(isRecording) {
-        const recordBtn = document.getElementById('context-record-btn');
-        const btnText = recordBtn?.querySelector('.btn-text');
-        
-        if (isRecording) {
-            recordBtn?.classList.add('recording');
-            if (btnText) btnText.textContent = 'Stop Recording';
-            this.updateStatus('Recording... Speak your additional context');
-        } else {
-            recordBtn?.classList.remove('recording');
-            if (btnText) btnText.textContent = 'Start Recording';
-            this.updateStatus('Ready to record');
-        }
-    }
-    
-    updateStatus(message) {
-        const statusText = document.getElementById('context-status-text');
-        if (statusText) {
-            statusText.textContent = message;
-        }
-    }
-    
-    updateTranscriptionDisplay(text) {
-        const liveText = document.getElementById('context-live-text');
-        if (liveText) {
-            liveText.textContent = text;
-        }
-    }
-    
-    startTimer() {
-        const timerElement = document.getElementById('context-timer');
-        if (!timerElement) return;
-        
-        this.timerInterval = setInterval(() => {
-            const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
-            const minutes = Math.floor(elapsed / 60);
-            const seconds = elapsed % 60;
-            timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        }, 1000);
-    }
-    
-    stopTimer() {
-        if (this.timerInterval) {
-            clearInterval(this.timerInterval);
-            this.timerInterval = null;
-        }
-        
-        const timerElement = document.getElementById('context-timer');
-        if (timerElement) {
-            timerElement.textContent = '';
-        }
-    }
-}
+// Context Recording Functions removed - feature deprecated
 
 // Safe wrapper functions with additional error handling
 async function safeToggleEntryStatus(entryId) {
@@ -4127,62 +3746,6 @@ function updateEntryStatusInDOM(entryId, entry) {
     }
 }
 
-// Undo enhancement function
-async function undoEnhancement(entryId, narrativeIndex) {
-    try {
-        // Get the entry from local storage
-        const entry = await dbOperations.getEntry(entryId);
-        if (!entry || !entry.narratives || !entry.narratives[narrativeIndex]) {
-            showNotification('Entry not found', 'error');
-            return;
-        }
-        
-        const narrative = entry.narratives[narrativeIndex];
-        if (!narrative.metadata || !narrative.metadata.enhanced || !narrative.metadata.original_text) {
-            showNotification('No enhancement to undo', 'error');
-            return;
-        }
-        
-        // Restore the original text
-        narrative.text = narrative.metadata.original_text;
-        
-        // Clear enhancement metadata
-        delete narrative.metadata.enhanced;
-        delete narrative.metadata.original_text;
-        delete narrative.metadata.enhancement_context;
-        delete narrative.metadata.enhanced_at;
-        
-        // If metadata is now empty, remove it
-        if (Object.keys(narrative.metadata).length === 0) {
-            delete narrative.metadata;
-        }
-        
-        // Save the updated entry
-        await dbOperations.saveEntry(entry);
-        
-        // Update the backend if the entry has a real ID
-        if (typeof entryId === 'number') {
-            try {
-                await api.updateEntry(entryId, entry);
-            } catch (error) {
-                console.error('Failed to update backend:', error);
-            }
-        }
-        
-        // Update the UI
-        const entryIndex = currentEntries.findIndex(e => e.id === entryId);
-        if (entryIndex !== -1) {
-            currentEntries[entryIndex] = entry;
-        }
-        
-        renderFilteredEntries();
-        showNotification('Enhancement undone', 'success');
-        
-    } catch (error) {
-        console.error('Error undoing enhancement:', error);
-        showNotification('Failed to undo enhancement', 'error');
-    }
-}
 
 // Make functions available globally
 window.editEntry = editEntry;
@@ -4199,7 +3762,6 @@ window.addNewPreset = addNewPreset;
 window.duplicateEntry = duplicateEntry;
 window.toggleDescription = toggleDescription;
 window.changeEntryStatus = changeEntryStatus;
-window.undoEnhancement = undoEnhancement;
 
 // Bulk assignment functions
 function showBulkAssignmentControls() {
