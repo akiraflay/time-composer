@@ -111,7 +111,13 @@ function setupEventListeners() {
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const view = e.target.dataset.view;
-            switchView(view);
+            if (view === 'export') {
+                // Handle export directly instead of switching views
+                e.preventDefault();
+                handleExportClick();
+            } else {
+                switchView(view);
+            }
         });
     });
     
@@ -273,11 +279,6 @@ function setupEventListeners() {
         });
     }
     
-    // Export controls
-    const exportButton = document.getElementById('export-btn');
-    if (exportButton) {
-        exportButton.addEventListener('click', () => exportEntries());
-    }
     
     
     // Modal functionality for fallback
@@ -399,9 +400,6 @@ async function switchView(view) {
     switch (view) {
         case 'dashboard':
             loadDashboard();
-            break;
-        case 'export':
-            loadExport();
             break;
     }
 }
@@ -1421,7 +1419,7 @@ function renderTableView(entries, container) {
 // Create a single row for condensed view
 function createCondensedRow(entry, narrative, narrativeIndex) {
     const row = document.createElement('tr');
-    row.className = 'condensed-row';
+    row.className = 'condensed-row' + (selectedEntries.has(entry.id) ? ' selected' : '');
     row.dataset.entryId = entry.id;
     if (narrativeIndex !== null) {
         row.dataset.narrativeIndex = narrativeIndex;
@@ -1544,6 +1542,12 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
                         <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
                     </svg>
                 </button>
+                <input type="checkbox" 
+                       class="table-action-checkbox" 
+                       data-entry-id="${entry.id}"
+                       ${selectedEntries.has(entry.id) ? 'checked' : ''}
+                       onchange="toggleEntrySelection(${entry.id})"
+                       title="Select entry">
             </div>
             <div class="mobile-action-menu">
                 <button onclick="toggleMobileMenu(this, ${entry.id})" title="Actions">
@@ -1642,390 +1646,55 @@ function createTableRow(entry) {
     return row;
 }
 
-// Export functionality
-function loadExport() {
-    // Remove any existing event listeners first to prevent duplicates
-    const exportBtn = document.getElementById('export-btn');
-    const startInput = document.getElementById('export-start');
-    const endInput = document.getElementById('export-end');
-    const filenameInput = document.getElementById('export-filename');
-    const nonExportedCheckbox = document.getElementById('export-non-exported-only');
-    
-    // Clone elements to remove all event listeners
-    if (exportBtn) {
-        const newExportBtn = exportBtn.cloneNode(true);
-        exportBtn.parentNode.replaceChild(newExportBtn, exportBtn);
-        newExportBtn.addEventListener('click', exportEntries);
-    }
-    
-    // Initialize date presets
-    initializeDatePresets();
-    
-    // Set default to this month
-    setDatePreset('this-month');
-    
-    // Mark this-month button as active
-    const thisMonthBtn = document.querySelector('.preset-btn[data-preset="this-month"]');
-    if (thisMonthBtn) {
-        document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
-        thisMonthBtn.classList.add('active');
-    }
-    
-    // Date inputs are always visible now, no need to hide them
-    
-    // Add event listeners with proper cleanup
-    if (startInput) {
-        startInput.removeEventListener('change', updateExportPreview);
-        startInput.addEventListener('change', updateExportPreview);
-    }
-    if (endInput) {
-        endInput.removeEventListener('change', updateExportPreview);
-        endInput.addEventListener('change', updateExportPreview);
-    }
-    if (filenameInput) {
-        filenameInput.removeEventListener('input', updateExportPreview);
-        filenameInput.addEventListener('input', updateExportPreview);
-    }
-    if (nonExportedCheckbox) {
-        nonExportedCheckbox.removeEventListener('change', updateExportPreview);
-        nonExportedCheckbox.addEventListener('change', updateExportPreview);
-    }
-    
-    // Initial preview update
-    updateExportPreview();
-}
-
-function initializeDatePresets() {
-    const presetButtons = document.querySelectorAll('.preset-btn');
-    presetButtons.forEach(btn => {
-        // Clone to remove existing listeners
-        const newBtn = btn.cloneNode(true);
-        btn.parentNode.replaceChild(newBtn, btn);
-        
-        newBtn.addEventListener('click', (e) => {
-            const preset = e.currentTarget.dataset.preset;
-            setDatePreset(preset);
-            
-            // Update active state
-            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-            e.currentTarget.classList.add('active');
-        });
-    });
-    
-    // Add event listeners to date inputs to clear preset selection when manually changed
-    const startInput = document.getElementById('export-start');
-    const endInput = document.getElementById('export-end');
-    
-    const clearPresetSelection = () => {
-        document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-    };
-    
-    if (startInput) {
-        startInput.addEventListener('input', clearPresetSelection);
-    }
-    if (endInput) {
-        endInput.addEventListener('input', clearPresetSelection);
+async function handleExportClick() {
+    if (selectedEntries.size > 0) {
+        // Export selected entries
+        await exportSelectedEntries();
+    } else {
+        // Show dialog to confirm exporting all draft entries
+        const dialog = confirm("No entries selected. Do you want to export all Draft entries?");
+        if (dialog) {
+            await exportAllDraftEntries();
+        }
     }
 }
 
-function setDatePreset(preset) {
-    const startInput = document.getElementById('export-start');
-    const endInput = document.getElementById('export-end');
-    const today = new Date();
-    let startDate, endDate;
-    
-    switch (preset) {
-        case 'today':
-            startDate = endDate = today;
-            break;
-            
-        case 'this-week':
-            startDate = new Date(today);
-            startDate.setDate(today.getDate() - today.getDay()); // Start of week (Sunday)
-            endDate = new Date(startDate);
-            endDate.setDate(startDate.getDate() + 6); // End of week (Saturday)
-            break;
-            
-        case 'this-month':
-            startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-            endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-            break;
-            
-        case 'last-month':
-            startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-            endDate = new Date(today.getFullYear(), today.getMonth(), 0);
-            break;
-    }
-    
-    // Format dates for input
-    if (startInput && startDate) {
-        startInput.valueAsDate = startDate;
-    }
-    if (endInput && endDate) {
-        endInput.valueAsDate = endDate;
-    }
-    
-    // Update preview
-    updateExportPreview();
-}
-
-async function updateExportPreview() {
+async function exportSelectedEntries() {
     try {
-        const startDate = document.getElementById('export-start').value;
-        const endDate = document.getElementById('export-end').value;
-        const nonExportedOnly = document.getElementById('export-non-exported-only').checked;
+        showLoading('Exporting selected entries...');
         
-        // Show loading state
-        const preview = document.getElementById('export-preview');
-        preview.innerHTML = `
-            <div class="export-loading">
-                <div class="spinner"></div>
-                <span>Loading preview...</span>
-            </div>
-        `;
+        const entryIds = Array.from(selectedEntries);
         
-        // Get all entries first
-        let entries = await dbOperations.getEntries();
-        
-        // Apply date filtering
-        if (startDate || endDate) {
-            entries = entries.filter(entry => {
-                const entryDate = new Date(entry.created_at).toISOString().split('T')[0];
-                if (startDate && entryDate < startDate) return false;
-                if (endDate && entryDate > endDate) return false;
-                return true;
-            });
-        }
-        
-        // Filter out exported entries if checkbox is checked
-        if (nonExportedOnly) {
-            entries = entries.filter(entry => {
-                // Use the helper function to determine effective status
-                const effectiveStatus = determineEntryStatus(entry);
-                return effectiveStatus !== 'exported';
-            });
-        }
-        
-        // Update statistics BEFORE generating the table
-        updateExportStats(entries, startDate, endDate);
-        
-        // Generate preview table
-        if (entries.length === 0) {
-            const message = nonExportedOnly ? 
-                'No non-exported entries found for the selected date range' : 
-                'No entries found for the selected date range';
-            preview.innerHTML = `
-                <div class="export-empty-state">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3M19,5V19H5V5H19Z"/>
-                    </svg>
-                    <p>${message}</p>
-                </div>
-            `;
-        } else {
-            preview.innerHTML = generatePreviewTable(entries);
-        }
-        
-        // Update preview count
-        const previewCount = document.getElementById('preview-count');
-        if (previewCount) {
-            previewCount.textContent = `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}`;
-        }
-        
-    } catch (error) {
-        console.error('Error updating export preview:', error);
-        const preview = document.getElementById('export-preview');
-        preview.innerHTML = `
-            <div class="export-empty-state">
-                <p>Error loading preview</p>
-            </div>
-        `;
-        // Reset statistics on error
-        updateExportStats([], null, null);
-    }
-}
-
-function updateExportStats(entries, startDate, endDate) {
-    // Update entry count
-    const statEntries = document.getElementById('stat-entries');
-    if (statEntries) {
-        statEntries.textContent = entries.length;
-    }
-    
-    // Update total hours
-    const statHours = document.getElementById('stat-hours');
-    if (statHours) {
-        const totalHours = entries.reduce((sum, e) => sum + (e.total_hours || 0), 0);
-        statHours.textContent = totalHours.toFixed(1);
-    }
-    
-    // Update date range
-    const statDateRange = document.getElementById('stat-date-range');
-    if (statDateRange) {
-        if (startDate && endDate) {
-            const start = new Date(startDate).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-            });
-            const end = new Date(endDate).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric', 
-                year: 'numeric'
-            });
-            statDateRange.textContent = start === end ? start : `${start} - ${end}`;
-        } else if (startDate) {
-            const start = new Date(startDate).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-            });
-            statDateRange.textContent = `From ${start}`;
-        } else if (endDate) {
-            const end = new Date(endDate).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-            });
-            statDateRange.textContent = `Until ${end}`;
-        } else {
-            statDateRange.textContent = 'All dates';
-        }
-    }
-}
-
-function generatePreviewTable(entries) {
-    const rows = entries.map(entry => {
-        const dateObj = new Date(entry.created_at);
-        const dateTime = `${dateObj.toLocaleDateString('en-US', { 
-            month: '2-digit', 
-            day: '2-digit' 
-        })} ${dateObj.toLocaleTimeString([], { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-        })}`;
-        
-        const narratives = entry.narratives || [];
-        const description = narratives.map(n => n.text).join('; ') || entry.original_text || '';
-        const hours = entry.total_hours || 0;
-        const clientCode = entry.client_code || '-';
-        const matterNumber = entry.matter_number || '-';
-        const effectiveStatus = determineEntryStatus(entry);
-        
-        return `
-            <tr>
-                <td>${dateTime}</td>
-                <td><span class="export-description" title="${description.replace(/"/g, '&quot;')}">${description}</span></td>
-                <td style="text-align: center;">${hours.toFixed(1)}</td>
-                <td style="text-align: center;">${clientCode}</td>
-                <td style="text-align: center;">${matterNumber}</td>
-                <td style="text-align: center;"><span class="status-badge ${effectiveStatus}">${effectiveStatus.toUpperCase()}</span></td>
-            </tr>
-        `;
-    }).join('');
-    
-    return `
-        <table>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Description</th>
-                    <th>Hours</th>
-                    <th>Client</th>
-                    <th>Matter</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${rows}
-            </tbody>
-        </table>
-    `;
-}
-
-async function exportEntries() {
-    try {
-        console.log('Export button clicked');
-        showLoading('Exporting entries...');
-        
-        const startDate = document.getElementById('export-start').value;
-        const endDate = document.getElementById('export-end').value;
-        const nonExportedOnly = document.getElementById('export-non-exported-only').checked;
-        let filename = document.getElementById('export-filename').value.trim();
-        
-        console.log('Export params:', { startDate, endDate, filename, nonExportedOnly });
-        
-        // Get all entries first
-        let entries = await dbOperations.getEntries();
-        
-        // Apply date filtering
-        if (startDate || endDate) {
-            entries = entries.filter(entry => {
-                const entryDate = new Date(entry.created_at).toISOString().split('T')[0];
-                if (startDate && entryDate < startDate) return false;
-                if (endDate && entryDate > endDate) return false;
-                return true;
-            });
-        }
-        
-        // Filter out exported entries if checkbox is checked
-        if (nonExportedOnly) {
-            entries = entries.filter(entry => {
-                // Use the helper function to determine effective status
-                const effectiveStatus = determineEntryStatus(entry);
-                return effectiveStatus !== 'exported';
-            });
-        }
-        
-        const entryIds = entries.map(e => e.id);
-        
-        console.log(`Exporting ${entries.length} entries`);
-        
-        if (entries.length === 0) {
-            hideLoading();
-            const message = nonExportedOnly ? 
-                'No non-exported entries to export' : 
-                'No entries to export';
-            showNotification(message, 'warning');
-            return;
-        }
-        
-        // Generate filename if not provided
-        if (!filename) {
-            const dateStr = new Date().toISOString().split('T')[0];
-            filename = `time-entries-${dateStr}`;
-        }
-        
-        // Ensure filename doesn't include .csv extension (we'll add it)
-        filename = filename.replace(/\.csv$/i, '');
+        // Generate filename
+        const dateStr = new Date().toISOString().split('T')[0];
+        const filename = `time-entries-${dateStr}`;
         
         await api.exportEntries(entryIds, filename);
         
         // Update status of exported entries to 'exported'
-        for (const entry of entries) {
-            // Update all narratives to exported status
-            if (entry.narratives) {
+        for (const entryId of entryIds) {
+            const entry = await dbOperations.getEntry(entryId);
+            if (entry && entry.narratives) {
                 entry.narratives.forEach(narrative => {
                     narrative.status = 'exported';
                 });
             }
             
-            // Update the entry with exported status
-            await dbOperations.updateEntry(entry.id, {
+            await dbOperations.updateEntry(entryId, {
                 status: 'exported',
-                narratives: entry.narratives
+                narratives: entry?.narratives
             });
         }
         
         hideLoading();
-        showNotification('Export completed successfully', 'success');
+        showNotification(`${entryIds.length} entries exported successfully`, 'success');
         
-        // Refresh the current view to show updated statuses
-        if (currentView === 'dashboard') {
-            await loadDashboard();
-        } else if (currentView === 'export') {
-            await updateExportPreview();
-        }
+        // Clear selection
+        selectedEntries.clear();
+        updateExportButtonLabel();
+        
+        // Refresh dashboard
+        await loadDashboard();
         
     } catch (err) {
         console.error('Export failed:', err);
@@ -2033,6 +1702,73 @@ async function exportEntries() {
         showNotification(`Export failed: ${err.message}`, 'error');
     }
 }
+
+async function exportAllDraftEntries() {
+    try {
+        showLoading('Exporting all draft entries...');
+        
+        // Get all entries
+        let entries = await dbOperations.getEntries();
+        
+        // Filter for draft entries only
+        entries = entries.filter(entry => {
+            const effectiveStatus = determineEntryStatus(entry);
+            return effectiveStatus === 'draft';
+        });
+        
+        if (entries.length === 0) {
+            hideLoading();
+            showNotification('No draft entries to export', 'warning');
+            return;
+        }
+        
+        const entryIds = entries.map(e => e.id);
+        
+        // Generate filename
+        const dateStr = new Date().toISOString().split('T')[0];
+        const filename = `time-entries-${dateStr}`;
+        
+        await api.exportEntries(entryIds, filename);
+        
+        // Update status of exported entries to 'exported'
+        for (const entry of entries) {
+            if (entry.narratives) {
+                entry.narratives.forEach(narrative => {
+                    narrative.status = 'exported';
+                });
+            }
+            
+            await dbOperations.updateEntry(entry.id, {
+                status: 'exported',
+                narratives: entry.narratives
+            });
+        }
+        
+        hideLoading();
+        showNotification(`${entries.length} draft entries exported successfully`, 'success');
+        
+        // Refresh dashboard
+        await loadDashboard();
+        
+    } catch (err) {
+        console.error('Export failed:', err);
+        hideLoading();
+        showNotification(`Export failed: ${err.message}`, 'error');
+    }
+}
+
+// Modal functions
+function openModal() {
+    const modal = document.getElementById('add-modal');
+    modal.classList.add('active');
+    resetModal();
+}
+
+
+
+
+
+
 
 // Modal functions
 function openModal() {
@@ -2152,6 +1888,35 @@ async function deleteEntry(id) {
     } catch (err) {
         console.error('Error deleting entry:', err);
         showNotification('Failed to delete entry', 'error');
+    }
+}
+
+function toggleEntrySelection(entryId) {
+    if (selectedEntries.has(entryId)) {
+        selectedEntries.delete(entryId);
+    } else {
+        selectedEntries.add(entryId);
+    }
+    
+    // Update the Export button label
+    updateExportButtonLabel();
+    
+    // Update row highlighting
+    const rows = document.querySelectorAll(`tr[data-entry-id="${entryId}"]`);
+    rows.forEach(row => {
+        row.classList.toggle('selected', selectedEntries.has(entryId));
+    });
+}
+
+function updateExportButtonLabel() {
+    const exportBtn = document.querySelector('.nav-btn[data-view="export"]');
+    if (exportBtn) {
+        const count = selectedEntries.size;
+        if (count > 0) {
+            exportBtn.textContent = `Export (${count})`;
+        } else {
+            exportBtn.textContent = 'Export';
+        }
     }
 }
 
