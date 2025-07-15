@@ -479,7 +479,7 @@ class AIAssistant {
             const parts = text.split(/[,;]|and then|after that|also/i);
             parts.forEach((part, index) => {
                 const partTimeMatch = part.match(/(\d+\.?\d*)\s*(hours?|hrs?|minutes?|mins?)/i);
-                const hours = partTimeMatch ? parseFloat(partTimeMatch[1]) : 0.5;
+                const hours = partTimeMatch ? this.parseTimeToHours(partTimeMatch[1], partTimeMatch[2]) : 0.5;
                 const cleanText = part.replace(/(\d+\.?\d*)\s*(hours?|hrs?|minutes?|mins?)/i, '').trim();
                 
                 if (cleanText) {
@@ -492,7 +492,7 @@ class AIAssistant {
             });
         } else {
             // Single activity
-            const hours = times[0] ? parseFloat(times[0][1]) : 0.5;
+            const hours = times[0] ? this.parseTimeToHours(times[0][1], times[0][2]) : 0.5;
             narratives.push({
                 text: text.trim(),
                 hours: hours,
@@ -516,11 +516,18 @@ class AIAssistant {
         };
     }
 
+    parseTimeToHours(value, unit) {
+        const num = parseFloat(value);
+        if (unit.match(/min/i)) {
+            return num / 60;
+        }
+        return num;
+    }
+
     async simulateAIProcessing() {
         const steps = [
-            { message: 'Processing your transcribed speech...', delay: 600 },
-            { message: 'Grammar Agent: Cleaning up the text and expanding abbreviations...', delay: 600 },
-            { message: 'Separator Agent: Identifying distinct billable activities...', delay: 700 },
+            { message: 'Processing your input...', delay: 600 },
+            { message: 'Separator Agent: Cleaning text and identifying billable activities...', delay: 700 },
             { message: 'Refiner Agent: Crafting professional billing narratives...', delay: 800 }
         ];
         
@@ -559,9 +566,19 @@ class AIAssistant {
                     ${response.entry.narratives.map((narrative, index) => `
                         <div class="narrative-item ultra-compact-narrative" data-narrative-index="${index}">
                             <div class="narrative-main-row">
-                                <span class="narrative-hours-inline">${narrative.hours} hours</span>
-                                <span class="narrative-text-inline">${narrative.text}</span>
-                                <span class="narrative-index-inline">#${index + 1}</span>
+                                <input type="number" 
+                                       id="narrative-hours-${index}" 
+                                       class="narrative-hours-input" 
+                                       value="${narrative.hours}" 
+                                       step="0.1" 
+                                       min="0.1" 
+                                       style="width: 60px; margin-right: 5px;">
+                                <span style="margin-right: 10px;">hours</span>
+                                <textarea id="narrative-text-${index}" 
+                                          class="narrative-text-input" 
+                                          rows="1" 
+                                          style="flex: 1; resize: vertical; min-height: 24px;">${narrative.text}</textarea>
+                                <span class="narrative-index-inline" style="margin-left: 10px;">#${index + 1}</span>
                             </div>
                             <div class="narrative-inputs-row" id="narrative-fields-${index}">
                                 <input type="text" 
@@ -1129,15 +1146,22 @@ class AIAssistant {
             
             // Since we default to individual mode now, always get individual codes
             narrativesToSave = narrativesToSave.map((narrative, index) => {
+                const hoursInput = document.getElementById(`narrative-hours-${index}`);
+                const textInput = document.getElementById(`narrative-text-${index}`);
                 const clientInput = document.getElementById(`narrative-client-${index}`);
                 const matterInput = document.getElementById(`narrative-matter-${index}`);
                 
                 return {
                     ...narrative,
+                    hours: parseFloat(hoursInput?.value) || narrative.hours,
+                    text: textInput?.value || narrative.text,
                     client_code: clientInput?.value || narrative.client_code || '',
                     matter_number: matterInput?.value || narrative.matter_number || ''
                 };
             });
+            
+            // Calculate new total hours from edited values
+            const newTotalHours = narrativesToSave.reduce((sum, narrative) => sum + narrative.hours, 0);
             
             // Save the single entry with all narratives
             if (this.lastResponse && this.lastResponse.entry) {
@@ -1147,7 +1171,7 @@ class AIAssistant {
                     original_text: entryData.original_text,
                     cleaned_text: entryData.cleaned_text,
                     narratives: narrativesToSave,
-                    total_hours: entryData.total_hours,
+                    total_hours: newTotalHours,
                     status: entryData.status || 'draft',
                     created_at: entryData.created_at,
                     updated_at: entryData.updated_at,

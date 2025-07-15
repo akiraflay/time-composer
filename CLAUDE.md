@@ -44,17 +44,16 @@ python validate.py
 Time Composer is a speech-first AI agent for legal billing narratives with three main components:
 
 ### 1. Backend (Flask API)
-- **Flask server** (`backend/app.py`) with SQLAlchemy models
-- **Core endpoints**: `/api/transcribe`, `/api/enhance`, `/api/entries`, `/api/export`
+- **Flask app factory pattern** (`backend/app.py`) - minimal app initialization
+- **Core endpoints**: `/health`, `/api/enhance`, `/api/entries`, `/api/export`
 - **Database**: SQLite with TimeEntry model storing original text, cleaned text, narratives, and metadata
-- **OpenAI integration**: Whisper for transcription, GPT for text processing
+- **Azure OpenAI integration**: GPT for text processing via two-agent pipeline
 
-### 2. Three-Agent Processing Pipeline (`backend/agents/`)
-The AI processing uses a sequential three-agent architecture:
+### 2. Two-Agent Processing Pipeline (`backend/agents/`)
+The AI processing uses a streamlined two-agent architecture:
 
-1. **GrammarAgent**: Fixes spelling, grammar, expands abbreviations
-2. **SeparatorAgent**: Identifies distinct billable activities and time allocations  
-3. **RefinerAgent**: Transforms activities into professional billing narratives
+1. **SeparatorAgent**: Cleans up text (spelling, grammar, abbreviations) AND identifies distinct billable activities with time allocations
+2. **RefinerAgent**: Transforms activities into professional billing narratives without adding invented details
 
 Pipeline orchestrated by `AgentPipeline` class in `backend/agents/pipeline.py`.
 
@@ -65,7 +64,10 @@ Pipeline orchestrated by `AgentPipeline` class in `backend/agents/pipeline.py`.
 ## Key Configuration
 
 ### Environment Variables (.env)
-- `OPENAI_API_KEY`: Required for AI processing
+- `AZURE_OPENAI_API_KEY`: Required for AI processing
+- `AZURE_OPENAI_ENDPOINT`: Azure OpenAI endpoint URL
+- `AZURE_OPENAI_API_VERSION`: API version (e.g., "2024-02-01")
+- `AZURE_OPENAI_GPT_DEPLOYMENT`: Deployment name for GPT model
 - `SECRET_KEY`: Flask secret key
 - `DATABASE_URL`: SQLite database path (defaults to `data/time_composer.db`)
 
@@ -81,3 +83,51 @@ Pipeline orchestrated by `AgentPipeline` class in `backend/agents/pipeline.py`.
 - **Offline-first**: Frontend uses IndexedDB for local storage with sync capabilities
 - **Agent Base Class**: All agents inherit from `backend/agents/base.py`
 - **Error Handling**: Comprehensive error handling with proper HTTP status codes and logging
+
+## Backend Structure
+
+The backend follows a modular Flask blueprint architecture:
+
+```
+backend/
+├── api/
+│   └── routes/
+│       ├── health.py      # Health check endpoint
+│       ├── enhance.py     # AI enhancement endpoint  
+│       ├── entries.py     # Time entry CRUD operations
+│       └── export.py      # CSV export functionality
+├── agents/                # AI processing pipeline
+│   ├── base.py           # Abstract base agent class
+│   ├── separator.py      # Text cleanup & activity separation agent
+│   ├── refiner.py        # Narrative refinement agent
+│   └── pipeline.py       # Agent orchestration
+├── app.py                # Flask app factory (minimal)
+├── config.py             # Configuration settings & Flask extensions
+├── models.py             # SQLAlchemy models
+└── prompts.py            # Centralized AI prompts for easy editing
+```
+
+## Customizing AI Prompts
+
+All AI prompts are centralized in `backend/prompts.py` for easy customization:
+
+- **SEPARATOR_PROMPT**: Controls how text is cleaned and activities are identified
+- **REFINER_PROMPT**: Controls how activities are transformed into professional narratives
+
+To modify AI behavior:
+1. Edit the prompts in `backend/prompts.py`
+2. Restart the backend server
+3. Test with sample inputs
+
+Tips for prompt engineering:
+- Test changes with various input complexities
+- Keep instructions clear and specific
+- Use examples to show desired behavior
+- Avoid conflicting instructions
+
+## Frontend Features
+
+### AI Assistant Interface
+- **Editable Time Entries**: Users can now edit both hours and narrative text directly in the AI assistant interface
+- **Real-time Editing**: Changes to hours automatically recalculate the total hours when saved
+- **Client/Matter Fields**: Each narrative can have individual client codes and matter numbers

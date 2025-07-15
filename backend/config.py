@@ -35,3 +35,11 @@ class Config:
     
     # File upload settings
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
+
+
+# Flask extension objects
+from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
+
+db = SQLAlchemy()
+cors = CORS()

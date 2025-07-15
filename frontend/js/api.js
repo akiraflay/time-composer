@@ -81,6 +81,21 @@ const api = {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+    },
+    
+    async enhance(text) {
+        const response = await fetch(`${API_BASE}/enhance`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text })
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Enhancement failed');
+        }
+        
+        return response.json();
     }
 };
 
