@@ -2,7 +2,7 @@
 let currentView = 'dashboard';
 let currentEntries = [];
 let currentEntry = null;
-let viewMode = 'expanded'; // expanded, condensed
+let viewMode = 'condensed'; // Always use list view
 let dateFilter = '';
 let statusFilter = '';
 let clientFilter = '';
@@ -78,14 +78,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupEventListeners();
     
     
-    // Initialize view toggle icon to show current state
-    const listIcon = document.getElementById('list-view-icon');
-    const cardIcon = document.getElementById('card-view-icon');
-    if (listIcon && cardIcon) {
-        // viewMode starts as 'expanded' (card view), so show card icon
-        listIcon.style.display = 'none';
-        cardIcon.style.display = 'block';
-    }
+    // View toggle removed - always use list view
     
     // Load initial view
     loadDashboard();
@@ -122,21 +115,11 @@ function setupEventListeners() {
         });
     });
     
-    // App title navigation - always go to dashboard in card view
+    // App title navigation - always go to dashboard
     const appTitle = document.getElementById('app-title');
     if (appTitle) {
         appTitle.addEventListener('click', (e) => {
             e.preventDefault();
-            // Set to card view (expanded mode)
-            viewMode = 'expanded';
-            // Update the view toggle button to show correct state
-            const listIcon = document.getElementById('list-view-icon');
-            const cardIcon = document.getElementById('card-view-icon');
-            if (listIcon && cardIcon) {
-                // Show card icon when in expanded/card mode
-                listIcon.style.display = 'none';
-                cardIcon.style.display = 'block';
-            }
             // Switch to dashboard
             switchView('dashboard');
         });
@@ -144,8 +127,6 @@ function setupEventListeners() {
     
     // Streamlined controls
     const searchInput = document.getElementById('search');
-    const viewToggleBtn = document.getElementById('view-toggle');
-    const filtersBtn = document.getElementById('filters-btn');
     const addButton = document.getElementById('add-time-entry');
     
     // Search functionality
@@ -153,12 +134,7 @@ function setupEventListeners() {
         searchInput.addEventListener('input', debounce(() => loadDashboard(), 300));
     }
     
-    // View toggle - single button that switches between modes
-    if (viewToggleBtn) {
-        viewToggleBtn.addEventListener('click', () => {
-            toggleViewMode();
-        });
-    }
+    // View toggle removed - always use list view
     
     // Status filter dropdown
     const statusFilterBtn = document.getElementById('status-filter-btn');
@@ -451,69 +427,9 @@ async function switchView(view) {
     }
 }
 
-// View mode management - Streamlined
-function toggleViewMode() {
-    // Toggle between expanded and condensed
-    viewMode = viewMode === 'expanded' ? 'condensed' : 'expanded';
-    
-    // Update the view toggle button icons
-    const listIcon = document.getElementById('list-view-icon');
-    const cardIcon = document.getElementById('card-view-icon');
-    const viewToggleBtn = document.getElementById('view-toggle');
-    
-    if (listIcon && cardIcon) {
-        if (viewMode === 'condensed') {
-            // Show list icon when in condensed/list mode (current state)
-            listIcon.style.display = 'block';
-            cardIcon.style.display = 'none';
-        } else {
-            // Show card icon when in expanded/card mode (current state)
-            listIcon.style.display = 'none';
-            cardIcon.style.display = 'block';
-        }
-    }
-    
-    // Update tooltip
-    if (viewToggleBtn) {
-        viewToggleBtn.title = viewMode === 'condensed' ? 'Switch to card view' : 'Switch to list view';
-    }
-    
-    // Update container classes
-    const container = document.getElementById('entries-list');
-    if (container) {
-        if (viewMode === 'condensed') {
-            container.className = 'entries-condensed';
-        } else {
-            container.className = 'entries-container';
-        }
-    }
-    
-    // Show/hide bulk assignment controls based on view mode
-    if (viewMode === 'expanded') {
-        showBulkAssignmentControls();
-    } else {
-        hideBulkAssignmentControls();
-    }
-    
-    loadDashboard();
-}
+// View mode removed - always use list view
 
-// Legacy function for compatibility
-function setViewMode(mode) {
-    viewMode = mode;
-    
-    // Update container classes
-    const container = document.getElementById('entries-list');
-    if (container) {
-        if (mode === 'condensed') {
-            container.className = 'entries-condensed';
-        } else {
-            container.className = 'entries-container';
-        }
-    }
-    
-    loadDashboard();
-}
+// View mode removed - always use list view
 
 // Date picker functionality
 function toggleDatePicker() {
@@ -854,26 +770,10 @@ async function loadDashboard() {
         if (!container) return;
         
         container.innerHTML = '';
+        container.className = 'entries-condensed'; // Always use list view class
         
-        // Always render view structure first
-        if (viewMode === 'condensed') {
-            // For list view, always show time filter bar
-            renderCondensedView(entries, container);
-        } else if (entries.length === 0) {
-            // For card view, show empty state
-            container.innerHTML = `
-                <div class="empty-state">
-                    <p>No entries found. Click "Add New Time Entry" to get started.</p>
-                </div>
-            `;
-            return;
-        } else {
-            // Entries are now naturally grouped by session in the backend
-            entries.forEach(entry => {
-                const card = createEntryCard(entry);
-                container.appendChild(card);
-            });
-        }
+        // Always render list view
+        renderCondensedView(entries, container);
         
     } catch (err) {
         console.error('Error loading dashboard:', err);
@@ -954,154 +854,7 @@ function updateMatterFilter(entries) {
 }
 
 
-function createEntryCard(entry) {
-    const card = document.createElement('div');
-    card.className = 'entry-card';
-    card.dataset.entryId = entry.id;
-    
-    // Add bulk selection checkbox
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.className = 'bulk-checkbox';
-    checkbox.dataset.entryId = entry.id;
-    checkbox.addEventListener('change', updateBulkSelection);
-    card.appendChild(checkbox);
-    
-    const totalHours = entry.total_hours || 0;
-    const date = new Date(entry.created_at);
-    const dateStr = date.toLocaleDateString();
-    const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    
-    const narrativesHtml = (entry.narratives || []).map((n, index) => {
-        return `
-        <div class="narrative-item ${n.status === 'exported' ? 'narrative-exported' : 'narrative-draft'}" data-narrative-index="${index}">
-            <div class="narrative-header">
-                <span class="editable-field editable-hours" data-field="hours" data-entry-id="${entry.id}" data-narrative-index="${index}">
-                    ${n.hours} hours
-                </span>
-            </div>
-            <div class="narrative-text editable-field editable-narrative" data-field="text" data-entry-id="${entry.id}" data-narrative-index="${index}">
-                ${n.text}
-                <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
-                </svg>
-            </div>
-            <div class="narrative-meta">
-                <div class="narrative-client editable-field editable-client" data-field="client_code" data-entry-id="${entry.id}" data-narrative-index="${index}">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
-                        <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/>
-                    </svg>
-                    ${n.client_code || entry.client_code || 'No Client'}
-                </div>
-                <div class="narrative-matter editable-field editable-matter" data-field="matter_number" data-entry-id="${entry.id}" data-narrative-index="${index}">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
-                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-                    </svg>
-                    ${n.matter_number || entry.matter_number || 'No Matter'}
-                </div>
-            </div>
-        </div>
-    `;}).join('');
-    
-    // Add click handler for card interaction
-    card.addEventListener('click', (e) => {
-        // Check if clicked element is interactive
-        const isInteractive = e.target.matches('button, input, select, textarea, .editable-field, .editable-field *, .dropdown-trigger, .dropdown-menu, .dropdown-menu *, .bulk-checkbox, .status-dropdown, .status-dropdown *');
-        
-        if (!isInteractive) {
-            if (viewMode === 'compact' || viewMode === 'ultra-compact') {
-                // In compact/ultra-compact mode, toggle expansion
-                card.classList.toggle('expanded');
-            } else {
-                // In normal mode, open edit modal
-                openEditModal(entry.id);
-            }
-        }
-    });
-    
-    // Create different layouts based on view mode
-    if (viewMode === 'ultra-compact') {
-        // Ultra-compact layout: single line with essential info
-        const firstNarrative = (entry.narratives && entry.narratives.length > 0) ? entry.narratives[0].text : 'No description';
-        const truncatedText = firstNarrative.length > 200 ? firstNarrative.substring(0, 200) + '...' : firstNarrative;
-        
-        card.innerHTML = `
-            <div class="entry-header">
-                <div class="entry-meta">
-                    <span class="entry-meta-item">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
-                            <path d="M19,3H18V1H16V3H8V1H6V3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,19H5V8H19V19M5,6V5H19V6H5Z"/>
-                        </svg>
-                        ${dateStr}
-                    </span>
-                    <span class="entry-meta-item">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
-                            <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/>
-                        </svg>
-                        ${entry.client_code || 'No Client'}
-                    </span>
-                    <span class="entry-meta-item">
-                        <strong>${totalHours}h</strong>
-                    </span>
-                    <span class="entry-description">${truncatedText}</span>
-                </div>
-                ${createStatusDropdown(entry.id, entry.status || 'draft', entry)}
-            </div>
-            <div class="narrative-item expanded-content hidden">
-                ${narrativesHtml}
-            </div>
-            <div class="entry-actions">
-                <button class="edit-btn" onclick="openEditModal(${entry.id})">Edit</button>
-                <button class="delete-btn" onclick="deleteEntry(${entry.id})">Delete</button>
-                <button class="duplicate-btn" onclick="duplicateEntry(${entry.id})">Duplicate</button>
-                ${(entry.narratives && entry.narratives.length > 1) ? 
-                    `<button class="apply-to-all-btn" onclick="openApplyToAllModal(${entry.id})">Apply to All</button>` : 
-                    ''
-                }
-            </div>
-        `;
-    } else {
-        // Standard and compact layouts
-        card.innerHTML = `
-            <div class="entry-header">
-                <div class="entry-meta">
-                    <span class="entry-meta-item">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                            <path d="M19,3H18V1H16V3H8V1H6V3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,19H5V8H19V19M5,6V5H19V6H5Z"/>
-                        </svg>
-                        <span class="editable-field editable-date" data-field="created_at" data-entry-id="${entry.id}">
-                            ${dateStr} ${timeStr}
-                        </span>
-                    </span>
-                    <span class="entry-meta-item">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                            <path d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"/>
-                        </svg>
-                        <span class="total-hours-display">
-                            ${totalHours} hours
-                        </span>
-                    </span>
-                </div>
-                ${createStatusDropdown(entry.id, entry.status || 'draft', entry)}
-            </div>
-            ${narrativesHtml}
-            <div class="entry-actions">
-                <button class="edit-btn" onclick="openEditModal(${entry.id})">Edit</button>
-                <button class="delete-btn" onclick="deleteEntry(${entry.id})">Delete</button>
-                <button class="duplicate-btn" onclick="duplicateEntry(${entry.id})">Duplicate</button>
-                ${(entry.narratives && entry.narratives.length > 1) ? 
-                    `<button class="apply-to-all-btn" onclick="openApplyToAllModal(${entry.id})">Apply to All</button>` : 
-                    ''
-                }
-            </div>
-        `;
-    }
-    
-    // Add inline editing event listeners
-    setupInlineEditing(card);
-    
-    return card;
-}
+// Card view removed - always use list view
 
 // Inline editing functionality
 function setupInlineEditing(card) {
@@ -3763,133 +3516,11 @@ window.duplicateEntry = duplicateEntry;
 window.toggleDescription = toggleDescription;
 window.changeEntryStatus = changeEntryStatus;
 
-// Bulk assignment functions
-function showBulkAssignmentControls() {
-    const controls = document.getElementById('bulk-assignment-controls');
-    if (controls) {
-        controls.classList.remove('hidden');
-    }
-}
+// Bulk assignment removed - not needed for list view
 
-function hideBulkAssignmentControls() {
-    const controls = document.getElementById('bulk-assignment-controls');
-    if (controls) {
-        controls.classList.add('hidden');
-    }
-}
+// Bulk assignment removed - not needed for list view
 
-async function bulkAssignClient() {
-    const clientInput = document.getElementById('bulk-client-input');
-    const clientCode = clientInput.value.trim();
-    
-    if (!clientCode) {
-        showNotification('Please enter a client code', 'error');
-        return;
-    }
-    
-    // Show confirmation dialog
-    const confirmed = await showBulkAssignmentDialog('client', clientCode);
-    if (!confirmed) return;
-    
-    try {
-        // Get all visible entries
-        const visibleEntries = getVisibleEntries();
-        
-        if (visibleEntries.length === 0) {
-            showNotification('No entries found to update', 'error');
-            return;
-        }
-        
-        // Update each entry
-        for (const entry of visibleEntries) {
-            entry.client_code = clientCode;
-            
-            // Also update narratives
-            if (entry.narratives && entry.narratives.length > 0) {
-                entry.narratives.forEach(narrative => {
-                    narrative.client_code = clientCode;
-                });
-            }
-            
-            await dbOperations.updateEntry(entry.id, entry);
-        }
-        
-        // Clear input and refresh dashboard
-        clientInput.value = '';
-        loadDashboard();
-        
-        showNotification(`Client code "${clientCode}" applied to ${visibleEntries.length} entries`, 'success');
-        
-    } catch (error) {
-        console.error('Error applying bulk client assignment:', error);
-        showNotification('Failed to apply client code', 'error');
-    }
-}
-
-async function bulkAssignMatter() {
-    const matterInput = document.getElementById('bulk-matter-input');
-    const matterNumber = matterInput.value.trim();
-    
-    if (!matterNumber) {
-        showNotification('Please enter a matter number', 'error');
-        return;
-    }
-    
-    // Show confirmation dialog
-    const confirmed = await showBulkAssignmentDialog('matter', matterNumber);
-    if (!confirmed) return;
-    
-    try {
-        // Get all visible entries
-        const visibleEntries = getVisibleEntries();
-        
-        if (visibleEntries.length === 0) {
-            showNotification('No entries found to update', 'error');
-            return;
-        }
-        
-        // Update each entry
-        for (const entry of visibleEntries) {
-            entry.matter_number = matterNumber;
-            
-            // Also update narratives
-            if (entry.narratives && entry.narratives.length > 0) {
-                entry.narratives.forEach(narrative => {
-                    narrative.matter_number = matterNumber;
-                });
-            }
-            
-            await dbOperations.updateEntry(entry.id, entry);
-        }
-        
-        // Clear input and refresh dashboard
-        matterInput.value = '';
-        loadDashboard();
-        
-        showNotification(`Matter number "${matterNumber}" applied to ${visibleEntries.length} entries`, 'success');
-        
-    } catch (error) {
-        console.error('Error applying bulk matter assignment:', error);
-        showNotification('Failed to apply matter number', 'error');
-    }
-}
-
-function getVisibleEntries() {
-    // Get all entry cards currently visible in the DOM
-    const entryCards = document.querySelectorAll('.entry-card[data-entry-id]');
-    const entries = [];
-    
-    entryCards.forEach(card => {
-        const entryId = parseInt(card.dataset.entryId);
-        // Find the entry data from the current loaded entries
-        const entry = window.currentEntries?.find(e => e.id === entryId);
-        if (entry) {
-            entries.push(entry);
-        }
-    });
-    
-    return entries;
-}
+// Bulk assignment removed - not needed for list view
 
 // Confirmation dialog for bulk assignments
 function showBulkAssignmentDialog(type, value) {

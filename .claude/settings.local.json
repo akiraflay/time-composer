@@ -41,7 +41,8 @@
       "Bash(mv:*)",
       "mcp__ide__getDiagnostics",
       "Bash(python:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(pip3 install:*)"
     ],
     "deny": []
   }
