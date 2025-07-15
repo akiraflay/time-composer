@@ -215,7 +215,7 @@ function setupEventListeners() {
     }
     
     // Advanced filters panel controls
-    const statusFilter = document.getElementById('status-filter');
+    const statusFilterElement = document.getElementById('status-filter');
     const clientFilterEl = document.getElementById('client-filter');
     const matterFilterEl = document.getElementById('matter-filter');
     const hoursFilterEl = document.getElementById('hours-filter');
@@ -223,8 +223,8 @@ function setupEventListeners() {
     const clearAllFiltersBtn = document.getElementById('clear-all-filters');
     const applyFiltersBtn = document.getElementById('apply-filters');
     
-    if (statusFilter) {
-        statusFilter.addEventListener('change', () => {
+    if (statusFilterElement) {
+        statusFilterElement.addEventListener('change', () => {
             loadDashboard();
             updateActiveFiltersCount();
         });
@@ -678,6 +678,14 @@ async function loadDashboard() {
         
         // Get entries from IndexedDB
         let entries = await dbOperations.getEntries({ search, status });
+        
+        // Apply status filter (must be done after retrieval as per database.js comment)
+        if (status) {
+            entries = entries.filter(entry => {
+                const effectiveStatus = determineEntryStatus(entry);
+                return effectiveStatus === status;
+            });
+        }
         
         // Apply client filter
         if (clientFilter) {
