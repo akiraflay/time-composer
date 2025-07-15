@@ -45,8 +45,16 @@ Time Composer is a speech-first AI agent for legal billing narratives with three
 
 ### 1. Backend (Flask API)
 - **Flask app factory pattern** (`backend/app.py`) - minimal app initialization
-- **Core endpoints**: `/health`, `/api/enhance`, `/api/entries`, `/api/export`
-- **Database**: SQLite with TimeEntry model storing original text, cleaned text, narratives, and metadata
+- **Core endpoints**: 
+  - `/health` - Health check
+  - `/api/enhance` - AI text enhancement
+  - `/api/entries` - List all entries (GET), individual entry CRUD (GET/PUT/DELETE with ID)
+  - `/api/export` - CSV export
+- **Database**: SQLite with TimeEntry model storing:
+  - Original and cleaned text
+  - Client code and matter number
+  - Narratives (JSON field with activities, hours, client/matter per narrative)
+  - Total hours and status (draft, ready, billed)
 - **Azure OpenAI integration**: GPT for text processing via two-agent pipeline
 
 ### 2. Two-Agent Processing Pipeline (`backend/agents/`)
@@ -128,6 +136,11 @@ Tips for prompt engineering:
 ## Frontend Features
 
 ### AI Assistant Interface
-- **Editable Time Entries**: Users can now edit both hours and narrative text directly in the AI assistant interface
-- **Real-time Editing**: Changes to hours automatically recalculate the total hours when saved
+- **Inline Editing**: Direct editing of hours and narrative text in the list view
+  - Click any editable field to modify (hours, narrative text, client code, matter number)
+  - Real-time validation and total hours recalculation
+  - Keyboard navigation support (Tab/Enter to save and move to next field)
+- **Edit Modal**: Bulk editing interface for comprehensive entry modifications
 - **Client/Matter Fields**: Each narrative can have individual client codes and matter numbers
+- **Mobile Support**: Touch-friendly interface with dropdown menus for actions
+- **Offline-First**: IndexedDB storage with background sync when online
