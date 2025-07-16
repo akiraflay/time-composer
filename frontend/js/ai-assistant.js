@@ -460,6 +460,12 @@ class AIAssistant {
         try {
             this.currentMode = 'processing';
             
+            // Disable the main button during processing
+            const recordBtn = document.getElementById('voice-record-btn');
+            if (recordBtn) {
+                recordBtn.disabled = true;
+            }
+            
             // Sync any final edits
             this.syncEditedTranscription();
             
@@ -502,6 +508,12 @@ class AIAssistant {
             console.error('Error processing recording:', err);
             this.clearThinking();
             this.showError(err.message || 'Failed to process recording. Please try again.');
+            
+            // Re-enable the button on error
+            const recordBtn = document.getElementById('voice-record-btn');
+            if (recordBtn) {
+                recordBtn.disabled = false;
+            }
         }
     }
     
@@ -689,11 +701,25 @@ class AIAssistant {
         
         // Convert main button to Save entries
         this.convertMainButtonToSave();
+        
+        // Scroll to show the summary message after DOM updates
+        setTimeout(() => {
+            const container = document.getElementById('messages-container');
+            const messages = container.querySelectorAll('.message');
+            if (messages.length >= 2) {
+                // Find the summary message (second to last message)
+                const summaryMessage = messages[messages.length - 2];
+                summaryMessage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 100);
     }
     
     convertMainButtonToSave() {
         const recordBtn = document.getElementById('voice-record-btn');
         if (recordBtn) {
+            // Enable the button now that processing is complete
+            recordBtn.disabled = false;
+            
             // Update button appearance
             recordBtn.innerHTML = `
                 <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
@@ -704,6 +730,7 @@ class AIAssistant {
             
             // Remove old event listener and add new one
             const newButton = recordBtn.cloneNode(true);
+            newButton.disabled = false; // Ensure the cloned button is also enabled
             recordBtn.parentNode.replaceChild(newButton, recordBtn);
             newButton.addEventListener('click', () => this.confirmEntries());
             

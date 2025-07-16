@@ -3708,6 +3708,21 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
     box-shadow: 0 8px 30px rgba(37, 99, 235, 0.4);
 }
 
+.voice-btn:disabled,
+.voice-btn.primary:disabled {
+    background: linear-gradient(135deg, #94a3b8, #64748b);
+    color: rgba(255, 255, 255, 0.6);
+    cursor: not-allowed;
+    opacity: 0.7;
+    box-shadow: none;
+}
+
+.voice-btn:disabled:hover,
+.voice-btn.primary:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
 .voice-btn.secondary {
     background: var(--surface);
     color: var(--text-secondary);
@@ -4347,8 +4362,7 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
 
 /* AI Assistant Ultra-Compact Review Styles */
 .ai-response.ultra-compact-review {
-    padding: 0.75rem;
-    max-height: calc(100vh - 250px);
+    padding: 0.5rem;
     display: flex;
     flex-direction: column;
     font-size: 0.875rem;
@@ -4383,30 +4397,18 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
 
 .scrollable-entries-compact {
     flex: 1;
-    overflow-y: auto;
     padding-right: 0.25rem;
 }
 
-.scrollable-entries-compact::-webkit-scrollbar {
-    width: 4px;
-}
-
-.scrollable-entries-compact::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.scrollable-entries-compact::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: 2px;
-}
+/* Removed scrollbar styling since scrolling is now handled by messages-container */
 
 /* Ultra-compact narrative items */
 .ultra-compact-narrative {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 6px;
-    padding: 0.75rem;
-    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
     display: flex;
     gap: 0.75rem;
     align-items: flex-start;
