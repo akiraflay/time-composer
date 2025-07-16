@@ -1394,6 +1394,12 @@ main {
     gap: 0.25rem;
 }
 
+/* Remove transitions for client and matter fields to prevent shifts */
+.editable-client:not(.narrative-text),
+.editable-matter:not(.narrative-text) {
+    transition: none;
+}
+
 .editable-field:not(.narrative-text):hover {
     background-color: var(--background);
     border-color: var(--border);
@@ -1473,9 +1479,9 @@ main {
 .narrative-matter.editable-field:hover,
 .editable-client.editable-field:hover,
 .editable-matter.editable-field:hover {
-    background-color: var(--background);
-    border-color: var(--border);
-    cursor: pointer;
+    background-color: transparent;
+    border-color: transparent;
+    cursor: text;
 }
 
 .editable-field.editing .edit-icon {
@@ -2974,38 +2980,40 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
 
 /* Column-specific header alignments to match cell content */
 .condensed-table th.condensed-date {
-    width: 100px;
-    min-width: 100px;
+    width: 95px;
+    min-width: 95px;
     text-align: center;
+    padding-left: 1.75rem;
     padding-right: 2.75rem;
 }
 
 .condensed-table th.condensed-client {
-    width: 150px;
+    width: 130px;
     text-align: center;
 }
 
 .condensed-table th.condensed-matter {
-    width: 120px;
+    width: 110px;
     text-align: center;
 }
 
 .condensed-table th.condensed-time {
-    width: 70px;
+    width: 65px;
     text-align: right;
 }
 
-.condensed-table th.condensed-description {
+.condensed-table th.condensed-narrative {
     text-align: center;
 }
 
 .condensed-table th.condensed-actions {
-    width: 100px;
+    width: 120px;
     text-align: center;
+    padding-left: 1rem;
 }
 
 .condensed-table th.condensed-status {
-    width: 90px;
+    width: 85px;
     text-align: center;
 }
 
@@ -3021,14 +3029,14 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
 }
 
 .condensed-table td {
-    padding: 1rem 0.5rem;
+    padding: 1rem 0.375rem;
     border-bottom: 1px solid var(--border);
     vertical-align: middle;
     line-height: 1.2;
 }
 
 /* Consistent padding for all cells */
-.condensed-table td.condensed-description {
+.condensed-table td.condensed-narrative {
     padding-top: 1rem;
     padding-bottom: 1rem;
     position: relative;
@@ -3153,17 +3161,21 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
     color: white;
 }
 
-/* Hide description actions by default */
-.description-actions {
+/* Hide narrative actions by default */
+.narrative-actions {
     display: none;
 }
 
 
 /* Date/Time Column */
 .condensed-date {
-    width: 100px;
-    min-width: 100px;
+    width: 95px;
+    min-width: 95px;
     white-space: nowrap;
+}
+
+.condensed-table td.condensed-date {
+    padding-left: 1rem;
 }
 
 .date-time {
@@ -3213,7 +3225,7 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
 
 /* Separate Client and Matter Columns */
 .condensed-client {
-    width: 150px;
+    width: 130px;
     text-align: center;
     white-space: nowrap;
     transition: none;
@@ -3227,7 +3239,7 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
 }
 
 .condensed-matter {
-    width: 120px;
+    width: 110px;
     text-align: center;
     white-space: nowrap;
     transition: none;
@@ -3279,7 +3291,7 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
 
 /* Time Column */
 .condensed-time {
-    width: 70px;
+    width: 65px;
     text-align: right;
 }
 
@@ -3289,15 +3301,15 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
 }
 
 
-/* Description Column */
-.condensed-description {
+/* Narrative Column */
+.condensed-narrative {
     max-width: none;
     position: relative;
     white-space: normal;
     word-wrap: break-word;
 }
 
-.description-content {
+.narrative-content {
     display: flex;
     align-items: baseline;
     gap: 0.5rem;
@@ -3305,7 +3317,7 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
     position: relative;
 }
 
-.description-text {
+.narrative-text {
     color: var(--text-primary);
     line-height: 1.4;
     flex: 1;
@@ -3323,7 +3335,7 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
 
 /* Actions Column */
 .condensed-actions {
-    width: 100px;
+    width: 120px;
     text-align: center;
     position: relative;
 }
@@ -3397,14 +3409,41 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
     border-color: var(--error-color);
 }
 
+/* Checkbox button in actions column */
+.table-action-btn.checkbox-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.table-action-btn.checkbox-btn:hover {
+    background: var(--background);
+    border-color: var(--border);
+}
+
 /* Checkbox in actions column */
 .table-action-checkbox {
-    width: 18px;
-    height: 18px;
+    width: 14px;
+    height: 14px;
     cursor: pointer;
-    margin-left: 0.25rem;
+    margin: 0;
     align-self: center;
     flex-shrink: 0;
+    border: 1px solid transparent;
+    opacity: 0.6;
+    accent-color: #6b7280;
+    transition: opacity 0.2s;
+    pointer-events: none; /* Let the button handle clicks */
+}
+
+.table-action-btn.checkbox-btn:hover .table-action-checkbox {
+    opacity: 0.9;
+}
+
+.table-action-checkbox:checked {
+    opacity: 1;
+    accent-color: var(--primary-color);
 }
 
 /* Selected row highlighting */
@@ -3425,7 +3464,7 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
 
 /* Status Column */
 .condensed-status {
-    width: 90px;
+    width: 85px;
     text-align: center;
 }
 
@@ -3444,6 +3483,23 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
 
 .condensed-table .editable-field:hover {
     background: var(--background);
+}
+
+/* Remove hover styling for client and matter fields in condensed table */
+.condensed-table .editable-client:hover,
+.condensed-table .editable-matter:hover {
+    background: transparent;
+    cursor: text;
+    padding: 0.125rem 0.25rem;
+    border: 1px solid transparent;
+}
+
+/* Prevent any hover-induced layout shifts for client/matter fields */
+.condensed-table .editable-client,
+.condensed-table .editable-matter {
+    padding: 0.125rem 0.25rem;
+    border: 1px solid transparent;
+    transition: none;
 }
 
 /* Edit icon rules for condensed table - show on hover for client/matter fields */
@@ -3503,7 +3559,7 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
 
 
 .condensed-date {
-    width: 110px;
+    width: 95px;
     white-space: nowrap;
 }
 
@@ -3514,7 +3570,7 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
     min-width: 80px;
 }
 
-.condensed-description {
+.condensed-narrative {
     color: var(--text-primary);
     overflow: visible;
     white-space: normal;
@@ -3523,7 +3579,7 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
 
 
 .condensed-actions {
-    width: 100px;
+    width: 120px;
     text-align: center;
 }
 

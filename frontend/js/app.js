@@ -1302,7 +1302,7 @@ function renderCondensedView(entries, container) {
                 <th class="condensed-client">Client</th>
                 <th class="condensed-matter">Matter</th>
                 <th class="condensed-time">Time</th>
-                <th class="condensed-description">Description</th>
+                <th class="condensed-narrative">Narrative</th>
                 <th class="condensed-actions actions-column">Actions</th>
                 <th class="condensed-status">Status</th>
             </tr>
@@ -1496,33 +1496,15 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
                 ${hours}
             </span>
         </td>
-        <td class="condensed-description">
-            <div class="description-content ${description.length > maxDescLength ? 'has-more' : ''}">
-                <span class="editable-field description-text" 
+        <td class="condensed-narrative">
+            <div class="narrative-content ${description.length > maxDescLength ? 'has-more' : ''}">
+                <span class="editable-field narrative-text" 
                       data-field="text" 
                       data-entry-id="${entry.id}"
                       ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}
                       title="${description}">
                     ${description}
                 </span>
-            </div>
-            <!-- Actions for mobile view -->
-            <div class="description-actions">
-                <button class="table-action-btn edit-btn" onclick="openEditModal(${entry.id})" title="Edit">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                        <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
-                    </svg>
-                </button>
-                <button class="table-action-btn duplicate-btn" onclick="duplicateEntry(${entry.id})" title="Duplicate">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                        <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"/>
-                    </svg>
-                </button>
-                <button class="table-action-btn delete-btn" onclick="deleteEntry(${entry.id})" title="Delete">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                        <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
-                    </svg>
-                </button>
             </div>
         </td>
         <td class="condensed-actions">
@@ -1542,12 +1524,17 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
                         <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
                     </svg>
                 </button>
-                <input type="checkbox" 
-                       class="table-action-checkbox" 
-                       data-entry-id="${entry.id}"
-                       ${selectedEntries.has(entry.id) ? 'checked' : ''}
-                       onchange="toggleEntrySelection(${entry.id})"
-                       title="Select entry">
+                <button class="table-action-btn checkbox-btn" 
+                        onclick="toggleEntrySelection(${entry.id})" 
+                        title="Select entry"
+                        data-entry-id="${entry.id}">
+                    <input type="checkbox" 
+                           class="table-action-checkbox" 
+                           data-entry-id="${entry.id}"
+                           ${selectedEntries.has(entry.id) ? 'checked' : ''}
+                           onclick="event.stopPropagation()"
+                           tabindex="-1">
+                </button>
             </div>
             <div class="mobile-action-menu">
                 <button onclick="toggleMobileMenu(this, ${entry.id})" title="Actions">
@@ -1593,7 +1580,7 @@ function createMobileExpandedRow(entry, narrative, narrativeIndex) {
                     <span class="mobile-detail-value">${status.toUpperCase()}</span>
                 </div>
                 <div class="mobile-detail">
-                    <span class="mobile-detail-label">FULL DESCRIPTION</span>
+                    <span class="mobile-detail-label">FULL NARRATIVE</span>
                     <span class="mobile-detail-value">${narrative ? narrative.text : (entry.original_text || 'No description')}</span>
                 </div>
             </div>
@@ -1905,6 +1892,12 @@ function toggleEntrySelection(entryId) {
     const rows = document.querySelectorAll(`tr[data-entry-id="${entryId}"]`);
     rows.forEach(row => {
         row.classList.toggle('selected', selectedEntries.has(entryId));
+    });
+    
+    // Update checkbox state
+    const checkboxes = document.querySelectorAll(`.table-action-checkbox[data-entry-id="${entryId}"]`);
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectedEntries.has(entryId);
     });
 }
 
@@ -2752,7 +2745,7 @@ window.safeToggleEntryStatus = safeToggleEntryStatus;
 window.openApplyToAllModal = openApplyToAllModal;
 window.addNewPreset = addNewPreset;
 window.duplicateEntry = duplicateEntry;
-window.toggleDescription = toggleDescription;
+window.toggleNarrative = toggleNarrative;
 window.changeEntryStatus = changeEntryStatus;
 
 // Bulk assignment removed - not needed for list view
@@ -2893,28 +2886,28 @@ window.bulkAssignClient = bulkAssignClient;
 window.bulkAssignMatter = bulkAssignMatter;
 window.closeBulkDialog = closeBulkDialog;
 
-// Helper function for description expansion
-function toggleDescription(btn) {
-    const descriptionContent = btn.closest('.description-content');
-    const descriptionText = descriptionContent.querySelector('.description-text');
-    const fullText = descriptionText.getAttribute('title');
+// Helper function for narrative expansion
+function toggleNarrative(btn) {
+    const narrativeContent = btn.closest('.narrative-content');
+    const narrativeText = narrativeContent.querySelector('.narrative-text');
+    const fullText = narrativeText.getAttribute('title');
     
     if (btn.textContent === 'more') {
-        descriptionText.textContent = fullText;
+        narrativeText.textContent = fullText;
         btn.textContent = 'less';
-        descriptionContent.classList.add('expanded');
+        narrativeContent.classList.add('expanded');
     } else {
         const maxLength = 150;
-        descriptionText.textContent = fullText.substring(0, maxLength) + '...';
+        narrativeText.textContent = fullText.substring(0, maxLength) + '...';
         btn.textContent = 'more';
-        descriptionContent.classList.remove('expanded');
+        narrativeContent.classList.remove('expanded');
     }
 }
 
 // Mobile-specific functions
-function toggleMobileDescription(btn, entryId, narrativeIndex) {
+function toggleMobileNarrative(btn, entryId, narrativeIndex) {
     const row = btn.closest('tr');
-    const descriptionDiv = row.querySelector('.description-text');
+    const narrativeDiv = row.querySelector('.narrative-text');
     
     // Get the full entry data
     const entry = currentEntries.find(e => e.id === entryId);
@@ -2922,14 +2915,14 @@ function toggleMobileDescription(btn, entryId, narrativeIndex) {
     
     const narrative = narrativeIndex !== null && entry.narratives ? 
         entry.narratives[narrativeIndex] : null;
-    const fullText = narrative ? narrative.text : (entry.original_text || 'No description');
+    const fullText = narrative ? narrative.text : (entry.original_text || 'No narrative');
     
     if (btn.textContent === 'show more') {
-        descriptionDiv.textContent = fullText;
+        narrativeDiv.textContent = fullText;
         btn.textContent = 'show less';
     } else {
         const maxLength = 100;
-        descriptionDiv.textContent = fullText.substring(0, maxLength) + '...';
+        narrativeDiv.textContent = fullText.substring(0, maxLength) + '...';
         btn.textContent = 'show more';
     }
 }
