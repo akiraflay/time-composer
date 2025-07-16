@@ -593,7 +593,7 @@ class AIAssistant {
         
         // Add analysis message
         const narrativeCount = narratives.length;
-        const summary = `I've identified ${narrativeCount} billable ${narrativeCount === 1 ? 'activity' : 'activities'} totaling ${totalHours} hours:`;
+        const summary = `I've identified ${narrativeCount} billable ${narrativeCount === 1 ? 'activity' : 'activities'} totaling ${totalHours.toFixed(1)} hours:`;
         this.addAssistantMessage(summary);
         
         // Add each narrative as part of a single entry message - ultra-compact design with integrated actions
@@ -624,7 +624,7 @@ class AIAssistant {
                                        id="narrative-hours-${index}" 
                                        name="narrative-hours-${index}"
                                        class="narrative-hours-input" 
-                                       value="${narrative.hours}" 
+                                       value="${narrative.hours.toFixed(1)}" 
                                        step="0.1" 
                                        min="0.1" 
                                        style="width: 60px; margin-right: 5px;">

@@ -1865,19 +1865,13 @@ async function applyToAllNarratives() {
             });
         }
         
-        // Save to database
-        const response = await api.updateEntry(updatedEntry.id, updatedEntry);
+        // Save to IndexedDB (no backend storage)
+        await dbOperations.saveEntry(updatedEntry);
         
-        // Update IndexedDB with the response from backend
-        if (response) {
-            // Save to IndexedDB
-            await dbOperations.saveEntry(response);
-        }
-        
-        // Update the in-memory entries array with the actual response
+        // Update the in-memory entries array
         const entryIndex = currentEntries.findIndex(e => e.id === updatedEntry.id);
         if (entryIndex !== -1) {
-            currentEntries[entryIndex] = response || updatedEntry;
+            currentEntries[entryIndex] = updatedEntry;
         }
         
         // Close modal and refresh display

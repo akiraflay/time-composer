@@ -1,31 +1,30 @@
 const API_BASE = 'http://localhost:5001/api';
 
 const api = {
-    // Legacy methods - no longer used but kept for compatibility
+    // Legacy methods - throw errors to alert developers of usage
     async getEntries() {
-        // Returns empty array - data is now in IndexedDB
-        return [];
+        throw new Error('getEntries() is deprecated. Use dbOperations.getAllEntries() for IndexedDB access.');
     },
     
     async getEntry(id) {
-        // Returns null - data is now in IndexedDB
-        return null;
+        throw new Error('getEntry() is deprecated. Use dbOperations.getEntry() for IndexedDB access.');
     },
     
     async updateEntry(id, data) {
-        // No-op - data is now in IndexedDB
-        return data;
+        throw new Error('updateEntry() is deprecated. Use dbOperations.saveEntry() for IndexedDB access.');
     },
     
     async deleteEntry(id) {
-        // No-op - data is now in IndexedDB
-        return { success: true };
+        throw new Error('deleteEntry() is deprecated. Use dbOperations.deleteEntry() for IndexedDB access.');
     },
     
     async exportEntries(entryIds = [], filename = null) {
-        // Legacy method - no longer used
-        console.warn('exportEntries is deprecated. Use the new export functionality.');
-        return true;
+        throw new Error(
+            'exportEntries() is deprecated. Use the new export functionality:\n' +
+            '1. For CSV export: Click the export button on individual narratives or use bulk export from the dashboard\n' +
+            '2. The export is now handled client-side using the Export class in frontend/js/export.js\n' +
+            '3. To export programmatically: Use new Export().exportNarratives(narratives, filename)'
+        );
     },
     
     async enhance(text) {
