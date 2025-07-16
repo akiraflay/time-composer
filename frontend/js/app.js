@@ -1626,10 +1626,22 @@ async function handleExportClick() {
         // Export selected entries
         await exportSelectedEntries();
     } else {
-        // Show dialog to confirm exporting all draft entries
-        const dialog = confirm("No entries selected. Do you want to export all Draft entries?");
-        if (dialog) {
-            await exportAllDraftEntries();
+        // Check if there are any draft entries first
+        let entries = await dbOperations.getEntries();
+        const draftEntries = entries.filter(entry => {
+            const effectiveStatus = determineEntryStatus(entry);
+            return effectiveStatus === 'draft';
+        });
+        
+        if (draftEntries.length === 0) {
+            // No draft entries available
+            alert("No draft entries to export. Use add entry please.");
+        } else {
+            // Show dialog to confirm exporting all draft entries
+            const dialog = confirm("No entries selected. Do you want to export all Draft entries?");
+            if (dialog) {
+                await exportAllDraftEntries();
+            }
         }
     }
 }
@@ -1857,7 +1869,12 @@ async function deleteEntry(id) {
     if (!confirm('Are you sure you want to delete this entry?')) return;
     
     try {
+        // Delete from backend first
+        await api.deleteEntry(id);
+        
+        // Then delete from local IndexedDB
         await dbOperations.deleteEntry(id);
+        
         loadDashboard();
         showNotification('Entry deleted', 'success');
     } catch (err) {
@@ -1986,7 +2003,15 @@ async function bulkDeleteEntries() {
     if (!confirm(`Are you sure you want to delete ${count} entries?`)) return;
     
     try {
-        const promises = Array.from(selectedEntries).map(id => dbOperations.deleteEntry(parseInt(id)));
+        // Delete from backend first, then from IndexedDB
+        const promises = Array.from(selectedEntries).map(async (id) => {
+            const entryId = parseInt(id);
+            // Delete from backend
+            await api.deleteEntry(entryId);
+            // Then delete from local IndexedDB
+            await dbOperations.deleteEntry(entryId);
+        });
+        
         await Promise.all(promises);
         
         selectedEntries.clear();

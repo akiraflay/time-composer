@@ -130,30 +130,6 @@
 
                 <div class="conversation-area">
                     <div class="messages-container" id="messages-container">
-                        <div class="message assistant-message initial-message">
-                            <div class="message-avatar">
-                                <svg viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 6L13.5 10.5L18 12L13.5 13.5L12 18L10.5 13.5L6 12L10.5 10.5L12 6Z"/>
-                                </svg>
-                            </div>
-                            <div class="message-content">
-                                <div class="message-text">What billable work did you accomplish today? I'll help you turn it into professional time entries.</div>
-                                <div class="suggested-actions">
-                                    <button class="suggestion-btn" data-action="voice">
-                                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                                            <path d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"/>
-                                        </svg>
-                                        Record
-                                    </button>
-                                    <button class="suggestion-btn" data-action="type">
-                                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                                            <path d="M19,10H17V8H19M19,13H17V11H19M16,10H14V8H16M16,13H14V11H16M16,17H8V15H16M13,10H11V8H13M13,13H11V11H13M10,10H8V8H10M10,13H8V11H10M10,17H8V15H10M7,10H5V8H7M7,13H5V11H7M7,17H5V15H7M2,4V20A2,2 0 0,0 4,22H20A2,2 0 0,0 22,20V4A2,2 0 0,0 20,2H4A2,2 0 0,0 2,4Z"/>
-                                        </svg>
-                                        Type
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
                     <!-- Voice Recording Interface -->
@@ -206,25 +182,6 @@
                         </div>
                     </div>
 
-                    <!-- Text Input Interface -->
-                    <div class="text-interface hidden" id="text-interface">
-                        <div class="text-input-area">
-                            <div class="text-prompt">
-                                <textarea 
-                                    id="text-input" 
-                                    placeholder="E.g., Spent 2 hours reviewing the Smith merger agreement, 30 minutes on client call with Jones Corp about contract amendments, and 1.5 hours drafting motion for summary judgment in the Williams case..."
-                                    rows="6"
-                                ></textarea>
-                                <div class="text-controls">
-                                    <button id="text-submit-btn" class="voice-btn primary">Process Text</button>
-                                    <button id="text-clear-btn" class="voice-btn secondary">Clear</button>
-                                </div>
-                                <div class="keyboard-hint" style="font-size: 0.85em; color: #888; margin-top: 0.5rem;">
-                                    Tip: Press Ctrl+Enter to submit
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- Input Area -->
                     <div class="input-area" id="input-area">

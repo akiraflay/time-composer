@@ -73,9 +73,6 @@ class AIAssistant {
         document.getElementById('voice-pause-btn')?.addEventListener('click', () => this.togglePause());
         document.getElementById('voice-stop-btn')?.addEventListener('click', () => this.stopRecording());
         
-        // Text interface controls
-        document.getElementById('text-submit-btn')?.addEventListener('click', () => this.processTextInput());
-        document.getElementById('text-clear-btn')?.addEventListener('click', () => this.clearTextInput());
         
         // Voice orb click
         document.getElementById('voice-orb')?.addEventListener('click', () => this.toggleRecording());
@@ -98,6 +95,11 @@ class AIAssistant {
         this.updateStatus('Ready to capture your billable time');
         this.resetInterface();
         this.selectedDate = null;
+        
+        // Automatically start voice recording
+        setTimeout(() => {
+            this.switchToVoiceMode();
+        }, 300);
     }
 
     openWithDate(date) {
@@ -122,6 +124,11 @@ class AIAssistant {
         if (initialMessage) {
             initialMessage.textContent = `What billable work did you accomplish on ${dateStr}? I'll help you turn it into professional time entries.`;
         }
+        
+        // Automatically start voice recording
+        setTimeout(() => {
+            this.switchToVoiceMode();
+        }, 300);
     }
 
     async close() {
@@ -137,9 +144,6 @@ class AIAssistant {
             case 'voice':
                 this.switchToVoiceMode();
                 break;
-            case 'type':
-                this.switchToTextMode();
-                break;
             default:
                 console.log('Unknown action:', action);
         }
@@ -151,49 +155,20 @@ class AIAssistant {
         document.getElementById('voice-interface').classList.remove('hidden');
         this.updateStatus('Voice mode active');
         
+        // Only add the message if we don't already have messages
+        if (document.querySelectorAll('#messages-container .message').length === 0) {
+            this.addAssistantMessage('What work did you accomplish today? I\'ll help you turn it into professional time entries.');
+        }
+        
         try {
             // Automatically start recording
             await this.startRecording();
-            // Add assistant message only if recording started successfully
-            this.addAssistantMessage('Recording started! Tell me about your billable activities.');
         } catch (err) {
             console.error('Failed to start recording:', err);
             this.showError('Unable to start recording. Please check your microphone permissions.');
         }
     }
 
-    switchToTextMode() {
-        console.log('Switching to text mode...');
-        this.currentMode = 'text';
-        this.hideAllInterfaces();
-        
-        const textInterface = document.getElementById('text-interface');
-        if (textInterface) {
-            textInterface.classList.remove('hidden');
-            console.log('Text interface hidden class removed, should be visible');
-            console.log('Text interface classes:', textInterface.className);
-            console.log('Text interface display style:', window.getComputedStyle(textInterface).display);
-        } else {
-            console.error('Text interface element not found!');
-        }
-        
-        this.updateStatus('Text mode active');
-        
-        // Add message to conversation
-        this.addUserMessage('I\'ll type my work details');
-        this.addAssistantMessage('Great! Type your work details below.');
-        
-        // Focus on text input
-        setTimeout(() => {
-            const textInput = document.getElementById('text-input');
-            if (textInput) {
-                textInput.focus();
-                console.log('Text input focused');
-            } else {
-                console.error('Text input element not found!');
-            }
-        }, 100);
-    }
 
     async toggleRecording() {
         if (this.isRecording) {
@@ -630,36 +605,7 @@ class AIAssistant {
         this.updateStatus('Review and confirm your time entries');
     }
 
-    async processTextInput() {
-        console.log('Processing text input...');
-        const textInput = document.getElementById('text-input');
-        const text = textInput.value.trim();
-        
-        if (!text) {
-            this.showError('Please enter some text describing your work');
-            return;
-        }
-        
-        this.addUserMessage(`Here's what I worked on: "${text}"`);
-        this.currentMode = 'processing';
-        console.log('Hiding interfaces for processing mode...');
-        this.hideAllInterfaces();
-        
-        this.addAssistantThinking('Analyzing your work description...');
-        
-        try {
-            await this.simulateAIProcessing();
-            const response = await api.enhance(text);
-            this.showConversationalResults(response);
-        } catch (err) {
-            console.error('Error processing text:', err);
-            this.showError('Failed to process text. Please try again.');
-        }
-    }
 
-    clearTextInput() {
-        document.getElementById('text-input').value = '';
-    }
 
     // UI Helper Methods
     hideAllInterfaces() {
@@ -678,17 +624,10 @@ class AIAssistant {
 
     resetInterface() {
         this.hideAllInterfaces();
-        document.getElementById('input-area').classList.remove('hidden');
         this.clearMessages();
         this.hideLiveTranscription();
         this.clearTimer();
         this.transcriptionMessageId = null;
-        
-        // Show initial message again
-        const initialMessage = document.querySelector('.initial-message');
-        if (initialMessage) {
-            initialMessage.style.display = 'flex';
-        }
     }
 
     updateStatus(text) {
@@ -740,12 +679,6 @@ class AIAssistant {
         const liveTransArea = document.getElementById('live-transcription-area');
         if (liveTransArea) {
             liveTransArea.classList.remove('hidden');
-        }
-        
-        // Hide the initial message when recording starts
-        const initialMessage = document.querySelector('.initial-message');
-        if (initialMessage) {
-            initialMessage.style.display = 'none';
         }
         
         // Add a user message that will be replaced with live transcription
@@ -1024,16 +957,10 @@ class AIAssistant {
 
     clearMessages() {
         const container = document.getElementById('messages-container');
-        const initialMessage = container.querySelector('.initial-message');
         
-        // Remove all messages except the initial one
-        const messages = container.querySelectorAll('.message:not(.initial-message)');
+        // Remove all messages
+        const messages = container.querySelectorAll('.message');
         messages.forEach(msg => msg.remove());
-        
-        // Make sure initial message is visible
-        if (initialMessage) {
-            initialMessage.style.display = 'flex';
-        }
         
         // Clear transcription message ID
         this.transcriptionMessageId = null;
@@ -1065,11 +992,6 @@ class AIAssistant {
             this.toggleRecording();
         }
         
-        // Enter to submit text in text mode
-        if (e.code === 'Enter' && e.ctrlKey && this.currentMode === 'text') {
-            e.preventDefault();
-            this.processTextInput();
-        }
     }
 
     // Show bulk apply modal
@@ -1291,7 +1213,6 @@ class AIAssistant {
                 this.addAssistantMessage('Please describe what additional details you\'d like to include in your billing narratives. I can help you incorporate them naturally.');
                 break;
         }
-        this.switchToTextMode();
     }
 
     splitEntries() {
@@ -1337,20 +1258,17 @@ class AIAssistant {
 
     splitByTime() {
         this.addUserMessage('Split by time periods');
-        this.addAssistantMessage('I\'ll organize entries by when you did the work. Please tell me how you\'d like time periods divided (hourly, by session, morning/afternoon, etc.).');
-        this.switchToTextMode();
+        this.addAssistantMessage('I\'ll organize entries by when you did the work. For now, I\'ll use standard time divisions. You can edit the results manually.');
     }
 
     splitByClient() {
         this.addUserMessage('Split by client/matter');
-        this.addAssistantMessage('I\'ll separate entries by different clients or matters. Please clarify which clients or matters were involved in your work.');
-        this.switchToTextMode();
+        this.addAssistantMessage('I\'ll separate entries by different clients or matters based on the context. You can edit the client/matter codes in the results.');
     }
 
     splitCustom() {
         this.addUserMessage('Custom split');
-        this.addAssistantMessage('Tell me exactly how you\'d like the entries organized. I can split them however makes the most sense for your billing needs.');
-        this.switchToTextMode();
+        this.addAssistantMessage('I\'ll reorganize the entries. You can edit them manually in the results.');
     }
 
     changeWording() {
@@ -1404,9 +1322,8 @@ class AIAssistant {
                 break;
             case 'specific':
                 this.addUserMessage('Tell me what to change');
-                this.addAssistantMessage('Please describe the specific changes you\'d like to the wording or tone of the billing narratives.');
-                this.switchToTextMode();
-                return;
+                this.addAssistantMessage('I\'ll adjust the wording. You can edit the narratives directly in the results.');
+                break;
         }
         this.showContextualSuggestion('style-change', style);
     }
