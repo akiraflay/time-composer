@@ -1,86 +1,31 @@
 const API_BASE = 'http://localhost:5001/api';
 
 const api = {
-    async getEntries(filters = {}) {
-        const params = new URLSearchParams();
-        if (filters.status) params.append('status', filters.status);
-        if (filters.client_code) params.append('client_code', filters.client_code);
-        if (filters.start_date) params.append('start_date', filters.start_date);
-        if (filters.end_date) params.append('end_date', filters.end_date);
-        
-        const response = await fetch(`${API_BASE}/entries?${params}`);
-        
-        if (!response.ok) {
-            throw new Error('Failed to fetch entries');
-        }
-        
-        return response.json();
+    // Legacy methods - no longer used but kept for compatibility
+    async getEntries() {
+        // Returns empty array - data is now in IndexedDB
+        return [];
     },
     
     async getEntry(id) {
-        const response = await fetch(`${API_BASE}/entries/${id}`);
-        
-        if (!response.ok) {
-            throw new Error('Failed to fetch entry');
-        }
-        
-        return response.json();
+        // Returns null - data is now in IndexedDB
+        return null;
     },
     
     async updateEntry(id, data) {
-        const response = await fetch(`${API_BASE}/entries/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to update entry');
-        }
-        
-        return response.json();
+        // No-op - data is now in IndexedDB
+        return data;
     },
     
     async deleteEntry(id) {
-        const response = await fetch(`${API_BASE}/entries/${id}`, {
-            method: 'DELETE'
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to delete entry');
-        }
-        
-        return response.json();
+        // No-op - data is now in IndexedDB
+        return { success: true };
     },
     
     async exportEntries(entryIds = [], filename = null) {
-        const response = await fetch(`${API_BASE}/export`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ entry_ids: entryIds })
-        });
-        
-        if (!response.ok) {
-            throw new Error('Export failed');
-        }
-        
-        // Create download link
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        
-        // Use provided filename or generate one
-        if (filename) {
-            a.download = `${filename}.csv`;
-        } else {
-            a.download = `time_entries_${new Date().toISOString().split('T')[0]}.csv`;
-        }
-        
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        // Legacy method - no longer used
+        console.warn('exportEntries is deprecated. Use the new export functionality.');
+        return true;
     },
     
     async enhance(text) {

@@ -418,7 +418,9 @@ class AIAssistant {
             
             try {
                 // Process with enhancement API
+                console.log('Calling API enhancement with text:', this.finalTranscript);
                 const response = await api.enhance(this.finalTranscript);
+                console.log('API response:', response);
                 
                 // Store original text in response for later use
                 response.original_text = this.finalTranscript;
@@ -427,6 +429,7 @@ class AIAssistant {
                 this.showConversationalResults(response);
             } catch (apiError) {
                 console.error('API enhancement failed:', apiError);
+                console.log('Falling back to mock response');
                 
                 // Create a mock response for demo purposes
                 const mockResponse = this.createMockResponse(this.finalTranscript);
@@ -478,16 +481,18 @@ class AIAssistant {
         const totalHours = narratives.reduce((sum, n) => sum + n.hours, 0);
         
         return {
+            groupId: generateUUID(),
+            originalText: text,
+            cleanedText: text,
+            narratives: narratives,
+            totalHours: totalHours,
+            // For backward compatibility with UI
             entry: {
-                id: `local_${Date.now()}`, // Temporary local ID
                 narratives: narratives,
-                total_hours: totalHours,
-                created_at: this.selectedDate ? this.selectedDate.toISOString() : new Date().toISOString()
+                total_hours: totalHours
             },
             total_narratives: narratives.length,
-            total_hours: totalHours,
-            cleaned_text: text,
-            original_text: text
+            total_hours: totalHours
         };
     }
 
@@ -520,9 +525,13 @@ class AIAssistant {
         // Initialize assignment mode - default to individual for better UX
         this.assignmentMode = 'individual'; // 'bulk' or 'individual'
         
+        // Handle both old and new response formats
+        const narratives = response.narratives || (response.entry && response.entry.narratives) || [];
+        const totalHours = response.totalHours || response.total_hours || 0;
+        
         // Add analysis message
-        const narrativeCount = response.entry.narratives.length;
-        const summary = `I've identified ${narrativeCount} billable ${narrativeCount === 1 ? 'activity' : 'activities'} totaling ${response.total_hours} hours:`;
+        const narrativeCount = narratives.length;
+        const summary = `I've identified ${narrativeCount} billable ${narrativeCount === 1 ? 'activity' : 'activities'} totaling ${totalHours} hours:`;
         this.addAssistantMessage(summary);
         
         // Add each narrative as part of a single entry message - ultra-compact design with integrated actions
@@ -538,7 +547,7 @@ class AIAssistant {
                     </div>
                 </div>
                 <div class="entry-content scrollable-entries-compact" id="ai-entry-content">
-                    ${response.entry.narratives.map((narrative, index) => `
+                    ${narratives.map((narrative, index) => `
                         <div class="narrative-item ultra-compact-narrative" data-narrative-index="${index}">
                             <div class="narrative-main-row">
                                 <input type="number" 
@@ -560,12 +569,12 @@ class AIAssistant {
                                        id="narrative-client-${index}" 
                                        placeholder="Client Code" 
                                        class="ultra-compact-input"
-                                       value="${narrative.client_code || ''}">
+                                       value="${narrative.clientCode || narrative.client_code || ''}">
                                 <input type="text" 
                                        id="narrative-matter-${index}" 
                                        placeholder="Matter #" 
                                        class="ultra-compact-input"
-                                       value="${narrative.matter_number || ''}">
+                                       value="${narrative.matterNumber || narrative.matter_number || ''}">
                             </div>
                         </div>
                     `).join('')}
@@ -1064,7 +1073,8 @@ class AIAssistant {
             this.addAssistantThinking('Saving your time entries...');
             
             // Prepare narratives with client/matter codes
-            let narrativesToSave = [...this.lastResponse.entry.narratives];
+            const responseNarratives = this.lastResponse.narratives || (this.lastResponse.entry && this.lastResponse.entry.narratives) || [];
+            let narrativesToSave = [...responseNarratives];
             
             // Since we default to individual mode now, always get individual codes
             narrativesToSave = narrativesToSave.map((narrative, index) => {
@@ -1085,21 +1095,26 @@ class AIAssistant {
             // Calculate new total hours from edited values
             const newTotalHours = narrativesToSave.reduce((sum, narrative) => sum + narrative.hours, 0);
             
-            // Save the single entry with all narratives
-            if (this.lastResponse && this.lastResponse.entry) {
-                const entryData = this.lastResponse.entry;
-                await dbOperations.saveEntry({
-                    id: entryData.id, // Use the ID from backend
-                    original_text: entryData.original_text,
-                    cleaned_text: entryData.cleaned_text,
-                    narratives: narrativesToSave,
-                    total_hours: newTotalHours,
-                    status: entryData.status || 'draft',
-                    created_at: entryData.created_at,
-                    updated_at: entryData.updated_at,
-                    client_code: entryData.client_code || '',
-                    matter_number: entryData.matter_number || ''
-                });
+            // Save each narrative as an individual record
+            if (this.lastResponse) {
+                const groupId = this.lastResponse.groupId || generateUUID();
+                const createdAt = this.selectedDate ? this.selectedDate.toISOString() : new Date().toISOString();
+                
+                // Save each narrative individually
+                for (const narrative of narrativesToSave) {
+                    await dbOperations.saveNarrative({
+                        narrative: narrative.text,
+                        hours: narrative.hours,
+                        clientCode: narrative.client_code || '',
+                        matterNumber: narrative.matter_number || '',
+                        taskCode: narrative.task_code || '',
+                        status: 'draft',
+                        groupId: groupId,
+                        originalText: this.lastResponse.originalText || this.lastResponse.original_text,
+                        cleanedText: this.lastResponse.cleanedText || this.lastResponse.cleaned_text,
+                        createdAt: createdAt
+                    });
+                }
             }
             
             this.clearThinking();
@@ -1356,7 +1371,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Using browser speech recognition for transcription');
     
     // Check backend status
-    fetch('http://localhost:5001/api/entries')
+    fetch('http://localhost:5001/api/health')
         .then(() => console.log('✅ Backend server is running'))
         .catch(() => {
             console.warn('⚠️ Backend server is not running. Start it with: python run.py');

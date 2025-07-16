@@ -1,8 +1,6 @@
 from flask import Blueprint, request, jsonify
 from agents import AgentPipeline
-from models import TimeEntry
-from config import db
-from .entries import create_entry
+import uuid
 
 enhance_bp = Blueprint('enhance', __name__)
 
@@ -20,16 +18,27 @@ def enhance():
         pipeline = AgentPipeline()
         result = pipeline.process(text)
         
-        entry = create_entry(text, result)
+        # Generate a group ID for narratives from this session
+        group_id = str(uuid.uuid4())
+        
+        # Format narratives for frontend consumption
+        narratives = []
+        for narrative in result.get('narratives', []):
+            narratives.append({
+                'text': narrative.get('text', ''),
+                'hours': narrative.get('hours', 0.0),
+                'clientCode': None,  # To be filled by user
+                'matterNumber': None,  # To be filled by user
+                'original': narrative.get('original', '')
+            })
         
         return jsonify({
-            'entry': entry.to_dict(),
-            'total_narratives': len(result['narratives']),
-            'total_hours': result['total_hours'],
-            'original_text': text,
-            'cleaned_text': result['cleaned']
+            'groupId': group_id,
+            'originalText': text,
+            'cleanedText': result['cleaned'],
+            'narratives': narratives,
+            'totalHours': result['total_hours']
         })
     
     except Exception as e:
-        db.session.rollback()
         return jsonify({'error': f'Enhancement failed: {str(e)}'}), 500

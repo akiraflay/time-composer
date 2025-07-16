@@ -42,10 +42,6 @@ def start_backend():
     print("Starting Flask backend...")
     os.chdir("backend")
     
-    # Initialize database
-    subprocess.run([sys.executable, "-c", 
-                   "from app import app, db; app.app_context().push(); db.create_all()"])
-    
     # Start Flask app
     process = subprocess.Popen([sys.executable, "app.py"])
     os.chdir("..")
@@ -72,9 +68,7 @@ def main():
     if not check_env_file():
         return 1
     
-    # Create data directory
-    Path("data").mkdir(exist_ok=True)
-    print("✓ Data directory ready")
+    # No longer need data directory
     
     try:
         # Start backend

@@ -58,20 +58,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         await initDB();
         console.log('Database initialized');
         
-        // Clean up any entries with invalid IDs on startup
-        const cleanedCount = await dbOperations.cleanupInvalidEntries();
-        if (cleanedCount > 0) {
-            console.log(`Cleaned up ${cleanedCount} entries with invalid IDs`);
-        }
+        // Database initialized successfully
     } catch (err) {
         console.error('Failed to initialize database:', err);
     }
     
-    // Initialize network status
-    networkStatus.init();
-    
-    // Start auto-sync
-    syncManager.startAutoSync();
+    // Network status no longer needed (no sync)
     
     // Set up event listeners
     setupEventListeners();
@@ -641,34 +633,18 @@ async function loadDashboard() {
         const search = document.getElementById('search')?.value || '';
         const status = statusFilter || document.getElementById('status-filter')?.value || '';
         
-        // Get entries from IndexedDB
-        let entries = await dbOperations.getEntries({ search, status });
-        
-        // Apply status filter (must be done after retrieval as per database.js comment)
-        if (status) {
-            entries = entries.filter(entry => {
-                const effectiveStatus = determineEntryStatus(entry);
-                return effectiveStatus === status;
-            });
-        }
-        
-        // Apply client filter
-        if (clientFilter) {
-            entries = entries.filter(entry => entry.client_code === clientFilter);
-        }
-        
-        // Apply matter filter
-        if (matterFilter) {
-            entries = entries.filter(entry => 
-                entry.matter_number === matterFilter ||
-                (entry.narratives && entry.narratives.some(n => n.matter_number === matterFilter))
-            );
-        }
+        // Get narratives from IndexedDB
+        let narratives = await dbOperations.getNarratives({ 
+            search, 
+            status,
+            clientCode: clientFilter,
+            matterNumber: matterFilter
+        });
         
         // Apply hours filter
         if (hoursFilter) {
-            entries = entries.filter(entry => {
-                const hours = entry.total_hours || 0;
+            narratives = narratives.filter(narrative => {
+                const hours = narrative.hours || 0;
                 switch (hoursFilter) {
                     case '0.5-1':
                         return hours >= 0.5 && hours <= 1.0;
@@ -687,10 +663,8 @@ async function loadDashboard() {
         // Apply task filter
         if (taskFilter) {
             const taskLower = taskFilter.toLowerCase();
-            entries = entries.filter(entry => 
-                entry.narratives && entry.narratives.some(n => 
-                    n.task_code && n.task_code.toLowerCase().includes(taskLower)
-                )
+            narratives = narratives.filter(narrative => 
+                narrative.taskCode && narrative.taskCode.toLowerCase().includes(taskLower)
             );
         }
         
@@ -703,10 +677,10 @@ async function loadDashboard() {
             switch (quickTimeFilter) {
                 case 'today':
                     filterDate = today;
-                    entries = entries.filter(entry => {
-                        const entryDate = new Date(entry.created_at);
-                        const entryday = new Date(entryDate.getFullYear(), entryDate.getMonth(), entryDate.getDate());
-                        return entryday.getTime() === filterDate.getTime();
+                    narratives = narratives.filter(narrative => {
+                        const narrativeDate = new Date(narrative.createdAt);
+                        const narrativeDay = new Date(narrativeDate.getFullYear(), narrativeDate.getMonth(), narrativeDate.getDate());
+                        return narrativeDay.getTime() === filterDate.getTime();
                     });
                     break;
                 case 'week':
@@ -714,30 +688,30 @@ async function loadDashboard() {
                     weekStart.setDate(today.getDate() - today.getDay());
                     const weekEnd = new Date(weekStart);
                     weekEnd.setDate(weekStart.getDate() + 6);
-                    entries = entries.filter(entry => {
-                        const entryDate = new Date(entry.created_at);
-                        return entryDate >= weekStart && entryDate <= weekEnd;
+                    narratives = narratives.filter(narrative => {
+                        const narrativeDate = new Date(narrative.createdAt);
+                        return narrativeDate >= weekStart && narrativeDate <= weekEnd;
                     });
                     break;
                 case 'month':
                     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
                     const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-                    entries = entries.filter(entry => {
-                        const entryDate = new Date(entry.created_at);
-                        return entryDate >= monthStart && entryDate <= monthEnd;
+                    narratives = narratives.filter(narrative => {
+                        const narrativeDate = new Date(narrative.createdAt);
+                        return narrativeDate >= monthStart && narrativeDate <= monthEnd;
                     });
                     break;
             }
         }
         
-        currentEntries = entries;
+        currentEntries = narratives;
         
         // Update stats
-        updateDashboardStats(entries);
+        updateDashboardStats(narratives);
         
         // Update filter options
-        updateClientFilter(entries);
-        updateMatterFilter(entries);
+        updateClientFilter(narratives);
+        updateMatterFilter(narratives);
         
         const container = document.getElementById('entries-list');
         if (!container) return;
@@ -746,7 +720,7 @@ async function loadDashboard() {
         container.className = 'entries-condensed'; // Always use list view class
         
         // Always render list view
-        renderCondensedView(entries, container);
+        renderCondensedView(narratives, container);
         
     } catch (err) {
         console.error('Error loading dashboard:', err);
@@ -754,26 +728,26 @@ async function loadDashboard() {
     }
 }
 
-function updateDashboardStats(entries) {
+function updateDashboardStats(narratives) {
     const totalEntries = document.getElementById('total-entries');
     const totalHours = document.getElementById('total-hours');
     
     if (totalEntries) {
-        totalEntries.textContent = entries.length;
+        totalEntries.textContent = narratives.length;
     }
     
     if (totalHours) {
-        const hours = entries.reduce((sum, entry) => sum + (entry.total_hours || 0), 0);
+        const hours = narratives.reduce((sum, narrative) => sum + (narrative.hours || 0), 0);
         totalHours.textContent = hours.toFixed(1);
     }
 }
 
-function updateClientFilter(entries) {
+function updateClientFilter(narratives) {
     const clientFilterEl = document.getElementById('client-filter');
     if (!clientFilterEl) return;
     
     // Get unique clients
-    const clients = [...new Set(entries.map(e => e.client_code).filter(Boolean))];
+    const clients = [...new Set(narratives.map(n => n.clientCode).filter(Boolean))];
     
     // Preserve current selection
     const currentValue = clientFilterEl.value;
@@ -791,22 +765,15 @@ function updateClientFilter(entries) {
     clientFilterEl.value = currentValue;
 }
 
-function updateMatterFilter(entries) {
+function updateMatterFilter(narratives) {
     const matterFilterEl = document.getElementById('matter-filter');
     if (!matterFilterEl) return;
     
-    // Get unique matter numbers from both entry level and narrative level
+    // Get unique matter numbers from narratives
     const matters = new Set();
-    entries.forEach(entry => {
-        if (entry.matter_number) {
-            matters.add(entry.matter_number);
-        }
-        if (entry.narratives) {
-            entry.narratives.forEach(narrative => {
-                if (narrative.matter_number) {
-                    matters.add(narrative.matter_number);
-                }
-            });
+    narratives.forEach(narrative => {
+        if (narrative.matterNumber) {
+            matters.add(narrative.matterNumber);
         }
     });
     
@@ -1022,27 +989,22 @@ async function saveInlineEdit(field, inputElement, entryId, fieldType, narrative
         // Show saving state
         field.classList.add('saving');
         
-        // Get current entry data
-        const entry = await dbOperations.getEntry(parseInt(entryId));
-        if (!entry) {
-            throw new Error('Entry not found');
+        // Get current narrative data
+        const narrative = await dbOperations.getNarrative(entryId);
+        if (!narrative) {
+            throw new Error('Narrative not found');
         }
         
         // Check if the value actually changed
         let currentValue = '';
-        if (fieldType === 'total_hours') {
-            currentValue = entry.total_hours?.toString() || '0';
-        } else if (narrativeIndex !== undefined && entry.narratives && entry.narratives[narrativeIndex]) {
-            const narrative = entry.narratives[narrativeIndex];
-            if (fieldType === 'hours') {
-                currentValue = narrative.hours?.toString() || '0';
-            } else if (fieldType === 'text') {
-                currentValue = narrative.text || '';
-            } else if (fieldType === 'client_code') {
-                currentValue = narrative.client_code || entry.client_code || '';
-            } else if (fieldType === 'matter_number') {
-                currentValue = narrative.matter_number || entry.matter_number || '';
-            }
+        if (fieldType === 'hours') {
+            currentValue = narrative.hours?.toString() || '0';
+        } else if (fieldType === 'narrative') {
+            currentValue = narrative.narrative || '';
+        } else if (fieldType === 'clientCode') {
+            currentValue = narrative.clientCode || '';
+        } else if (fieldType === 'matterNumber') {
+            currentValue = narrative.matterNumber || '';
         }
         
         // If no change, just cancel editing without showing error
@@ -1055,29 +1017,10 @@ async function saveInlineEdit(field, inputElement, entryId, fieldType, narrative
         
         // Prepare updates object
         let updates = {};
-        
-        if (fieldType === 'total_hours') {
-            updates.total_hours = parseFloat(newValue) || 0;
-        } else if (narrativeIndex !== undefined) {
-            // For narrative fields, we need to update the entire narratives array
-            if (!entry.narratives) entry.narratives = [];
-            if (!entry.narratives[narrativeIndex]) entry.narratives[narrativeIndex] = {};
-            
-            if (fieldType === 'hours') {
-                entry.narratives[narrativeIndex].hours = parseFloat(newValue) || 0;
-            } else if (fieldType === 'text') {
-                entry.narratives[narrativeIndex].text = newValue;
-            } else if (fieldType === 'client_code') {
-                entry.narratives[narrativeIndex].client_code = newValue;
-            } else if (fieldType === 'matter_number') {
-                entry.narratives[narrativeIndex].matter_number = newValue;
-            }
-            
-            updates.narratives = entry.narratives;
-        }
+        updates[fieldType] = fieldType === 'hours' ? (parseFloat(newValue) || 0) : newValue;
         
         // Save to database
-        await dbOperations.updateEntry(parseInt(entryId), updates);
+        await dbOperations.updateNarrative(entryId, updates);
         
         // Update display
         updateFieldDisplay(field, fieldType, newValue);
@@ -1086,34 +1029,13 @@ async function saveInlineEdit(field, inputElement, entryId, fieldType, narrative
         field.classList.remove('editing', 'saving');
         delete field.dataset.originalValue;
         
-        // If we updated narrative hours, recalculate and update total hours display
-        if (fieldType === 'hours' && narrativeIndex !== undefined) {
-            const updatedEntry = await dbOperations.getEntry(parseInt(entryId));
-            if (updatedEntry && updatedEntry.narratives) {
-                const newTotalHours = updatedEntry.narratives.reduce((sum, n) => sum + (n.hours || 0), 0);
-                
-                // Find the card element
-                const card = field.closest('.entry-card');
-                if (card) {
-                    const totalHoursDisplay = card.querySelector('.total-hours-display');
-                    if (totalHoursDisplay) {
-                        totalHoursDisplay.textContent = `${newTotalHours} hours`;
-                    }
-                }
-                
-                // Also update the entry's total_hours in the database
-                await dbOperations.updateEntry(parseInt(entryId), { total_hours: newTotalHours });
-            }
+        // Update the in-memory array
+        const index = currentEntries.findIndex(n => n.id === entryId);
+        if (index !== -1) {
+            currentEntries[index][fieldType] = updates[fieldType];
         }
         
-        // Sync with server
-        try {
-            if (window.syncManager && typeof syncManager.syncWithServer === 'function') {
-                syncManager.syncWithServer();
-            }
-        } catch (syncError) {
-            console.warn('Sync failed, but changes were saved locally:', syncError);
-        }
+        // Changes saved successfully to IndexedDB
         
     } catch (error) {
         console.error('Failed to save inline edit:', error);
@@ -1247,7 +1169,7 @@ function setupInlineEditingForField(field) {
 }
 
 // Condensed table view rendering
-function renderCondensedView(entries, container) {
+function renderCondensedView(narratives, container) {
     // Add time filter bar above table
     const timeFilterBar = document.createElement('div');
     timeFilterBar.className = 'time-filter-bar';
@@ -1301,7 +1223,7 @@ function renderCondensedView(entries, container) {
     const tbody = table.querySelector('tbody');
     
     // Handle empty state
-    if (entries.length === 0) {
+    if (narratives.length === 0) {
         tbody.innerHTML = `
             <tr>
                 <td colspan="7" class="empty-state-cell">
@@ -1317,29 +1239,8 @@ function renderCondensedView(entries, container) {
         return;
     }
     
-    // Create flat list of all narratives with their entries
-    const flatRows = [];
-    entries.forEach(entry => {
-        if (entry.narratives && entry.narratives.length > 0) {
-            entry.narratives.forEach((narrative, index) => {
-                flatRows.push({
-                    entry: entry,
-                    narrative: narrative,
-                    narrativeIndex: index
-                });
-            });
-        } else {
-            // Fallback for entries without narratives
-            flatRows.push({
-                entry: entry,
-                narrative: null,
-                narrativeIndex: null
-            });
-        }
-    });
-    
-    // Sort by date (newest first)
-    flatRows.sort((a, b) => new Date(b.entry.created_at) - new Date(a.entry.created_at));
+    // Sort narratives by date (newest first)
+    narratives.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     
     // Group by day for separators
     let lastDate = null;
@@ -1351,9 +1252,9 @@ function renderCondensedView(entries, container) {
         day: 'numeric'
     });
     
-    flatRows.forEach(row => {
-        const entryDate = new Date(row.entry.created_at);
-        const dateStr = entryDate.toLocaleDateString('en-US', { 
+    narratives.forEach(narrative => {
+        const narrativeDate = new Date(narrative.createdAt);
+        const dateStr = narrativeDate.toLocaleDateString('en-US', { 
             weekday: 'long',
             year: 'numeric',
             month: 'long',
@@ -1368,7 +1269,7 @@ function renderCondensedView(entries, container) {
         }
         
         // Create and add the row
-        const tableRow = createCondensedRow(row.entry, row.narrative, row.narrativeIndex);
+        const tableRow = createCondensedRow(narrative);
         tbody.appendChild(tableRow);
     });
     
@@ -1405,15 +1306,12 @@ function renderTableView(entries, container) {
 }
 
 // Create a single row for condensed view
-function createCondensedRow(entry, narrative, narrativeIndex) {
+function createCondensedRow(narrative) {
     const row = document.createElement('tr');
-    row.className = 'condensed-row' + (selectedEntries.has(entry.id) ? ' selected' : '');
-    row.dataset.entryId = entry.id;
-    if (narrativeIndex !== null) {
-        row.dataset.narrativeIndex = narrativeIndex;
-    }
+    row.className = 'condensed-row' + (selectedEntries.has(narrative.id) ? ' selected' : '');
+    row.dataset.entryId = narrative.id;
     
-    const date = new Date(entry.created_at);
+    const date = new Date(narrative.createdAt);
     const dateStr = date.toLocaleDateString('en-US', { 
         month: '2-digit', 
         day: '2-digit', 
@@ -1421,12 +1319,12 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
     });
     const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     
-    // Use narrative data if available, otherwise entry data
-    const clientCode = narrative?.client_code || entry.client_code || 'No Client';
-    const matterNumber = narrative?.matter_number || entry.matter_number || '';
-    const hours = narrative ? narrative.hours : (entry.total_hours || 0);
-    const description = narrative ? narrative.text : (entry.original_text || 'No description');
-    const status = entry.status || 'draft';
+    // Use narrative data
+    const clientCode = narrative.clientCode || 'No Client';
+    const matterNumber = narrative.matterNumber || '';
+    const hours = narrative.hours || 0;
+    const description = narrative.narrative || 'No description';
+    const status = narrative.status || 'draft';
     
     // Truncate description for display
     const maxDescLength = 150;
@@ -1444,9 +1342,8 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
         <td class="condensed-client">
             <div class="client-matter">
                 <span class="editable-field client-field client-main" 
-                      data-field="client_code" 
-                      data-entry-id="${entry.id}"
-                      ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}>
+                      data-field="clientCode" 
+                      data-entry-id="${narrative.id}">
                     ${clientCode}
                     <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
@@ -1454,9 +1351,8 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
                 </span>
                 <div class="matter-subtext">
                     <span class="editable-field matter-field" 
-                          data-field="matter_number" 
-                          data-entry-id="${entry.id}"
-                          ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}>
+                          data-field="matterNumber" 
+                          data-entry-id="${narrative.id}">
                         ${matterNumber || '-'}
                         <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
@@ -1467,9 +1363,8 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
         </td>
         <td class="condensed-matter">
             <span class="editable-field matter-field" 
-                  data-field="matter_number" 
-                  data-entry-id="${entry.id}"
-                  ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}>
+                  data-field="matterNumber" 
+                  data-entry-id="${narrative.id}">
                 ${matterNumber || '-'}
                 <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
@@ -1478,18 +1373,16 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
         </td>
         <td class="condensed-time">
             <span class="editable-field hours-field" 
-                  data-field="${narrative ? 'hours' : 'total_hours'}" 
-                  data-entry-id="${entry.id}"
-                  ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}>
+                  data-field="hours" 
+                  data-entry-id="${narrative.id}">
                 ${hours}
             </span>
         </td>
         <td class="condensed-narrative">
             <div class="narrative-content ${description.length > maxDescLength ? 'has-more' : ''}">
                 <span class="editable-field narrative-text" 
-                      data-field="text" 
-                      data-entry-id="${entry.id}"
-                      ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}
+                      data-field="narrative" 
+                      data-entry-id="${narrative.id}"
                       title="${description}">
                     ${description}
                 </span>
@@ -1497,35 +1390,35 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
         </td>
         <td class="condensed-actions">
             <div class="table-actions">
-                <button class="table-action-btn edit-btn" onclick="openEditModal(${entry.id})" title="Edit">
+                <button class="table-action-btn edit-btn" onclick="editNarrative('${narrative.id}')" title="Edit">
                     <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                         <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
                     </svg>
                 </button>
-                <button class="table-action-btn duplicate-btn" onclick="duplicateEntry(${entry.id})" title="Duplicate">
+                <button class="table-action-btn duplicate-btn" onclick="duplicateNarrative('${narrative.id}')" title="Duplicate">
                     <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                         <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"/>
                     </svg>
                 </button>
-                <button class="table-action-btn delete-btn" onclick="deleteEntry(${entry.id})" title="Delete">
+                <button class="table-action-btn delete-btn" onclick="deleteNarrative('${narrative.id}')" title="Delete">
                     <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                         <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
                     </svg>
                 </button>
                 <button class="table-action-btn checkbox-btn" 
-                        onclick="toggleEntrySelection(${entry.id})" 
+                        onclick="toggleEntrySelection('${narrative.id}')" 
                         title="Select entry"
-                        data-entry-id="${entry.id}">
+                        data-entry-id="${narrative.id}">
                     <input type="checkbox" 
                            class="table-action-checkbox" 
-                           data-entry-id="${entry.id}"
-                           ${selectedEntries.has(entry.id) ? 'checked' : ''}
+                           data-entry-id="${narrative.id}"
+                           ${selectedEntries.has(narrative.id) ? 'checked' : ''}
                            onclick="event.stopPropagation()"
                            tabindex="-1">
                 </button>
             </div>
             <div class="mobile-action-menu">
-                <button onclick="toggleMobileMenu(this, ${entry.id})" title="Actions">
+                <button onclick="toggleMobileMenu(this, '${narrative.id}')" title="Actions">
                     <svg viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12,16A2,2 0 0,1 14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18A2,2 0 0,1 12,16M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M12,4A2,2 0 0,1 14,6A2,2 0 0,1 12,8A2,2 0 0,1 10,6A2,2 0 0,1 12,4Z"/>
                     </svg>
@@ -1533,7 +1426,7 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
             </div>
         </td>
         <td class="condensed-status">
-            ${createStatusDropdown(entry.id, status, entry)}
+            ${createStatusDropdown(narrative.id, status, narrative)}
         </td>
     `;
     
@@ -1626,15 +1519,11 @@ async function handleExportClick() {
         // Export selected entries
         await exportSelectedEntries();
     } else {
-        // Check if there are any draft entries first
-        let entries = await dbOperations.getEntries();
-        const draftEntries = entries.filter(entry => {
-            const effectiveStatus = determineEntryStatus(entry);
-            return effectiveStatus === 'draft';
-        });
+        // Check if there are any draft narratives first
+        let narratives = await dbOperations.getNarratives({ status: 'draft' });
         
-        if (draftEntries.length === 0) {
-            // No draft entries available
+        if (narratives.length === 0) {
+            // No draft narratives available
             alert("No draft entries detected - use Add Entry.");
         } else {
             // Show dialog to confirm exporting all draft entries
@@ -1650,31 +1539,57 @@ async function exportSelectedEntries() {
     try {
         showLoading('Exporting selected entries...');
         
-        const entryIds = Array.from(selectedEntries);
+        const narrativeIds = Array.from(selectedEntries);
+        
+        // Get narratives data
+        const narratives = [];
+        for (const id of narrativeIds) {
+            const narrative = await dbOperations.getNarrative(id);
+            if (narrative) {
+                narratives.push(narrative);
+            }
+        }
+        
+        if (narratives.length === 0) {
+            hideLoading();
+            showNotification('No entries to export', 'warning');
+            return;
+        }
         
         // Generate filename
         const dateStr = new Date().toISOString().split('T')[0];
-        const filename = `time-entries-${dateStr}`;
+        const filename = `time-entries-${dateStr}.csv`;
         
-        await api.exportEntries(entryIds, filename);
+        // Call new export endpoint
+        const response = await fetch('http://localhost:5001/api/export/narratives', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ narratives, format: 'csv' })
+        });
         
-        // Update status of exported entries to 'exported'
-        for (const entryId of entryIds) {
-            const entry = await dbOperations.getEntry(entryId);
-            if (entry && entry.narratives) {
-                entry.narratives.forEach(narrative => {
-                    narrative.status = 'exported';
-                });
-            }
-            
-            await dbOperations.updateEntry(entryId, {
-                status: 'exported',
-                narratives: entry?.narratives
-            });
+        if (!response.ok) {
+            throw new Error('Export failed');
         }
         
+        // Download the file
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        
+        // Update status of exported narratives
+        const batchId = generateUUID();
+        await dbOperations.markAsExported(narrativeIds, batchId);
+        
         hideLoading();
-        showNotification(`${entryIds.length} entries exported successfully`, 'success');
+        showNotification(`${narratives.length} entries exported successfully`, 'success');
         
         // Clear selection
         selectedEntries.clear();
@@ -1694,45 +1609,50 @@ async function exportAllDraftEntries() {
     try {
         showLoading('Exporting all draft entries...');
         
-        // Get all entries
-        let entries = await dbOperations.getEntries();
+        // Get all draft narratives
+        const narratives = await dbOperations.getNarratives({ status: 'draft' });
         
-        // Filter for draft entries only
-        entries = entries.filter(entry => {
-            const effectiveStatus = determineEntryStatus(entry);
-            return effectiveStatus === 'draft';
-        });
-        
-        if (entries.length === 0) {
+        if (narratives.length === 0) {
             hideLoading();
             showNotification('No draft entries to export', 'warning');
             return;
         }
         
-        const entryIds = entries.map(e => e.id);
-        
         // Generate filename
         const dateStr = new Date().toISOString().split('T')[0];
-        const filename = `time-entries-${dateStr}`;
+        const filename = `time-entries-${dateStr}.csv`;
         
-        await api.exportEntries(entryIds, filename);
+        // Call new export endpoint
+        const response = await fetch('http://localhost:5001/api/export/narratives', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ narratives, format: 'csv' })
+        });
         
-        // Update status of exported entries to 'exported'
-        for (const entry of entries) {
-            if (entry.narratives) {
-                entry.narratives.forEach(narrative => {
-                    narrative.status = 'exported';
-                });
-            }
-            
-            await dbOperations.updateEntry(entry.id, {
-                status: 'exported',
-                narratives: entry.narratives
-            });
+        if (!response.ok) {
+            throw new Error('Export failed');
         }
         
+        // Download the file
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        
+        // Update status of exported narratives
+        const narrativeIds = narratives.map(n => n.id);
+        const batchId = generateUUID();
+        await dbOperations.markAsExported(narrativeIds, batchId);
+        
         hideLoading();
-        showNotification(`${entries.length} draft entries exported successfully`, 'success');
+        showNotification(`${narratives.length} draft entries exported successfully`, 'success');
         
         // Refresh dashboard
         await loadDashboard();
@@ -1808,7 +1728,7 @@ async function saveEntries() {
             });
         } else {
             // Get recent entries that were created during recording
-            const entries = await dbOperations.getEntries();
+            const entries = await dbOperations.getNarratives();
             const recentEntries = entries.slice(0, result.narratives.length);
             
             // Update each entry with its metadata
@@ -1833,30 +1753,49 @@ async function saveEntries() {
 
 // Entry actions
 async function editEntry(id) {
+    // Legacy function - redirects to editNarrative
+    return editNarrative(id);
+}
+
+async function editNarrative(id) {
     try {
-        const entry = await dbOperations.getEntry(id);
-        if (!entry) return;
+        const narrative = await dbOperations.getNarrative(id);
+        if (!narrative) return;
         
-        currentEntry = entry;
+        // Convert narrative to entry-like structure for compatibility
+        currentEntry = {
+            id: narrative.id,
+            narratives: [{
+                text: narrative.narrative,
+                hours: narrative.hours,
+                client_code: narrative.clientCode,
+                matter_number: narrative.matterNumber
+            }],
+            original_text: narrative.originalText || narrative.narrative,
+            client_code: narrative.clientCode,
+            matter_number: narrative.matterNumber,
+            total_hours: narrative.hours,
+            status: narrative.status
+        };
         
-        // Open modal with entry data
+        // Open modal with narrative data
         openModal();
         
         // Populate fields (handled by displayEnhancedResults for new interface)
         // Legacy support for old interface
         const legacyClientCode = document.getElementById('client-code');
         const legacyMatterNumber = document.getElementById('matter-number');
-        if (legacyClientCode) legacyClientCode.value = entry.client_code || '';
-        if (legacyMatterNumber) legacyMatterNumber.value = entry.matter_number || '';
+        if (legacyClientCode) legacyClientCode.value = narrative.clientCode || '';
+        if (legacyMatterNumber) legacyMatterNumber.value = narrative.matterNumber || '';
         
         // Show transcription and results
         document.getElementById('transcription').classList.remove('hidden');
-        document.getElementById('transcription-text').textContent = entry.original_text;
+        document.getElementById('transcription-text').textContent = narrative.originalText || narrative.narrative;
         
         displayEnhancedResults({
-            narratives: entry.narratives,
-            cleaned: entry.cleaned_text,
-            total_hours: entry.total_hours
+            narratives: currentEntry.narratives,
+            cleaned: narrative.cleanedText || narrative.narrative,
+            total_hours: narrative.hours
         });
         
     } catch (err) {
@@ -1866,19 +1805,21 @@ async function editEntry(id) {
 }
 
 async function deleteEntry(id) {
+    // Legacy function - redirects to deleteNarrative
+    return deleteNarrative(id);
+}
+
+async function deleteNarrative(id) {
     if (!confirm('Are you sure you want to delete this entry?')) return;
     
     try {
-        // Delete from backend first
-        await api.deleteEntry(id);
-        
-        // Then delete from local IndexedDB
-        await dbOperations.deleteEntry(id);
+        // Delete from local IndexedDB only (no backend)
+        await dbOperations.deleteNarrative(id);
         
         loadDashboard();
         showNotification('Entry deleted', 'success');
     } catch (err) {
-        console.error('Error deleting entry:', err);
+        console.error('Error deleting narrative:', err);
         showNotification('Failed to delete entry', 'error');
     }
 }
@@ -1919,28 +1860,32 @@ function updateExportButtonLabel() {
 }
 
 async function duplicateEntry(id) {
+    // Legacy function - redirects to duplicateNarrative
+    return duplicateNarrative(id);
+}
+
+async function duplicateNarrative(id) {
     try {
-        const originalEntry = await dbOperations.getEntry(parseInt(id));
-        if (!originalEntry) {
-            throw new Error('Entry not found');
+        const originalNarrative = await dbOperations.getNarrative(id);
+        if (!originalNarrative) {
+            throw new Error('Narrative not found');
         }
         
-        // Create a new entry with the same data but new timestamp
-        const duplicatedEntry = {
-            ...originalEntry,
-            id: undefined, // Let the database generate a new ID
-            created_at: new Date().toISOString(),
-            status: 'draft' // Reset status to draft for duplicated entries
+        // Create a new narrative with the same data but new ID and timestamp
+        const duplicatedNarrative = {
+            ...originalNarrative,
+            id: generateUUID(),
+            groupId: generateUUID(), // Generate new groupId to ensure independence
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            status: 'draft' // Reset status to draft for duplicated narratives
         };
         
-        // Remove the id field completely
-        delete duplicatedEntry.id;
-        
-        await dbOperations.saveEntry(duplicatedEntry);
+        await dbOperations.saveNarrative(duplicatedNarrative);
         loadDashboard();
         showNotification('Entry duplicated successfully', 'success');
     } catch (err) {
-        console.error('Error duplicating entry:', err);
+        console.error('Error duplicating narrative:', err);
         showNotification('Failed to duplicate entry', 'error');
     }
 }
@@ -2369,8 +2314,7 @@ async function applyToAllNarratives() {
         
         // Update IndexedDB with the response from backend
         if (response) {
-            // Mark as synced since it just came from the backend
-            response.sync_status = 'synced';
+            // Save to IndexedDB
             await dbOperations.saveEntry(response);
         }
         
@@ -2491,12 +2435,6 @@ async function changeNarrativeStatus(entryId, narrativeIndex, newStatus) {
             
             // Save to database
             await dbOperations.updateEntry(entryId, entry);
-            
-            // Update in-memory entries array
-            const entryIndex = entries.findIndex(e => e.id === entryId);
-            if (entryIndex !== -1) {
-                entries[entryIndex] = entry;
-            }
             
             // Refresh dashboard to reflect changes
             loadDashboard();
@@ -2893,6 +2831,17 @@ function closeBulkDialog(confirmed) {
         window.bulkDialogResolve(confirmed);
         delete window.bulkDialogResolve;
     }
+}
+
+// Bulk assignment functions
+function bulkAssignClient(client) {
+    console.log('Bulk assign client:', client);
+    // This functionality is no longer needed with individual narratives
+}
+
+function bulkAssignMatter(matter) {
+    console.log('Bulk assign matter:', matter);
+    // This functionality is no longer needed with individual narratives
 }
 
 window.bulkAssignClient = bulkAssignClient;
