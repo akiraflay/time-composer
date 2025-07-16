@@ -2,7 +2,6 @@
 let currentView = 'dashboard';
 let currentEntries = [];
 let currentEntry = null;
-let viewMode = 'condensed'; // Always use list view
 let dateFilter = '';
 let statusFilter = '';
 let clientFilter = '';
@@ -94,8 +93,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const wasMobile = previousWidth <= 768;
             const isMobile = currentWidth <= 768;
             
-            // Only reload if crossing the mobile breakpoint and in list view
-            if (viewMode === 'condensed' && currentView === 'dashboard' && wasMobile !== isMobile) {
+            // Only reload if crossing the mobile breakpoint
+            if (currentView === 'dashboard' && wasMobile !== isMobile) {
                 previousWidth = currentWidth;
                 loadDashboard();
             } else {
@@ -108,18 +107,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Event listeners - Streamlined
 function setupEventListeners() {
     // Navigation
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const view = e.target.dataset.view;
-            if (view === 'export') {
-                // Handle export directly instead of switching views
-                e.preventDefault();
-                handleExportClick();
-            } else {
-                switchView(view);
-            }
+    // Handle export button click
+    const exportBtn = document.querySelector('.nav-btn[data-view="export"]');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            handleExportClick();
         });
-    });
+    }
     
     // App title navigation - always go to dashboard
     const appTitle = document.getElementById('app-title');
@@ -386,11 +381,6 @@ function setupEventListeners() {
 async function switchView(view) {
     currentView = view;
     
-    // Update navigation
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.view === view);
-    });
-    
     // Update views
     document.querySelectorAll('.view').forEach(v => {
         v.classList.toggle('active', v.id === `${view}-view`);
@@ -565,15 +555,13 @@ function clearAllFilters() {
         if (allStatusItem) allStatusItem.classList.add('active');
     }
     
-    // Reset time filter buttons (only in condensed view)
-    if (viewMode === 'condensed') {
-        document.querySelectorAll('.time-filter-btn').forEach(btn => {
-            btn.classList.remove('active');
-            if (btn.dataset.filter === 'all') {
-                btn.classList.add('active');
-            }
-        });
-    }
+    // Reset time filter buttons
+    document.querySelectorAll('.time-filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.filter === 'all') {
+            btn.classList.add('active');
+        }
+    });
     
     // Update display and reload
     updateActiveFiltersCount();
