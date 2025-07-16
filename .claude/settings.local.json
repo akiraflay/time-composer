@@ -40,7 +40,9 @@
       "Bash(mkdir:*)",
       "Bash(mv:*)",
       "mcp__ide__getDiagnostics",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(cp:*)",
+      "Bash(pip3 install:*)"
     ],
     "deny": []
   }

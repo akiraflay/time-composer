@@ -1,86 +1,45 @@
 const API_BASE = 'http://localhost:5001/api';
 
 const api = {
-    async getEntries(filters = {}) {
-        const params = new URLSearchParams();
-        if (filters.status) params.append('status', filters.status);
-        if (filters.client_code) params.append('client_code', filters.client_code);
-        if (filters.start_date) params.append('start_date', filters.start_date);
-        if (filters.end_date) params.append('end_date', filters.end_date);
-        
-        const response = await fetch(`${API_BASE}/entries?${params}`);
-        
-        if (!response.ok) {
-            throw new Error('Failed to fetch entries');
-        }
-        
-        return response.json();
+    // Legacy methods - throw errors to alert developers of usage
+    async getEntries() {
+        throw new Error('getEntries() is deprecated. Use dbOperations.getAllEntries() for IndexedDB access.');
     },
     
     async getEntry(id) {
-        const response = await fetch(`${API_BASE}/entries/${id}`);
-        
-        if (!response.ok) {
-            throw new Error('Failed to fetch entry');
-        }
-        
-        return response.json();
+        throw new Error('getEntry() is deprecated. Use dbOperations.getEntry() for IndexedDB access.');
     },
     
     async updateEntry(id, data) {
-        const response = await fetch(`${API_BASE}/entries/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to update entry');
-        }
-        
-        return response.json();
+        throw new Error('updateEntry() is deprecated. Use dbOperations.saveEntry() for IndexedDB access.');
     },
     
     async deleteEntry(id) {
-        const response = await fetch(`${API_BASE}/entries/${id}`, {
-            method: 'DELETE'
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to delete entry');
-        }
-        
-        return response.json();
+        throw new Error('deleteEntry() is deprecated. Use dbOperations.deleteEntry() for IndexedDB access.');
     },
     
     async exportEntries(entryIds = [], filename = null) {
-        const response = await fetch(`${API_BASE}/export`, {
+        throw new Error(
+            'exportEntries() is deprecated. Use the new export functionality:\n' +
+            '1. For CSV export: Click the export button on individual narratives or use bulk export from the dashboard\n' +
+            '2. The export is now handled client-side using the Export class in frontend/js/export.js\n' +
+            '3. To export programmatically: Use new Export().exportNarratives(narratives, filename)'
+        );
+    },
+    
+    async enhance(text) {
+        const response = await fetch(`${API_BASE}/enhance`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ entry_ids: entryIds })
+            body: JSON.stringify({ text })
         });
         
         if (!response.ok) {
-            throw new Error('Export failed');
+            const error = await response.json();
+            throw new Error(error.error || 'Enhancement failed');
         }
         
-        // Create download link
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        
-        // Use provided filename or generate one
-        if (filename) {
-            a.download = `${filename}.csv`;
-        } else {
-            a.download = `time_entries_${new Date().toISOString().split('T')[0]}.csv`;
-        }
-        
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        return response.json();
     }
 };
 

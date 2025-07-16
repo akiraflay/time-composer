@@ -1,3 +1,12 @@
+/* 
+ * Time Composer Styles
+ * Desktop-only application - Minimum viewport width: 1024px
+ * 
+ * This application is designed exclusively for desktop use.
+ * Mobile/responsive styles have been intentionally removed.
+ * All UI components assume a minimum screen width of 1024px.
+ */
+
 /* Modern legal industry aesthetic */
 :root {
     --primary-color: #2563eb;
@@ -27,6 +36,11 @@ body {
     line-height: 1.6;
 }
 
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
 /* Header */
 header {
     background: var(--surface);
@@ -42,6 +56,7 @@ h1 {
     font-size: 1.5rem;
     color: var(--primary-color);
     font-weight: 600;
+    white-space: nowrap;
 }
 
 .app-title-link {
@@ -51,6 +66,8 @@ h1 {
     padding: 0.25rem 0.5rem;
     margin: -0.25rem -0.5rem;
     border-radius: 0.375rem;
+    display: inline-block;
+    white-space: nowrap;
 }
 
 .app-title-link:hover {
@@ -100,7 +117,6 @@ main {
     display: block;
 }
 
-/* Streamlined Controls - Ultra Clean Design */
 .streamlined-controls {
     display: flex;
     align-items: center;
@@ -115,8 +131,7 @@ main {
 
 /* Streamlined search input */
 .streamlined-controls .search-input {
-    flex: 1;
-    min-width: 300px;
+    width: 400px;
     padding: 0.75rem 1rem;
     border: 1px solid var(--border);
     border-radius: 0.5rem;
@@ -220,6 +235,7 @@ main {
     transition: all 0.2s;
     box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
     white-space: nowrap;
+    margin-left: auto;
 }
 
 .add-entry-btn:hover {
@@ -297,221 +313,6 @@ main {
     border-radius: 0 0 0.5rem 0.5rem;
 }
 
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-    .streamlined-controls {
-        gap: 0.5rem;
-        padding: 0.75rem;
-        border-radius: 0.625rem;
-        margin: 0 1rem 1.5rem 1rem;
-    }
-    
-    .streamlined-controls .search-input {
-        min-width: 200px;
-        font-size: 16px; /* Prevent zoom on iOS */
-    }
-    
-    .control-btn {
-        width: 36px;
-        height: 36px;
-    }
-    
-    .add-entry-btn {
-        padding: 0.625rem 1rem;
-        font-size: 0.8125rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .streamlined-controls {
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        margin: 0 2rem 1.5rem 2rem;
-    }
-    
-    /* Match margins for all main containers on smallest screens */
-    .condensed-table-wrapper {
-        margin: 0 2rem 1.5rem 2rem !important;
-    }
-    
-    .time-period-container {
-        margin: 0 2rem 1.5rem 2rem !important;
-    }
-    
-    .time-filter-bar {
-        margin: 0 2rem -1px 2rem !important;
-    }
-    
-    /* Hide actions column on very small screens */
-    .condensed-table th.condensed-actions,
-    .condensed-table td.condensed-actions {
-        display: none;
-    }
-    
-    /* Description cell with space for action buttons */
-    .condensed-table td.condensed-description {
-        padding-bottom: 1rem;
-    }
-    
-    /* Double the padding on table cells for smallest screens */
-    .condensed-table th,
-    .condensed-table td {
-        padding: 0.5rem 0.75rem !important;
-    }
-    
-    /* Center align table headers on mobile */
-    .condensed-table th {
-        text-align: center !important;
-        font-size: 0.75rem !important;
-        font-weight: 600 !important;
-        text-transform: uppercase !important;
-    }
-    
-    /* Adjust specific column alignments */
-    .condensed-table th.condensed-date {
-        padding-left: 1rem !important;
-    }
-    
-    .condensed-table th.condensed-time {
-        padding-right: 1rem !important;
-    }
-    
-    /* Keep description left-aligned for readability */
-    .condensed-table td.condensed-description {
-        text-align: left !important;
-    }
-    
-    /* Show and position action buttons in description area */
-    .condensed-table .description-actions {
-        display: flex !important;
-        position: static;
-        margin-top: 0.5rem;
-        gap: 0.375rem;
-        justify-content: flex-start;
-    }
-    
-    /* Fix inline number input for hours on mobile */
-    .condensed-table .hours-field input[type="number"] {
-        -webkit-appearance: none;
-        -moz-appearance: textfield;
-        appearance: textfield;
-        width: 100%;
-        background: var(--surface);
-        border: 1px solid var(--primary-color);
-        border-radius: 0.25rem;
-        padding: 0.25rem 0.5rem;
-        font-size: inherit;
-    }
-    
-    /* Hide spinner buttons */
-    .condensed-table .hours-field input[type="number"]::-webkit-inner-spin-button,
-    .condensed-table .hours-field input[type="number"]::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-    
-    .condensed-table .description-actions .table-action-btn {
-        padding: 0.375rem;
-        min-width: 1.75rem;
-        min-height: 1.75rem;
-        width: 1.75rem;
-        height: 1.75rem;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 0.25rem;
-        color: var(--text-secondary);
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .condensed-table .description-actions .table-action-btn:hover {
-        background: var(--background);
-        color: var(--text-primary);
-        width: 1.75rem;
-        height: 1.75rem;
-    }
-    
-    .condensed-table .description-actions .table-action-btn:hover svg {
-        fill: var(--text-primary);
-    }
-    
-    .condensed-table .description-actions .table-action-btn svg {
-        width: 14px;
-        height: 14px;
-        display: block;
-        flex-shrink: 0;
-    }
-    
-    .streamlined-controls .search-input {
-        flex-basis: 100%;
-        min-width: auto;
-        order: 1;
-    }
-    
-    .control-btn {
-        order: 2;
-    }
-    
-    .add-entry-btn {
-        order: 3;
-        flex: 1;
-        justify-content: center;
-    }
-    
-    /* Condensed table mobile optimizations for very small screens */
-    /* Keep table structure but enable horizontal scroll */
-    .condensed-table-wrapper {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-    
-    .condensed-table {
-        min-width: 600px;
-    }
-    
-    .condensed-table tr {
-        /* Remove card-like styling */
-        padding: 0;
-        margin-bottom: 0;
-    }
-    
-    /* Keep table cells as table cells on mobile */
-    .condensed-table td.condensed-client,
-    .condensed-table td.condensed-matter,
-    .condensed-table td.condensed-time,
-    .condensed-table td.condensed-description,
-    .condensed-table td.condensed-actions {
-        display: table-cell;
-        padding: 0.5rem 0.75rem;
-    }
-    
-    /* Adjust font sizes for mobile readability */
-    .client-field,
-    .matter-field {
-        font-size: 0.8125rem;
-    }
-    
-    .description-text {
-        font-size: 0.8125rem;
-    }
-    
-    /* Hide the "Hours:" prefix on mobile */
-    .hours-field::before {
-        content: none;
-    }
-    
-    .table-action-btn {
-        padding: 0.25rem;
-    }
-    
-    .table-action-btn svg {
-        width: 14px;
-        height: 14px;
-    }
-}
-
 .search-input {
     width: 100%;
     padding: 0.625rem 1rem;
@@ -529,163 +330,9 @@ main {
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1), inset 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-/* Filter Section */
-.filter-section {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
 
-.filter-button {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.625rem 1rem;
-    background: var(--background);
-    border: 1px solid var(--border);
-    border-radius: 0.5rem;
-    cursor: pointer;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-    transition: all 0.2s ease;
-    white-space: nowrap;
-    position: relative;
-}
-
-.filter-button:hover {
-    border-color: var(--primary-color);
-    color: var(--text-primary);
-    background: var(--surface);
-}
-
-.filter-button:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
 
 /* Date Picker */
-.date-picker-container {
-    position: relative;
-}
-
-.date-button {
-    min-width: 140px;
-    justify-content: space-between;
-}
-
-.date-button .chevron {
-    margin-left: 0.5rem;
-    transition: transform 0.2s;
-}
-
-.date-button.active .chevron {
-    transform: rotate(180deg);
-}
-
-.date-picker-popover {
-    position: absolute;
-    top: calc(100% + 0.5rem);
-    left: 0;
-    min-width: 280px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 0.75rem;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-    padding: 1rem;
-    z-index: 1000;
-    animation: popoverSlideIn 0.2s ease;
-}
-
-@keyframes popoverSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-0.5rem);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.quick-dates {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-}
-
-.quick-date-btn {
-    padding: 0.75rem;
-    border: 1px solid var(--border);
-    border-radius: 0.5rem;
-    background: var(--background);
-    cursor: pointer;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-    transition: all 0.2s;
-    text-align: center;
-}
-
-.quick-date-btn:hover {
-    border-color: var(--primary-color);
-    color: var(--text-primary);
-}
-
-.quick-date-btn.active {
-    background: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
-}
-
-.date-separator {
-    text-align: center;
-    font-size: 0.8125rem;
-    color: var(--text-secondary);
-    margin: 1rem 0 0.75rem 0;
-    font-style: italic;
-}
-
-.custom-range {
-    border-top: 1px solid var(--border);
-    padding-top: 1rem;
-}
-
-.date-inputs {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-}
-
-.date-input {
-    flex: 1;
-    padding: 0.5rem;
-    border: 1px solid var(--border);
-    border-radius: 0.375rem;
-    font-size: 0.875rem;
-    background: var(--background);
-}
-
-.date-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
-}
-
-.to-label {
-    color: var(--text-secondary);
-    font-size: 0.875rem;
-    font-weight: 500;
-}
-
-.date-actions {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: flex-end;
-}
 
 /* Status Filter */
 .status-filter {
@@ -693,68 +340,7 @@ main {
     min-width: 120px;
 }
 
-/* More Filters Button */
-.more-filters-btn {
-    position: relative;
-}
 
-.filter-count {
-    position: absolute;
-    top: -0.375rem;
-    right: -0.375rem;
-    background: var(--primary-color);
-    color: white;
-    border-radius: 50%;
-    width: 1.25rem;
-    height: 1.25rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.6875rem;
-    font-weight: 600;
-}
-
-/* Action Section */
-.action-section {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-/* View Toggle */
-.view-toggle {
-    display: flex;
-    background: var(--background);
-    border: 1px solid var(--border);
-    border-radius: 0.5rem;
-    padding: 0.25rem;
-}
-
-.view-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    padding: 0.5rem 0.75rem;
-    border: none;
-    background: transparent;
-    border-radius: 0.375rem;
-    cursor: pointer;
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-    transition: all 0.2s;
-}
-
-.view-btn:hover {
-    color: var(--text-primary);
-    background: rgba(37, 99, 235, 0.05);
-}
-
-.view-btn.active {
-    background: var(--primary-color);
-    color: white;
-    box-shadow: 0 1px 3px rgba(37, 99, 235, 0.3);
-}
 
 /* Primary Action Button */
 .primary-action-btn {
@@ -893,167 +479,10 @@ main {
     background: #1d4ed8;
 }
 
-/* Mobile Layout */
-@media (max-width: 768px) {
-    .desktop-controls {
-        display: none;
-    }
-    
-    .mobile-controls {
-        display: block;
-    }
-    
-    .mobile-search-row {
-        margin-bottom: 0.75rem;
-    }
-    
-    .mobile-filter-row {
-        display: flex;
-        gap: 0.5rem;
-        padding: 0.75rem;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 0.75rem;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-    
-    .mobile-filter-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 44px;
-        height: 44px;
-        padding: 0.75rem;
-        background: var(--background);
-        border: 1px solid var(--border);
-        border-radius: 0.5rem;
-        cursor: pointer;
-        color: var(--text-secondary);
-        transition: all 0.2s;
-        white-space: nowrap;
-        flex-shrink: 0;
-    }
-    
-    .mobile-filter-btn:hover,
-    .mobile-filter-btn:active {
-        border-color: var(--primary-color);
-        color: var(--primary-color);
-        background: rgba(37, 99, 235, 0.05);
-    }
-    
-    .view-toggle-mobile {
-        display: flex;
-        background: var(--background);
-        border: 1px solid var(--border);
-        border-radius: 0.5rem;
-        padding: 0.125rem;
-    }
-    
-    .view-btn-mobile {
-        min-width: 44px;
-        height: 36px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: none;
-        background: transparent;
-        border-radius: 0.375rem;
-        cursor: pointer;
-        color: var(--text-secondary);
-        transition: all 0.2s;
-    }
-    
-    .view-btn-mobile.active {
-        background: var(--primary-color);
-        color: white;
-    }
-    
-    .mobile-add-btn {
-        background: var(--primary-color);
-        color: white;
-        border: none;
-    }
-    
-    .mobile-add-btn:hover,
-    .mobile-add-btn:active {
-        background: #1d4ed8;
-        border-color: #1d4ed8;
-    }
-}
-
-/* Export View Styles */
-#export-view {
-    padding: 0 2rem;
-}
-
-.export-container {
-    margin: 0 auto;
-}
-
-/* Export Cards - Match Dashboard Style */
-.export-card,
-.export-stats-card,
-.export-preview-card {
-    background: var(--surface);
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    border-radius: 0.75rem;
-    margin-bottom: 1rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    transition: all 0.2s ease;
-    overflow: hidden;
-}
-
-.export-card {
-    overflow: visible;
-}
-
-/* First card in export view needs top margin to match dashboard spacing */
-.export-container > .export-card:first-child {
-    margin-top: 1rem;
-}
-
-.export-card .card-body:first-child {
+.filter-group {
     border-radius: 0.75rem 0.75rem 0 0;
 }
 
-.export-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-    transform: translateY(-1px);
-}
-
-.export-preview-card:hover {
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
-}
-
-.card-header {
-    padding: 0.875rem 1rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-    background: linear-gradient(to bottom, #fafbfc, var(--surface));
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.header-title-group {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.card-header h3 {
-    margin: 0;
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    letter-spacing: -0.025em;
-}
-
-.card-body {
-    padding: 0.875rem 1rem;
-    background: var(--surface);
-    overflow-x: hidden;
-}
 
 /* Date Selection Section */
 .date-selection-section {
@@ -1181,14 +610,6 @@ main {
     z-index: 2;
 }
 
-/* Prevent date input calendar from expanding beyond container */
-.date-input::-webkit-calendar-picker-indicator {
-    position: absolute;
-    right: 0.5rem;
-    cursor: pointer;
-    width: 20px;
-    height: 20px;
-}
 
 .date-input.compact {
     padding: 0.25rem 0.5rem;
@@ -1272,13 +693,6 @@ main {
     margin: 0;
 }
 
-/* Export Action Section */
-.export-action-section {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-top: 0;
-}
 
 /* Compact Checkbox in Header */
 .checkbox-wrapper.compact {
@@ -1315,587 +729,19 @@ main {
 }
 
 
-/* Export Button */
-.export-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.625rem 1.25rem;
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    font-size: 0.875rem;
-    font-weight: 600;
-    transition: all 0.15s ease;
-    box-shadow: 0 1px 3px rgba(37, 99, 235, 0.15);
-    flex-shrink: 0;
-    position: relative;
-    z-index: 10;
-}
-
-.export-button.header-action {
-    padding: 0.5rem 1rem;
-    font-size: 0.8125rem;
-}
-
-.export-button svg {
-    width: 18px;
-    height: 18px;
-}
-
-.export-button:hover {
-    background: #1d4ed8;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(37, 99, 235, 0.2);
-}
-
-.export-button:active {
-    transform: translateY(0);
-    box-shadow: 0 1px 3px rgba(37, 99, 235, 0.15);
-}
-
-.export-button:disabled {
-    background: rgba(0, 0, 0, 0.1);
-    color: var(--text-secondary);
-    cursor: not-allowed;
-    box-shadow: none;
-    transform: none;
-}
-
-/* Statistics Card - Modern Dashboard Style */
-.export-stats-card {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-    padding: 1rem;
-    background: linear-gradient(135deg, rgba(240, 247, 255, 0.5) 0%, rgba(255, 255, 255, 0.8) 100%);
-    position: relative;
-    overflow: hidden;
-}
-
-.export-stats-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, rgba(37, 99, 235, 0.2), rgba(96, 165, 250, 0.2));
-}
-
-.export-stats-card:hover {
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
-    transform: translateY(-1px);
-}
-
-.stat-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.5rem;
-    border-radius: 0.375rem;
-    transition: all 0.15s ease;
-}
-
-.stat-item:hover {
-    background: rgba(255, 255, 255, 0.6);
-    transform: scale(1.01);
-}
-
-.stat-icon {
-    width: 40px;
-    height: 40px;
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.9), rgba(96, 165, 250, 0.9));
-    border-radius: 0.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    box-shadow: 0 1px 3px rgba(37, 99, 235, 0.15);
-    flex-shrink: 0;
-}
-
-.stat-icon svg {
-    width: 20px;
-    height: 20px;
-}
-
-.stat-details {
-    text-align: left;
-    flex: 1;
-}
-
-.stat-value {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    line-height: 1;
-    margin-bottom: 0.125rem;
-    font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
-    letter-spacing: -0.025em;
-}
-
-.stat-value.stat-date-range {
-    font-size: 0.875rem;
-    font-family: inherit;
-    font-weight: 600;
-}
-
-.stat-label {
-    font-size: 0.8125rem;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: 500;
-}
-
-/* Intermediate screen size - adjust filename section */
-@media (max-width: 900px) and (min-width: 601px) {
-    .filename-content {
-        flex-direction: column;
-        gap: 0.75rem;
-        align-items: stretch;
-    }
-    
-    .filename-content > div {
-        max-width: 100%;
-    }
-    
-    .export-button {
-        width: 100%;
-        justify-content: center;
-    }
-}
-
-/* Medium screens - keep date controls on one row */
-@media (max-width: 1024px) {
-    .preset-btn {
-        padding: 0.3rem 0.7rem;
-        font-size: 0.75rem;
-    }
-    
-    /* Start reducing stats size */
-    .stat-value {
-        font-size: 1.25rem;
-    }
-    
-    .stat-icon {
-        width: 36px;
-        height: 36px;
-    }
-    
-    /* Hide hint text on medium screens too */
-    .field-hint {
-        font-size: 0.625rem;
-    }
-    
-    .date-input-group.compact label {
-        font-size: 0.7rem;
-        min-width: 25px;
-    }
-    
-    .date-input.compact {
-        padding: 0.25rem 0.4rem;
-        font-size: 0.75rem;
-        min-width: 100px;
-    }
-}
-
-/* Responsive Design for Export View */
-@media (max-width: 768px) {
-    .export-container {
-        padding: 0 1rem;
-    }
-    
-    .export-header h2 {
-        font-size: 1.5rem;
-    }
-    
-    /* Keep stats horizontal but make them smaller */
-    .export-stats-card {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.5rem;
-        padding: 0.75rem;
-    }
-    
-    .stat-item {
-        padding: 0.25rem;
-        gap: 0.5rem;
-    }
-    
-    .stat-icon {
-        width: 32px;
-        height: 32px;
-    }
-    
-    .stat-icon svg {
-        width: 16px;
-        height: 16px;
-    }
-    
-    .stat-value {
-        font-size: 1.125rem;
-    }
-    
-    .stat-label {
-        font-size: 0.625rem;
-    }
-    
-    .stat-value.stat-date-range {
-        font-size: 0.75rem;
-    }
-    
-    /* Hide hint text on small screens */
-    .field-hint {
-        display: none;
-    }
-    
-    .date-controls-row {
-        grid-template-columns: 1fr;
-        gap: 0.75rem;
-    }
-    
-    .date-presets {
-        display: flex;
-        gap: 0.375rem;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-    
-    .preset-btn {
-        padding: 0.3rem 0.6rem;
-        font-size: 0.75rem;
-        flex: 1;
-        min-width: 60px;
-    }
-    
-    .date-range-inputs {
-        justify-content: space-between;
-    }
-    
-    .date-separator {
-        display: none;
-    }
-    
-    .date-input-group {
-        flex: 1;
-    }
-    
-    .date-input-group.compact label {
-        font-size: 0.75rem;
-        min-width: 30px;
-    }
-    
-    .date-input {
-        width: 100%;
-        min-width: 0;
-    }
-    
-    .date-input.compact {
-        padding: 0.3rem 0.5rem;
-        font-size: 0.8125rem;
-        min-width: 100px;
-    }
-    
-    .export-button.header-action {
-        padding: 0.375rem 0.75rem;
-        font-size: 0.75rem;
-    }
-    
-    .export-button.header-action .btn-icon {
-        width: 16px;
-        height: 16px;
-    }
-    
-    .filename-input-wrapper {
-        width: 100%;
-    }
-    
-    .export-preview-table {
-        font-size: 0.7rem;
-    }
-    
-    .export-preview-table th,
-    .export-preview-table td {
-        padding: 0.25rem 0.375rem;
-    }
-    
-    /* Hide client and matter columns on mobile */
-    .export-preview-table th:nth-child(4),
-    .export-preview-table td:nth-child(4),
-    .export-preview-table th:nth-child(5),
-    .export-preview-table td:nth-child(5) {
-        display: none;
-    }
-    
-    .card-header {
-        padding: 0.875rem;
-    }
-    
-    .card-body {
-        padding: 1rem;
-    }
-    
-    .header-title-group {
-        flex: 1;
-    }
-    
-    .checkbox-wrapper.compact .checkbox-label {
-        font-size: 0.75rem;
-    }
-}
-
-/* Small screens - optimize for mobile */
-@media (max-width: 600px) {
-    /* Hide the stats card entirely on small screens */
-    .export-stats-card {
-        display: none;
-    }
-    
-    /* Make filename section more compact */
-    .filename-section {
-        display: flex;
-        flex-direction: row;
-        align-items: flex-start;
-        gap: 0.5rem;
-        margin-top: 0.5rem;
-    }
-    
-    .filename-section .section-label {
-        margin-bottom: 0;
-        font-size: 0.7rem;
-        min-width: fit-content;
-        flex-shrink: 0;
-        padding-top: 0.375rem; /* Align with input */
-    }
-    
-    .filename-content {
-        flex: 1;
-        display: flex;
-        flex-direction: column !important;
-        gap: 0.5rem;
-        align-items: stretch;
-    }
-    
-    .filename-content > div {
-        max-width: 100%;
-    }
-    
-    /* Center the export button */
-    .export-button {
-        align-self: center;
-        width: auto;
-        padding: 0.5rem 1.5rem;
-    }
-    
-    /* Always hide field hint on small screens */
-    .field-hint {
-        display: none !important;
-    }
-}
-
-/* Very small screens - further optimizations */
-@media (max-width: 480px) {
-    .preset-btn {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.7rem;
-        min-width: 50px;
-    }
-    
-    /* Use CSS to abbreviate text on very small screens */
-    .preset-btn[data-preset="this-week"] {
-        font-size: 0;
-    }
-    .preset-btn[data-preset="this-week"]::after {
-        content: "Week";
-        font-size: 0.7rem;
-    }
-    
-    .preset-btn[data-preset="this-month"] {
-        font-size: 0;
-    }
-    .preset-btn[data-preset="this-month"]::after {
-        content: "Month";
-        font-size: 0.7rem;
-    }
-    
-    .preset-btn[data-preset="last-month"] {
-        font-size: 0;
-    }
-    .preset-btn[data-preset="last-month"]::after {
-        content: "Last Mo";
-        font-size: 0.7rem;
-    }
-}
-
-/* Preview Count */
-.preview-count {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    font-weight: 400;
-}
-
-/* Export Preview Table */
-.export-preview-table {
-    overflow: visible;
-    border-radius: 0.5rem;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    position: relative;
-}
-
-.export-preview-table table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.75rem;
-    table-layout: fixed;
-}
-
-.export-preview-table thead {
-    background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
-}
-
-.export-preview-table th {
-    padding: 0.375rem 0.5rem;
-    text-align: left;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-size: 0.625rem;
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-}
-
-.export-preview-table td {
-    padding: 0.375rem 0.5rem;
-    border-bottom: 1px solid #f1f5f9;
-    color: var(--text-primary);
-    line-height: 1.2;
-    height: 2rem;
-    max-height: 2rem;
-    vertical-align: middle;
-    position: relative;
-}
-
-/* Column widths */
-.export-preview-table th:nth-child(1),
-.export-preview-table td:nth-child(1) { 
-    width: 110px; 
-    white-space: nowrap;
-} /* Date */
-.export-preview-table th:nth-child(2),
-.export-preview-table td:nth-child(2) { width: auto; } /* Description */
-.export-preview-table th:nth-child(3),
-.export-preview-table td:nth-child(3) { width: 50px; text-align: center; } /* Hours */
-.export-preview-table th:nth-child(4),
-.export-preview-table td:nth-child(4) { 
-    width: 80px; 
-    text-align: center;
-} /* Client */
-.export-preview-table th:nth-child(5),
-.export-preview-table td:nth-child(5) { 
-    width: 80px; 
-    text-align: center;
-} /* Matter */
-.export-preview-table th:nth-child(6),
-.export-preview-table td:nth-child(6) { 
-    width: 90px; 
-    text-align: center;
-} /* Status */
-
-/* Description column */
-.export-description {
-    display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    position: relative;
-    cursor: default;
-}
-
-.export-description:hover {
-    overflow: visible;
-    white-space: normal;
-    word-wrap: break-word;
-    background: var(--surface);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    padding: 0.5rem;
-    position: absolute;
-    left: 0;
-    right: auto;
-    top: -0.5rem;
-    z-index: 1000;
-    border-radius: 0.25rem;
-    border: 1px solid var(--border);
-    min-width: 300px;
-    max-width: 500px;
-    min-height: 2.5rem;
-}
 
 
-.export-preview-table tr {
-    transition: all 0.15s ease;
-}
 
-.export-preview-table tbody tr:hover {
-    background: #f8fafc;
-}
 
-/* Empty State */
-.export-empty-state {
-    padding: 2.5rem 2rem;
-    text-align: center;
-    color: var(--text-secondary);
-    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
-    border-radius: 0.5rem;
-}
 
-.export-empty-state svg {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 1rem;
-    opacity: 0.2;
-    color: var(--primary-color);
-}
 
-.export-empty-state p {
-    margin: 0;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-}
 
-/* Loading State */
-.export-loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 3rem;
-    color: var(--text-secondary);
-}
 
-.export-loading .spinner {
-    width: 32px;
-    height: 32px;
-    border: 3px solid var(--border);
-    border-top-color: var(--primary-color);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-right: 1rem;
-}
 
-/* Status Badges in Export Table */
-.export-preview-table .status-badge {
-    display: inline-block;
-    padding: 0.125rem 0.5rem;
-    font-size: 0.625rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.025em;
-}
+
+
+
+
 
 .status-badge {
     display: inline-block;
@@ -1908,220 +754,22 @@ main {
     white-space: nowrap;
 }
 
-.export-preview-table .status-badge.draft,
 .status-badge.draft {
     background: rgba(156, 163, 175, 0.1);
     color: #6b7280;
     border: 1px solid rgba(156, 163, 175, 0.2);
 }
 
-.export-preview-table .status-badge.ready,
 .status-badge.ready {
     background: rgba(37, 99, 235, 0.1);
     color: #2563eb;
     border: 1px solid rgba(37, 99, 235, 0.2);
 }
 
-.export-preview-table .status-badge.exported,
 .status-badge.exported {
     background: rgba(34, 197, 94, 0.1);
     color: #16a34a;
     border: 1px solid rgba(34, 197, 94, 0.2);
-}
-
-/* Enhanced Dashboard Controls */
-.dashboard-stats {
-    width: 100%;
-    display: flex;
-    gap: 1rem;
-    padding: 0.5rem 0.75rem;
-    background: var(--background);
-    border-radius: 0.375rem;
-    margin-bottom: 0.75rem;
-    font-size: 0.8125rem;
-}
-
-.stat-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--text-secondary);
-}
-
-.stat-value {
-    font-weight: 600;
-    color: var(--text-primary);
-    font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
-}
-
-.filter-row {
-    display: flex;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-    width: 100%;
-}
-
-/* Time Period Container */
-.time-period-container {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 0.625rem;
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.time-period-container > label {
-    display: block;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-    margin-bottom: 0.75rem;
-}
-
-/* Quick Time Filters */
-.quick-time-filters {
-    display: flex;
-    background: var(--background);
-    border: 1px solid var(--border);
-    border-radius: 0.375rem;
-    padding: 0.25rem;
-    gap: 0.25rem;
-}
-
-.time-filter-btn {
-    padding: 0.375rem 0.75rem;
-    border: none;
-    background: transparent;
-    color: var(--text-secondary);
-    cursor: pointer;
-    border-radius: 0.25rem;
-    font-size: 0.8125rem;
-    font-weight: 500;
-    transition: all 0.2s;
-    white-space: nowrap;
-}
-
-.time-filter-btn:hover {
-    background: var(--surface);
-    color: var(--text-primary);
-}
-
-.time-filter-btn.active {
-    background: var(--primary-color);
-    color: white;
-    font-weight: 600;
-}
-
-/* Date Range Picker */
-.date-range-picker {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: var(--background);
-    border: 1px solid var(--border);
-    border-radius: 0.375rem;
-    padding: 0.5rem;
-}
-
-.date-input {
-    border: none;
-    background: transparent;
-    font-size: 0.875rem;
-    color: var(--text-primary);
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    min-width: 140px;
-}
-
-.date-input:focus {
-    outline: none;
-    background: var(--surface);
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
-}
-
-.date-separator {
-    color: var(--text-secondary);
-    font-size: 0.875rem;
-    font-weight: 500;
-}
-
-/* Filter Button */
-.filter-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0.75rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 0.375rem;
-    cursor: pointer;
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    transition: all 0.2s;
-    font-weight: 500;
-}
-
-.filter-btn:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-}
-
-.filter-btn.active {
-    background: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
-}
-
-/* View Toggle - Simplified */
-.view-toggle {
-    display: flex;
-    background: var(--background);
-    border: 1px solid var(--border);
-    border-radius: 0.375rem;
-    padding: 0.25rem;
-    gap: 0.25rem;
-}
-
-.view-toggle-btn {
-    padding: 0.5rem 0.75rem;
-    border: none;
-    background: transparent;
-    color: var(--text-secondary);
-    cursor: pointer;
-    border-radius: 0.25rem;
-    font-size: 0.875rem;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.view-toggle-btn:hover {
-    background: var(--surface);
-}
-
-.view-toggle-btn.active {
-    background: var(--surface);
-    color: var(--primary-color);
-    font-weight: 500;
-}
-
-/* Advanced Filters Panel */
-.advanced-filters-panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 0.5rem;
-    padding: 1rem;
-    margin-bottom: 0.75rem;
-    transition: all 0.3s ease;
-}
-
-.filter-section {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    align-items: start;
 }
 
 .filter-group {
@@ -2263,237 +911,7 @@ main {
     flex-shrink: 0;
 }
 
-/* Entry Cards */
-.entries-container {
-    display: grid;
-    gap: 1rem;
-}
 
-.entries-container.compact-view {
-    gap: 0.375rem;
-}
-
-/* Entry Groups (Session-based) */
-.entry-group {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 0.5rem;
-    overflow: hidden;
-    transition: all 0.2s;
-}
-
-.entry-group:hover {
-    box-shadow: var(--shadow);
-}
-
-.group-header {
-    padding: 0.625rem 1rem;
-    background: var(--background);
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-}
-
-.group-meta {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 0.875rem;
-}
-
-.group-toggle {
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
-}
-
-.toggle-icon {
-    transition: transform 0.2s;
-}
-
-.entry-group.collapsed .toggle-icon {
-    transform: rotate(-90deg);
-}
-
-.group-time {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    color: var(--text-primary);
-    font-weight: 500;
-}
-
-.group-time svg,
-.group-hours svg {
-    width: 14px;
-    height: 14px;
-    opacity: 0.7;
-}
-
-.group-count {
-    color: var(--text-secondary);
-    font-size: 0.8125rem;
-}
-
-.group-hours {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    margin-left: auto;
-    color: var(--primary-color);
-    font-weight: 600;
-    font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
-}
-
-.group-content {
-    padding: 0;
-    max-height: 2000px;
-    transition: max-height 0.3s ease-out, padding 0.3s ease-out;
-}
-
-.entry-group.collapsed .group-content {
-    max-height: 0;
-    overflow: hidden;
-    padding: 0;
-}
-
-/* Session Entries (within groups) */
-.session-entry {
-    border-bottom: 1px solid var(--border);
-    padding: 0.5rem 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 1rem;
-    transition: background-color 0.2s;
-}
-
-.session-entry:last-child {
-    border-bottom: none;
-}
-
-.session-entry:hover {
-    background: var(--background);
-}
-
-.session-entry-content {
-    flex: 1;
-    min-width: 0;
-}
-
-.session-entry-main {
-    margin-bottom: 0.375rem;
-}
-
-.session-narrative {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 0.25rem;
-    font-size: 0.875rem;
-    line-height: 1.4;
-}
-
-.session-narrative:last-child {
-    margin-bottom: 0;
-}
-
-.narrative-hours {
-    font-weight: 600;
-    color: var(--text-secondary);
-    font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
-    flex-shrink: 0;
-    font-size: 0.8125rem;
-}
-
-.narrative-text {
-    color: var(--text-primary);
-}
-
-.session-entry-meta {
-    display: flex;
-    gap: 0.75rem;
-    align-items: center;
-    font-size: 0.75rem;
-}
-
-.client-code {
-    color: var(--text-secondary);
-}
-
-.session-entry-actions {
-    display: flex;
-    gap: 0.375rem;
-    flex-shrink: 0;
-}
-
-.session-entry-actions button {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
-    border: 1px solid var(--border);
-    background: transparent;
-    border-radius: 0.25rem;
-    cursor: pointer;
-    color: var(--text-secondary);
-    transition: all 0.2s;
-}
-
-.session-entry-actions button:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-}
-
-/* Ultra compact mode adjustments */
-.compact-view .entry-group {
-    border-radius: 0.375rem;
-}
-
-.compact-view .group-header {
-    padding: 0.5rem 0.75rem;
-}
-
-.compact-view .group-meta {
-    font-size: 0.8125rem;
-}
-
-.compact-view .session-entry {
-    padding: 0.375rem 0.75rem;
-}
-
-.compact-view .session-narrative {
-    font-size: 0.8125rem;
-    margin-bottom: 0.125rem;
-}
-
-.entry-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 0.5rem;
-    padding: 0.75rem;
-    transition: all 0.2s;
-    cursor: pointer;
-}
-
-.entry-card:hover {
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-2px);
-}
-
-/* Compact Entry Cards */
-.compact-view .entry-card {
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.375rem;
-}
-
-.compact-view .entry-card:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow);
-}
 
 .entry-header {
     display: flex;
@@ -2523,36 +941,6 @@ main {
     opacity: 0.7;
 }
 
-/* Compact view meta styles */
-.compact-view .entry-header {
-    margin-bottom: 0.5rem;
-}
-
-.compact-view .entry-meta {
-    gap: 0.75rem;
-    font-size: 0.8125rem;
-}
-
-.compact-view .entry-meta-item svg {
-    width: 14px;
-    height: 14px;
-}
-
-.compact-view .entry-status {
-    padding: 0.125rem 0.5rem;
-    font-size: 0.7rem;
-}
-
-.compact-view .entry-actions {
-    margin-top: 0.5rem;
-    padding-top: 0.5rem;
-    gap: 0.375rem;
-}
-
-.compact-view .entry-actions button {
-    padding: 0.375rem 0.75rem;
-    font-size: 0.8125rem;
-}
 
 .entry-status {
     padding: 0.25rem 0.75rem;
@@ -2568,15 +956,6 @@ main {
     border: 1px solid #e5e7eb;
 }
 
-.status-ready {
-    background: #d1fae5;
-    color: #059669;
-}
-
-.status-billed {
-    background: #ddd6fe;
-    color: #7c3aed;
-}
 
 .narrative-item {
     background: var(--background);
@@ -2605,24 +984,24 @@ main {
 
 /* Special handling for narrative text editing in cards */
 .narrative-text.editable-field.editing {
-    padding: 0;
-    margin: 0;
+    padding: 1rem 0.375rem; /* Keep exact same padding as non-editing state */
+    margin: 0.75rem 0 0 0; /* Preserve top margin to prevent upward shift */
     width: 100%;
     background: transparent;
-    border: 1px solid rgba(37, 99, 235, 0.2);
-    border-radius: 0.25rem;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.05);
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
 }
 
 .narrative-text.editing .inline-textarea.seamless {
-    padding: 0.375rem;
+    padding: 0; /* No padding to match the visual appearance of non-edit state */
     background: transparent;
     border: none;
     border-radius: 0;
     width: 100%;
     font-size: inherit;
-    line-height: inherit;
-    color: var(--text-primary);
+    line-height: inherit; /* Inherit line-height from parent */
+    color: inherit;
     font-family: inherit;
     min-height: auto;
     overflow: hidden;
@@ -2632,14 +1011,10 @@ main {
     outline: none;
     margin: 0;
     display: block;
+    box-sizing: border-box;
 }
 
-.narrative-text.editing .inline-textarea.seamless:focus {
-    outline: none;
-}
-
-/* Narrative Meta Information */
-/* Duplicate removed - see line 1537 for narrative-header styles */
+/* Narrative Status Icon */
 
 .narrative-status-icon {
     cursor: pointer;
@@ -2714,49 +1089,6 @@ main {
     gap: 0.25rem;
 }
 
-/* Compact View Narratives */
-.compact-view .narrative-item {
-    background: transparent;
-    padding: 0;
-    margin-bottom: 0;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    position: relative;
-    min-height: 2rem; /* Ensure space for buttons */
-}
-
-.compact-view .narrative-header {
-    margin-bottom: 0;
-    min-width: 80px;
-    font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
-}
-
-.compact-view .narrative-text:not(.editing) {
-    flex: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: 0.9375rem;
-}
-
-.compact-view .entry-card.expanded .narrative-text,
-.compact-view .narrative-text.editing {
-    white-space: normal !important;
-    overflow: visible !important;
-    text-overflow: initial !important;
-}
-
-.compact-view .entry-card.expanded .narrative-item {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid var(--border);
-}
-
-.compact-view .entry-card.expanded .narrative-item:last-child {
-    border-bottom: none;
-}
 
 .narrative-item {
     position: relative;
@@ -2779,7 +1111,13 @@ main {
     gap: 0.25rem;
 }
 
-.editable-field:not(.narrative-text):hover {
+/* Remove transitions for client and matter fields to prevent shifts */
+.editable-client:not(.narrative-text),
+.editable-matter:not(.narrative-text) {
+    transition: none;
+}
+
+.editable-field:not(.narrative-text):not(.client-field):not(.matter-field):hover {
     background-color: var(--background);
     border-color: var(--border);
 }
@@ -2792,11 +1130,11 @@ main {
     display: inline-block;
 }
 
-/* Only add padding for list view fields on hover */
-.condensed-table .editable-field.client-field:hover,
+/* Don't add padding on hover - prevents layout shift */
+/* .condensed-table .editable-field.client-field:hover,
 .condensed-table .editable-field.matter-field:hover {
-    padding-right: 1.75rem; /* Make room for edit icon */
-}
+    padding-right: 1.75rem;
+} */
 
 /* Ensure minimum width when editing */
 .editable-field.client-field.editing,
@@ -2814,12 +1152,42 @@ main {
 .condensed-client,
 .condensed-matter {
     overflow: visible;
+    position: relative; /* Ensure edit icon positioning context */
 }
 
 .editable-field.editing {
-    background-color: var(--surface);
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    /* Remove default editing styles for seamless experience */
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+}
+
+/* Use subtle styling for client/matter fields like narrative fields */
+.editable-field.client-field.editing,
+.editable-field.matter-field.editing {
+    background: transparent;
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.05);
+}
+
+/* Make input fields inside client/matter fields transparent like narrative */
+.editable-field.client-field.editing .inline-input,
+.editable-field.matter-field.editing .inline-input {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    outline: none;
+}
+
+/* Center align input fields in client and matter columns */
+.condensed-client .inline-input,
+.condensed-matter .inline-input,
+.client-field .inline-input,
+.matter-field .inline-input {
+    text-align: center;
+    max-width: 90%; /* Reduce width by 10% for cleaner look */
+    margin: 0 auto; /* Center the input within the field */
 }
 
 .editable-field .edit-icon {
@@ -2841,11 +1209,11 @@ main {
 /* Specific positioning for client and matter field edit icons */
 .editable-field.client-field .edit-icon,
 .editable-field.matter-field .edit-icon {
-    right: 0.375rem;
+    right: -1.25rem; /* Position outside the field to avoid overlap */
     transition: opacity 0.15s ease 0.1s; /* Slight delay for smoother appearance */
 }
 
-/* Hide edit icons for card view client/matter fields */
+/* Hide edit icons for narrative client/matter fields in AI assistant */
 .narrative-client.editable-field .edit-icon,
 .narrative-matter.editable-field .edit-icon,
 .editable-client.editable-field .edit-icon,
@@ -2853,14 +1221,14 @@ main {
     display: none !important;
 }
 
-/* Card view client/matter fields - hover without edit icon */
+/* Narrative client/matter fields in AI assistant - hover without edit icon */
 .narrative-client.editable-field:hover,
 .narrative-matter.editable-field:hover,
 .editable-client.editable-field:hover,
 .editable-matter.editable-field:hover {
-    background-color: var(--background);
-    border-color: var(--border);
-    cursor: pointer;
+    background-color: transparent;
+    border-color: transparent;
+    cursor: text;
 }
 
 .editable-field.editing .edit-icon {
@@ -2905,27 +1273,32 @@ main {
 .inline-input.seamless,
 .inline-textarea.seamless {
     width: 100%;
-    padding: inherit;
-    border: 1px solid transparent;
-    border-radius: 0.25rem;
+    padding: 0;
+    border: none;
+    border-radius: 0;
     font-size: inherit;
     font-family: inherit;
     line-height: inherit;
     background: transparent;
-    color: var(--text-primary);
+    color: inherit;
     outline: none;
-    transition: all 0.15s ease;
+    transition: none;
     min-width: 100%;
     box-sizing: border-box;
-    margin: -1px;
+    margin: 0;
+    -webkit-appearance: none;
+    appearance: none;
 }
 
 .inline-input.seamless:focus,
 .inline-textarea.seamless:focus {
-    background: var(--surface);
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+    background: transparent;
+    border: none;
+    outline: 2px solid rgba(37, 99, 235, 0.3);
+    outline-offset: 2px;
+    border-radius: 4px;
 }
+
 
 .inline-textarea {
     width: 100%;
@@ -2954,6 +1327,7 @@ input[type="number"].inline-input {
     color: var(--text-primary) !important;
     -webkit-appearance: none;
     -moz-appearance: textfield;
+    appearance: none;
 }
 
 /* Remove spinner buttons for cleaner look */
@@ -3109,86 +1483,6 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
     backdrop-filter: blur(4px);
 }
 
-/* Edit Entry Modal */
-.edit-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(4px);
-}
-
-.edit-modal.active {
-    display: flex;
-}
-
-.edit-modal-content {
-    background: var(--surface);
-    padding: 2rem;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 800px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: var(--shadow-lg);
-    border: 1px solid var(--border);
-}
-
-.edit-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 1rem;
-}
-
-.edit-modal-header h2 {
-    font-size: 1.5rem;
-    color: var(--text-primary);
-    margin: 0;
-}
-
-
-.edit-narrative-item {
-    background: rgba(248, 250, 252, 0.5);
-    border: 1px solid rgba(226, 232, 240, 0.5);
-    border-radius: 0.375rem;
-    padding: 0.5rem;
-    margin-bottom: 0.375rem;
-    transition: all 0.2s ease;
-}
-
-.edit-narrative-item:hover {
-    background: rgba(248, 250, 252, 0.8);
-    border-color: rgba(226, 232, 240, 0.8);
-}
-
-.edit-narrative-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    font-size: 0.8125rem;
-    color: var(--text-primary);
-}
-
-.edit-narrative-header .activity-title {
-    font-weight: 600;
-}
-
-.edit-narrative-header .activity-hours {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    font-weight: 500;
-}
 
 .narrative-date-header {
     padding: 0.375rem 0.625rem;
@@ -3215,48 +1509,17 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
-/* Custom styling for date picker calendar */
-.narrative-date-header::-webkit-calendar-picker-indicator {
-    cursor: pointer;
-    border-radius: 6px;
-    padding: 2px;
-    opacity: 0.7;
+/* Custom styling for date picker */
+.narrative-date-header::-webkit-date-and-time-value {
+    text-align: left;
 }
 
-.narrative-date-header::-webkit-calendar-picker-indicator:hover {
-    opacity: 1;
-    background-color: rgba(99, 102, 241, 0.05);
-}
-
-/* Style the date picker dropdown */
-input[type="date"]::-webkit-datetime-edit {
-    padding: 0;
-}
-
-input[type="date"]::-webkit-datetime-edit-fields-wrapper {
-    padding: 0;
-}
 
 /* For better cross-browser support */
 .narrative-date-header {
     position: relative;
 }
 
-/* Custom date picker overlay styles for browsers that support it */
-@supports (-webkit-appearance: none) {
-    input[type="date"]::-webkit-calendar-picker-indicator {
-        background: transparent;
-        bottom: 0;
-        color: transparent;
-        cursor: pointer;
-        height: auto;
-        left: 0;
-        position: absolute;
-        right: 0;
-        top: 0;
-        width: auto;
-    }
-}
 
 .edit-entry-date {
     margin-bottom: 1.5rem;
@@ -3264,17 +1527,6 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     border-bottom: 1px solid rgba(226, 232, 240, 0.5);
 }
 
-.edit-entry-date .date-input {
-    width: 200px;
-    padding: 0.5rem 0.75rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.375rem;
-    font-size: 0.875rem;
-    font-family: inherit;
-    background-color: white;
-    color: var(--text-primary);
-    cursor: pointer;
-}
 
 .edit-entry-date .date-input:hover {
     border-color: #d1d5db;
@@ -3420,17 +1672,14 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
 
 
 
-.edit-modal-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: flex-end;
-    margin-top: 2rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border);
+
+/* Hide modals by default */
+.edit-modal {
+    display: none;
 }
 
-
-.modal.active {
+.modal.active,
+.edit-modal.active {
     display: flex;
 }
 
@@ -4046,10 +2295,14 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     height: 100%;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(8px);
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     z-index: 2000;
+}
+
+.loading-overlay:not(.hidden) {
+    display: flex;
 }
 
 .processing-container {
@@ -4187,647 +2440,6 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     to { transform: rotate(360deg); }
 }
 
-/* Calendar View */
-/* Calendar Styles - Compact Google Calendar Style */
-.calendar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0;
-    padding: 0.75rem 1rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 0.5rem 0.5rem 0 0;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-
-.calendar-header h2 {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0;
-}
-
-.calendar-nav {
-    background: transparent;
-    border: 1px solid var(--border);
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.375rem;
-    cursor: pointer;
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    transition: all 0.15s;
-    font-weight: 500;
-    line-height: 1;
-}
-
-.calendar-nav:hover {
-    background: var(--background);
-    border-color: var(--text-secondary);
-    color: var(--text-primary);
-}
-
-/* Calendar Export Controls - Subtle Second Row */
-.calendar-export-controls {
-    background: #f8fafc;
-    border-left: 1px solid var(--border);
-    border-right: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    padding: 0.5rem 1rem;
-    margin-bottom: 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-}
-
-.export-selection-info {
-    flex: 1;
-}
-
-#calendar-selection-text {
-    color: var(--text-secondary);
-    font-size: 0.75rem;
-}
-
-.export-actions {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-}
-
-.calendar-preset-btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    padding: 0.25rem 0.75rem;
-    border-radius: 0.25rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all 0.15s;
-}
-
-.calendar-preset-btn:hover {
-    background: var(--background);
-    border-color: var(--text-secondary);
-    color: var(--text-primary);
-}
-
-.calendar-export-btn {
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 0.25rem 0.75rem;
-    border-radius: 0.25rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s;
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-}
-
-.calendar-export-btn:hover:not(:disabled) {
-    background: #1d4ed8;
-}
-
-.calendar-export-btn:disabled {
-    background: var(--text-secondary);
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.calendar-add-entry-btn {
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 0.25rem 0.75rem;
-    border-radius: 0.25rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s;
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-}
-
-.calendar-add-entry-btn:hover {
-    background: #1d4ed8;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
-}
-
-.calendar-add-entry-btn svg {
-    width: 14px;
-    height: 14px;
-}
-
-/* Calendar View Container */
-#calendar-view {
-    /* Inherits padding from main container */
-}
-
-/* Calendar Grid - Compact Google Calendar Style */
-#calendar {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 0;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 0 0 0.5rem 0.5rem;
-    overflow: hidden;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-
-.calendar-day-header {
-    background: #f8fafc;
-    padding: 0.375rem 0.25rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-    text-align: center;
-    font-size: 0.6875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-right: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-}
-
-.calendar-day-header:last-child {
-    border-right: none;
-}
-
-.calendar-day {
-    background: var(--surface);
-    height: 120px;
-    max-height: 120px;
-    border-right: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    position: relative;
-    cursor: pointer;
-    transition: background 0.1s;
-    user-select: none;
-    overflow: hidden;
-}
-
-.calendar-day:nth-child(7n) {
-    border-right: none;
-}
-
-.calendar-day:hover:not(.other-month):not(.selected) {
-    background: rgba(37, 99, 235, 0.05);
-    box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.2);
-}
-
-.calendar-day.selected:hover:not(.other-month) {
-    background: rgba(37, 99, 235, 0.3);
-    box-shadow: inset 0 0 0 2px var(--primary-color);
-}
-
-.calendar-day.other-month {
-    background: #fcfcfc;
-    opacity: 0.4;
-}
-
-.calendar-day.today {
-    background: var(--surface);
-    position: relative;
-}
-
-.calendar-day.today::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border: 2px solid var(--primary-color);
-    border-radius: 0.125rem;
-    pointer-events: none;
-    opacity: 0.4;
-}
-
-.calendar-day.today .calendar-day-number {
-    color: var(--primary-color);
-    font-weight: 700;
-    text-decoration: underline;
-    text-underline-offset: 2px;
-}
-
-/* Date Selection Styles */
-.calendar-day.selected {
-    background: rgba(37, 99, 235, 0.25);
-    box-shadow: inset 0 0 0 2px var(--primary-color);
-}
-
-/* Special style when today is also selected */
-.calendar-day.today.selected {
-    background: rgba(37, 99, 235, 0.3);
-    box-shadow: inset 0 0 0 2px var(--primary-color);
-}
-
-.calendar-day.today.selected::after {
-    opacity: 1;
-}
-
-.calendar-day.selection-start {
-    border-top-left-radius: 0.375rem;
-    border-bottom-left-radius: 0.375rem;
-    background: rgba(37, 99, 235, 0.3);
-    box-shadow: inset 0 0 0 2px var(--primary-color);
-}
-
-.calendar-day.selection-end {
-    border-top-right-radius: 0.375rem;
-    border-bottom-right-radius: 0.375rem;
-    background: rgba(37, 99, 235, 0.3);
-    box-shadow: inset 0 0 0 2px var(--primary-color);
-}
-
-.calendar-day.selection-pending {
-    background: rgba(37, 99, 235, 0.08);
-    box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.5);
-    position: relative;
-}
-
-.calendar-day.selection-pending::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(
-        45deg,
-        transparent,
-        transparent 10px,
-        rgba(37, 99, 235, 0.05) 10px,
-        rgba(37, 99, 235, 0.05) 20px
-    );
-    pointer-events: none;
-}
-
-.calendar-day-content {
-    padding: 0.375rem 0.5rem;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 0.125rem;
-}
-
-/* Calendar Entries - Mini Cards */
-.calendar-entries-container {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    flex: 1;
-    overflow: hidden;
-    padding-top: 2px;
-}
-
-.calendar-entry {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--primary-color);
-    border-radius: 3px;
-    padding: 1px 4px;
-    font-size: 0.625rem;
-    cursor: pointer;
-    transition: all 0.15s;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 13px;
-    line-height: 1.1;
-}
-
-.calendar-entry:hover {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-    transform: translateY(-1px);
-    border-left-color: #1d4ed8;
-}
-
-.entry-time {
-    font-weight: 600;
-    color: var(--text-primary);
-    font-size: 0.625rem;
-}
-
-.entry-client-name {
-    color: var(--text-secondary);
-    font-size: 0.625rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 70%;
-}
-
-.calendar-more-entries {
-    background: var(--background);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    color: var(--primary-color);
-    font-size: 0.625rem;
-    font-weight: 500;
-    cursor: pointer;
-    padding: 2px 4px;
-    text-align: center;
-    transition: all 0.15s;
-    margin-top: 2px;
-}
-
-.calendar-more-entries:hover {
-    background: #eff6ff;
-    border-color: var(--primary-color);
-}
-
-/* Advanced Filters */
-.advanced-filters {
-    margin-top: 0.5rem;
-    padding-top: 0.5rem;
-    border-top: 1px solid var(--border);
-}
-
-.matter-filter, .hours-filter {
-    padding: 0.5rem 0.75rem;
-    border: 1px solid var(--border);
-    border-radius: 0.375rem;
-    font-size: 0.875rem;
-    background: var(--surface);
-    cursor: pointer;
-}
-
-#task-filter {
-    flex: 1;
-    min-width: 120px;
-    padding: 0.5rem 0.75rem;
-    border: 1px solid var(--border);
-    border-radius: 0.375rem;
-    font-size: 0.875rem;
-    transition: border-color 0.2s;
-}
-
-#task-filter:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgb(37 99 235 / 0.1);
-}
-
-.clear-filters-btn {
-    background: var(--surface);
-    color: var(--text-secondary);
-    border: 1px solid var(--border);
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.375rem;
-    cursor: pointer;
-    font-size: 0.875rem;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    white-space: nowrap;
-}
-
-.clear-filters-btn:hover {
-    background: var(--background);
-    border-color: var(--error-color);
-    color: var(--error-color);
-}
-
-/* Custom Date Range */
-.custom-date-range {
-    margin-top: 0.75rem;
-    padding: 0.75rem;
-    background: var(--background);
-    border: 1px solid var(--border);
-    border-radius: 0.375rem;
-}
-
-.date-range-inputs {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
-.date-input-group {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.date-input-group label {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    font-weight: 500;
-    white-space: nowrap;
-}
-
-.date-input-group input {
-    padding: 0.5rem 0.75rem;
-    border: 1px solid var(--border);
-    border-radius: 0.375rem;
-    font-size: 0.875rem;
-    background: var(--surface);
-}
-
-.apply-date-btn {
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 0.375rem;
-    cursor: pointer;
-    font-size: 0.875rem;
-    transition: all 0.2s;
-    white-space: nowrap;
-}
-
-.apply-date-btn:hover {
-    background: #1d4ed8;
-}
-
-/* Ultra Compact View */
-.ultra-compact-view .entry-card {
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    margin-bottom: 0.25rem;
-    border: 1px solid var(--border);
-    transition: all 0.1s;
-    cursor: pointer;
-}
-
-.ultra-compact-view .entry-card:hover {
-    transform: none;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    border-color: var(--primary-color);
-}
-
-.ultra-compact-view .entry-header {
-    margin-bottom: 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.ultra-compact-view .entry-meta {
-    gap: 0.5rem;
-    font-size: 0.75rem;
-    flex: 1;
-    display: flex;
-    align-items: center;
-}
-
-.ultra-compact-view .entry-meta-item svg {
-    width: 12px;
-    height: 12px;
-}
-
-.ultra-compact-view .entry-description {
-    margin-left: 0.5rem;
-    flex: 1;
-    color: var(--text-secondary);
-    font-size: 0.75rem;
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    line-height: 1.3;
-}
-
-.ultra-compact-view .entry-status {
-    padding: 0.125rem 0.375rem;
-    font-size: 0.65rem;
-    margin-left: 0.5rem;
-    flex-shrink: 0;
-}
-
-.ultra-compact-view .narrative-item {
-    display: none; /* Hide narratives in ultra-compact mode by default */
-}
-
-.ultra-compact-view .entry-card.expanded .narrative-item {
-    display: block; /* Show narratives when expanded */
-    margin-top: 0.5rem;
-    padding-top: 0.5rem;
-    border-top: 1px solid var(--border);
-}
-
-.ultra-compact-view .expanded-content {
-    margin-top: 0.5rem;
-    padding-top: 0.5rem;
-    border-top: 1px solid var(--border);
-}
-
-.ultra-compact-view .entry-card.expanded .expanded-content {
-    display: block !important;
-}
-
-.ultra-compact-view .entry-actions {
-    display: flex; /* Always show actions */
-    margin-top: 0.25rem;
-    padding-top: 0.25rem;
-    gap: 0.25rem;
-}
-
-.ultra-compact-view .entry-actions button {
-    padding: 0.125rem 0.375rem;
-    font-size: 0.7rem;
-}
-
-/* Expansion indicator for ultra-compact */
-.ultra-compact-view .entry-card::after {
-    content: '▶';
-    position: absolute;
-    top: 50%;
-    right: 0.5rem;
-    transform: translateY(-50%);
-    font-size: 0.6rem;
-    color: var(--text-secondary);
-    transition: all 0.2s;
-    opacity: 0.5;
-}
-
-.ultra-compact-view .entry-card:hover::after {
-    opacity: 1;
-    color: var(--primary-color);
-}
-
-.ultra-compact-view .entry-card.expanded::after {
-    content: '▼';
-    color: var(--primary-color);
-    opacity: 1;
-}
-
-/* Enhanced compact mode for better information display */
-.compact-view .narrative-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.125rem;
-    padding: 0.25rem 0;
-}
-
-.compact-view .narrative-header {
-    margin-bottom: 0;
-    min-width: 60px;
-    font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
-    font-size: 0.75rem;
-    color: var(--primary-color);
-    font-weight: 600;
-}
-
-.compact-view .narrative-text:not(.editing) {
-    flex: 1;
-    font-size: 0.8125rem;
-    line-height: 1.3;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.compact-view .entry-card.expanded .narrative-text,
-.compact-view .narrative-text.editing {
-    white-space: normal !important;
-    overflow: visible !important;
-    text-overflow: initial !important;
-}
-
-/* Quick expand indicator for compact cards */
-.compact-view .entry-card::after {
-    content: '';
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    width: 8px;
-    height: 8px;
-    background: var(--border);
-    border-radius: 50%;
-    transition: all 0.2s;
-    opacity: 0.5;
-}
-
-.compact-view .entry-card:hover::after {
-    background: var(--primary-color);
-    opacity: 1;
-}
-
-.compact-view .entry-card.expanded::after {
-    background: var(--success-color);
-    opacity: 1;
-}
-
-/* Utility Classes */
-.hidden {
-    display: none !important;
-}
-
-.text-center {
-    text-align: center;
-}
-
-.mt-1 { margin-top: 0.25rem; }
-.mt-2 { margin-top: 0.5rem; }
-.mt-4 { margin-top: 1rem; }
-.mt-8 { margin-top: 2rem; }
-
 /* Notifications */
 .notification {
     position: fixed;
@@ -4873,7 +2485,7 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     opacity: 1;
 }
 
-.edit-btn, .delete-btn, .duplicate-btn {
+.delete-btn, .duplicate-btn {
     padding: 0.375rem 0.75rem;
     border: 1px solid var(--border);
     background: var(--surface);
@@ -4885,11 +2497,6 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     color: var(--text-secondary);
 }
 
-.edit-btn:hover {
-    background: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
-}
 
 .delete-btn:hover {
     background: var(--error-color);
@@ -4903,82 +2510,7 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     border-color: var(--warning-color);
 }
 
-/* Bulk Selection */
-.bulk-selection-mode .entry-card {
-    position: relative;
-    padding-left: 3rem;
-}
 
-.bulk-checkbox {
-    position: absolute;
-    left: 0.75rem;
-    top: 0.75rem;
-    width: 1.25rem;
-    height: 1.25rem;
-    cursor: pointer;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-
-.bulk-selection-mode .bulk-checkbox {
-    opacity: 1;
-}
-
-.bulk-actions {
-    display: none;
-    position: fixed;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--surface);
-    padding: 1rem 1.5rem;
-    border-radius: 0.75rem;
-    box-shadow: var(--shadow-lg);
-    border: 1px solid var(--border);
-    z-index: 100;
-    gap: 0.75rem;
-    align-items: center;
-}
-
-.bulk-actions.active {
-    display: flex;
-}
-
-.bulk-actions-count {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    font-weight: 500;
-}
-
-.bulk-actions button {
-    padding: 0.5rem 1rem;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    border-radius: 0.375rem;
-    cursor: pointer;
-    font-size: 0.875rem;
-    font-weight: 500;
-    transition: all 0.2s;
-    color: var(--text-secondary);
-}
-
-.bulk-actions .bulk-delete-btn:hover {
-    background: var(--error-color);
-    color: white;
-    border-color: var(--error-color);
-}
-
-.bulk-actions .bulk-duplicate-btn:hover {
-    background: var(--warning-color);
-    color: white;
-    border-color: var(--warning-color);
-}
-
-.bulk-actions .bulk-cancel-btn:hover {
-    background: var(--text-secondary);
-    color: white;
-    border-color: var(--text-secondary);
-}
 
 /* Empty State */
 .empty-state {
@@ -5037,37 +2569,40 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
 
 /* Column-specific header alignments to match cell content */
 .condensed-table th.condensed-date {
-    width: 100px;
-    min-width: 100px;
+    width: 95px;
+    min-width: 95px;
+    text-align: center;
+    padding-left: 1.75rem;
+    padding-right: 2.75rem;
 }
 
 .condensed-table th.condensed-client {
-    width: 150px;
+    width: 130px;
     text-align: center;
 }
 
 .condensed-table th.condensed-matter {
-    width: 120px;
+    width: 110px;
     text-align: center;
 }
 
 .condensed-table th.condensed-time {
-    width: 70px;
+    width: 65px;
     text-align: right;
 }
 
-.condensed-table th.condensed-description {
-    min-width: 400px;
+.condensed-table th.condensed-narrative {
     text-align: center;
 }
 
 .condensed-table th.condensed-actions {
-    width: 100px;
+    width: 120px;
     text-align: center;
+    padding-left: 1rem;
 }
 
 .condensed-table th.condensed-status {
-    width: 90px;
+    width: 85px;
     text-align: center;
 }
 
@@ -5083,33 +2618,22 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
 }
 
 .condensed-table td {
-    padding: 0.5rem 0.5rem;
+    padding: 1rem 0.375rem;
     border-bottom: 1px solid var(--border);
     vertical-align: middle;
     line-height: 1.2;
 }
 
-/* Add more vertical padding to description cells */
-.condensed-table td.condensed-description {
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
+/* Consistent padding for all cells */
+.condensed-table td.condensed-narrative {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
     position: relative;
-}
-
-/* On mobile, reduce description padding for higher density */
-@media (max-width: 768px) {
-    .condensed-table td.condensed-description {
-        padding-top: 0.25rem;
-        padding-bottom: 0.25rem;
-    }
 }
 
 .condensed-table tbody tr {
     transition: background-color 0.1s ease-out;
     will-change: background-color;
-}
-
-.condensed-table tbody tr {
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
@@ -5138,8 +2662,7 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     padding: 0.5rem !important;
 }
 
-.select-all-checkbox,
-.bulk-checkbox {
+.select-all-checkbox {
     cursor: pointer;
     width: 16px;
     height: 16px;
@@ -5226,74 +2749,21 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     color: white;
 }
 
-/* Hide description actions by default */
-.description-actions {
+/* Hide narrative actions by default */
+.narrative-actions {
     display: none;
 }
 
-/* Show description actions on mobile */
-@media (max-width: 768px) {
-    .description-actions {
-        display: flex;
-        gap: 0.25rem;
-        margin-top: 0.25rem;
-        justify-content: flex-end;
-    }
-    
-    /* Show all action buttons on mobile */
-    .description-actions .table-action-btn {
-        display: flex;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 0.25rem;
-        padding: 0.25rem;
-        color: var(--text-secondary);
-        transition: all 0.2s;
-        min-width: 32px;
-        min-height: 32px;
-        width: 32px;
-        height: 32px;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .description-actions .table-action-btn svg {
-        width: 16px;
-        height: 16px;
-        display: block;
-        flex-shrink: 0;
-    }
-    
-    /* Hover effects for mobile action buttons */
-    .description-actions .table-action-btn:hover {
-        background: var(--background);
-        border-color: var(--border);
-    }
-    
-    .description-actions .edit-btn:hover {
-        background: var(--primary-color);
-        color: white;
-        border-color: var(--primary-color);
-    }
-    
-    .description-actions .duplicate-btn:hover {
-        background: var(--success-color);
-        color: white;
-        border-color: var(--success-color);
-    }
-    
-    .description-actions .delete-btn:hover {
-        background: var(--error-color);
-        color: white;
-        border-color: var(--error-color);
-    }
-}
 
 /* Date/Time Column */
 .condensed-date {
-    width: 100px;
-    min-width: 100px;
+    width: 95px;
+    min-width: 95px;
     white-space: nowrap;
+}
+
+.condensed-table td.condensed-date {
+    padding-left: 1rem;
 }
 
 .date-time {
@@ -5343,7 +2813,7 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
 
 /* Separate Client and Matter Columns */
 .condensed-client {
-    width: 150px;
+    width: 130px;
     text-align: center;
     white-space: nowrap;
     transition: none;
@@ -5357,7 +2827,7 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
 }
 
 .condensed-matter {
-    width: 120px;
+    width: 110px;
     text-align: center;
     white-space: nowrap;
     transition: none;
@@ -5368,77 +2838,12 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     color: var(--text-secondary);
 }
 
-/* CSS-only responsive client/matter handling */
-@media (max-width: 768px) {
-    .condensed-table th.condensed-client {
-        font-size: 0.65rem;
-    }
-    
-    .condensed-table th.condensed-client::after {
-        content: " / Matter";
-    }
-    
-    .condensed-table th.condensed-matter {
-        display: none;
-    }
-    
-    .condensed-table td.condensed-matter {
-        display: none;
-    }
-    
-    .condensed-table td.condensed-client {
-        width: auto;
-        max-width: 6rem;
-    }
-    
-    /* Always show matter subtext on mobile */
-    .condensed-table td.condensed-client .matter-subtext {
-        display: block !important;
-    }
-    
-    /* Hide status column on mobile */
-    .condensed-table th.condensed-status,
-    .condensed-table td.condensed-status {
-        display: none;
-    }
-    
-    /* Hide the main actions column on mobile since we have context in description */
-    .condensed-table th.condensed-actions,
-    .condensed-table td.condensed-actions {
-        display: none;
-    }
-    
-    /* Adjust description width on mobile */
-    .condensed-table td.condensed-description {
-        min-width: 200px;
-        max-width: 300px;
-    }
-    
-    .description-text {
-        -webkit-line-clamp: 3; /* Allow more lines on mobile */
-    }
+
+/* Matter subtext should be hidden since we have a separate column */
+.condensed-table td.condensed-client .matter-subtext {
+    display: none;
 }
 
-/* Hide matter subtext on desktop since we have a separate column */
-@media (min-width: 769px) {
-    .condensed-table td.condensed-client .matter-subtext {
-        display: none;
-    }
-}
-
-/* Very small screens - reduce description width to keep actions visible */
-@media (max-width: 500px) {
-    .condensed-table td.condensed-description {
-        min-width: 150px;
-        max-width: 200px;
-    }
-    
-    .condensed-table th.condensed-description {
-        min-width: 150px;
-    }
-    
-    /* Actions are hidden on mobile, so no need for width adjustments */
-}
 
 /* Day separators */
 .day-separator {
@@ -5457,6 +2862,7 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     text-align: center;
     background: var(--background);
     border-radius: 0.75rem;
+    max-width: 90%;
 }
 
 .day-separator-text {
@@ -5465,11 +2871,15 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
 }
 
 /* Time Column */
 .condensed-time {
-    width: 70px;
+    width: 65px;
     text-align: right;
 }
 
@@ -5479,14 +2889,15 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
 }
 
 
-/* Description Column */
-.condensed-description {
-    min-width: 400px;
+/* Narrative Column */
+.condensed-narrative {
     max-width: none;
     position: relative;
+    white-space: normal;
+    word-wrap: break-word;
 }
 
-.description-content {
+.narrative-content {
     display: flex;
     align-items: baseline;
     gap: 0.5rem;
@@ -5494,41 +2905,16 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     position: relative;
 }
 
-.description-text {
+.narrative-text {
     color: var(--text-primary);
     line-height: 1.4;
     flex: 1;
     word-break: break-word;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    transition: all 0.3s ease;
-}
-
-/* Hover expansion for descriptions */
-.condensed-row:hover .description-text {
-    -webkit-line-clamp: unset;
-    overflow: visible;
     white-space: normal;
-    position: relative;
-    z-index: 20;
+    word-wrap: break-word;
 }
 
-.condensed-row:hover .description-content.has-more {
-    position: relative;
-    z-index: 15;
-}
-
-.condensed-row:hover .description-content.has-more .description-text {
-    background: var(--surface);
-    padding: 0.5rem;
-    margin: -0.5rem;
-    border-radius: 0.25rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    border: 1px solid var(--border);
-}
+/* Hover expansion removed - text now wraps by default */
 
 .show-more-btn {
     display: none; /* Hide show more button as we're using hover */
@@ -5537,8 +2923,9 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
 
 /* Actions Column */
 .condensed-actions {
-    width: 100px;
+    width: 120px;
     text-align: center;
+    position: relative;
 }
 
 .table-actions {
@@ -5546,6 +2933,20 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     gap: 0.125rem;
     justify-content: center;
     align-items: center;
+    position: relative;
+}
+
+/* Subtle separator line below duplicate button */
+.table-actions::after {
+    content: '';
+    position: absolute;
+    bottom: -0.6rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 0.7rem;
+    background-color: var(--border);
+    opacity: 0.95;
 }
 
 .table-action-btn {
@@ -5578,12 +2979,6 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     border-color: var(--border);
 }
 
-.table-action-btn.edit-btn:hover {
-    background: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
-}
-
 .table-action-btn.duplicate-btn:hover {
     background: var(--success-color);
     color: white;
@@ -5596,20 +2991,53 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     border-color: var(--error-color);
 }
 
-
-/* Safeguard: Ensure all table action button SVGs remain visible on hover */
-/* Removed temporarily
-.table-action-btn:hover svg,
-.condensed-actions .table-action-btn:hover svg,
-.table-actions .table-action-btn:hover svg {
-    opacity: 1 !important;
-    visibility: visible !important;
+/* Checkbox button in actions column */
+.table-action-btn.checkbox-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
-*/
+
+.table-action-btn.checkbox-btn:hover {
+    background: var(--background);
+    border-color: var(--border);
+}
+
+/* Checkbox in actions column */
+.table-action-checkbox {
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+    margin: 0;
+    align-self: center;
+    flex-shrink: 0;
+    border: 1px solid transparent;
+    opacity: 0.6;
+    accent-color: #6b7280;
+    transition: opacity 0.2s;
+    pointer-events: none; /* Let the button handle clicks */
+}
+
+.table-action-btn.checkbox-btn:hover .table-action-checkbox {
+    opacity: 0.9;
+}
+
+.table-action-checkbox:checked {
+    opacity: 1;
+    accent-color: var(--primary-color);
+}
+
+/* Selected row highlighting */
+.condensed-row.selected {
+    background-color: rgba(79, 125, 255, 0.08);
+}
+
+
 
 /* Status Column */
 .condensed-status {
-    width: 90px;
+    width: 85px;
     text-align: center;
 }
 
@@ -5630,11 +3058,28 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     background: var(--background);
 }
 
+/* Remove hover styling for client and matter fields in condensed table */
+.condensed-table .editable-client:hover,
+.condensed-table .editable-matter:hover {
+    background: transparent;
+    cursor: text;
+    padding: 0.125rem 0.25rem;
+    border: 1px solid transparent;
+}
+
+/* Prevent any hover-induced layout shifts for client/matter fields */
+.condensed-table .editable-client,
+.condensed-table .editable-matter {
+    padding: 0.125rem 0.25rem;
+    border: 1px solid transparent;
+    transition: none;
+}
+
 /* Edit icon rules for condensed table - show on hover for client/matter fields */
 .condensed-table .editable-field .edit-icon {
     position: absolute;
     top: 50%;
-    right: 0.25rem;
+    right: -1.25rem; /* Position outside to avoid overlap */
     transform: translateY(-50%);
     opacity: 0;
     visibility: hidden;
@@ -5652,12 +3097,12 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
 
 /* Hide edit icon when editing */
 .condensed-table .editable-field.editing .edit-icon {
-    display: none !important;
+    display: none;
 }
 
 /* Hide edit icons for other fields (description, hours) in condensed view */
 .condensed-table .editable-field:not(.client-field):not(.matter-field) .edit-icon {
-    display: none !important;
+    display: none;
 }
 
 /* Ensure proper transitions for edit icons */
@@ -5668,8 +3113,8 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
 
 /* Remove any focus outlines in condensed view */
 .condensed-table .editable-field:focus {
-    outline: none !important;
-    box-shadow: none !important;
+    outline: none;
+    box-shadow: none;
 }
 
 /* Ensure no edit icons show even on hover in list view */
@@ -5683,12 +3128,76 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     cursor: text;
 }
 
+/* Use subtle styling for client/matter fields in condensed table */
+.condensed-table .editable-field.client-field.editing,
+.condensed-table .editable-field.matter-field.editing {
+    background: transparent;
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.05);
+}
+
+/* Make input fields inside client/matter fields transparent in condensed table */
+.condensed-table .editable-field.client-field.editing .inline-input,
+.condensed-table .editable-field.matter-field.editing .inline-input {
+    background: transparent !important;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    outline: none;
+}
+
+/* Match the subtle Client/Matter field style for narrative fields in condensed table */
+.condensed-table .narrative-text.editable-field.editing {
+    background: transparent;
+    border: 1px solid transparent; /* No visible border for seamless look */
+    box-shadow: none;
+    padding: 0; /* Keep same padding as non-editing state */
+    display: block;
+    width: 100%;
+}
+
+.condensed-table .narrative-text.editing .inline-textarea.seamless {
+    background: transparent !important;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    margin: 0 auto !important; /* Center the textarea to prevent drift */
+    outline: none;
+    line-height: 1.4 !important; /* Match the non-editing line-height */
+    overflow: hidden;
+    display: block;
+    width: 100%;
+    min-height: 1.4em; /* Ensure minimum height matches line-height */
+    vertical-align: middle; /* Prevent downward drift */
+}
+
+/* Add subtle focus indicator without disrupting layout */
+.condensed-table .narrative-text.editing .inline-textarea.seamless:focus {
+    outline: 2px solid rgba(37, 99, 235, 0.2);
+    outline-offset: -2px; /* Inside outline to prevent expansion */
+    border-radius: 4px;
+}
+
+/* Center align input fields in client and matter columns */
+.condensed-client .inline-input,
+.condensed-matter .inline-input,
+.client-field .inline-input,
+.matter-field .inline-input {
+    text-align: center;
+    max-width: 90%; /* Reduce width by 10% for cleaner look */
+    margin: 0 auto; /* Center the input within the field */
+}
+
+/* Specific width for matter field - narrower than client */
+.condensed-matter .inline-input {
+    max-width: 80% !important; /* Extra 10% reduction for matter fields */
+}
+
 /* Condensed Table Column Styles */
 
 
 .condensed-date {
-    width: 110px;
-    text-align: left;
+    width: 95px;
     white-space: nowrap;
 }
 
@@ -5699,20 +3208,16 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     min-width: 80px;
 }
 
-.condensed-description {
+.condensed-narrative {
     color: var(--text-primary);
-    min-width: 400px;
     overflow: visible;
-}
-
-.condensed-description:hover {
     white-space: normal;
     word-wrap: break-word;
 }
 
 
 .condensed-actions {
-    width: 100px;
+    width: 120px;
     text-align: center;
 }
 
@@ -5744,39 +3249,6 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     flex-shrink: 0;
 }
 
-/* Condensed actions hover effects removed temporarily */
-/*
-.condensed-actions .edit-btn:hover {
-    background: var(--primary-color) !important;
-    color: white !important;
-    border-color: var(--primary-color);
-}
-
-.condensed-actions .edit-btn:hover svg {
-    fill: currentColor !important;
-}
-
-.condensed-actions .delete-btn:hover {
-    background: var(--error-color) !important;
-    color: white !important;
-    border-color: var(--error-color);
-}
-
-.condensed-actions .delete-btn:hover svg {
-    fill: currentColor !important;
-}
-
-.condensed-actions .duplicate-btn:hover {
-    background: var(--success-color) !important;
-    color: white !important;
-    border-color: var(--success-color);
-}
-
-.condensed-actions .duplicate-btn:hover svg {
-    fill: currentColor !important;
-}
-
-*/
 
 /* Status styling in condensed view */
 .condensed-status .entry-status {
@@ -5788,33 +3260,7 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     letter-spacing: 0.025em;
 }
 
-/* Export Button for condensed view */
-.condensed-export-btn {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: var(--surface);
-    color: var(--text-secondary);
-    border: 1px solid var(--border);
-    border-radius: 0.375rem;
-    cursor: pointer;
-    font-size: 0.875rem;
-    font-weight: 500;
-    transition: all 0.2s;
-    z-index: 10;
-}
-
-.condensed-export-btn:hover {
-    background: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
-}
-
-/* Legacy Table View - keeping for backward compatibility */
+/* Table View (Legacy but kept for compatibility) */
 .entries-table {
     width: 100%;
     background: var(--surface);
@@ -5893,7 +3339,6 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     gap: 0.5rem;
 }
 
-/* Removed duplicate .table-action-btn styles - see lines 5646-5776 for the main styles */
 
 /* Table Session Grouping */
 .table-session-header td {
@@ -5942,188 +3387,6 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     padding-left: 2rem;
 }
 
-/* Calendar Day Number */
-.calendar-day-header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 0.25rem;
-}
-
-.calendar-day-number {
-    font-weight: 500;
-    color: var(--text-primary);
-    font-size: 0.8125rem;
-    line-height: 1;
-}
-
-.calendar-day-total {
-    font-size: 0.625rem;
-    color: var(--text-secondary);
-    background: var(--background);
-    padding: 1px 4px;
-    border-radius: 3px;
-    font-weight: 500;
-}
-
-/* Day Entries Modal */
-.day-entries-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10000;
-    backdrop-filter: blur(8px);
-    animation: fadeIn 0.2s ease;
-}
-
-.day-entries-content {
-    background: var(--surface);
-    border-radius: 0.75rem;
-    max-width: 700px;
-    width: 90%;
-    max-height: 85vh;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    animation: slideUp 0.3s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes slideUp {
-    from { 
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to { 
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.day-entries-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.75rem 2rem;
-    border-bottom: 1px solid var(--border);
-    background: var(--background);
-    border-radius: 0.75rem 0.75rem 0 0;
-}
-
-.day-entries-header h3 {
-    font-size: 1.375rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0;
-}
-
-.day-entries-header .close-btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 0.375rem;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    color: var(--text-secondary);
-    font-size: 1.25rem;
-}
-
-.day-entries-header .close-btn:hover {
-    background: var(--surface);
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-}
-
-.day-entries-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 1.5rem;
-    background: #fafbfc;
-}
-
-.day-entry-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 0.625rem;
-    padding: 1.25rem;
-    margin-bottom: 1rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    gap: 1.25rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.day-entry-item:hover {
-    border-color: var(--primary-color);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
-    transform: translateY(-1px);
-}
-
-.day-entry-item:last-child {
-    margin-bottom: 0;
-}
-
-.entry-time {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    white-space: nowrap;
-    font-weight: 500;
-    padding-top: 0.125rem;
-}
-
-.entry-details {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.entry-hours-client {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.entry-hours-client .entry-hours {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--primary-color);
-}
-
-.entry-hours-client .entry-client {
-    font-size: 1rem;
-    font-weight: 500;
-    color: var(--text-primary);
-}
-
-.entry-matter {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    font-style: italic;
-}
-
-.entry-description {
-    font-size: 0.9375rem;
-    color: var(--text-secondary);
-    line-height: 1.5;
-    margin-top: 0.25rem;
-}
-
 /* AI Assistant Interface */
 .assistant-overlay {
     display: none;
@@ -6148,8 +3411,8 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     background: var(--surface);
     border-radius: 20px;
     width: 95%;
-    max-width: 900px;
-    max-height: 90vh;
+    max-width: 1100px;
+    max-height: 98vh;
     display: flex;
     flex-direction: column;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
@@ -6225,10 +3488,9 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
 
 .messages-container {
     flex: 1;
-    padding: 2rem;
+    padding: 1.5rem;
     overflow-y: auto;
-    min-height: 200px;
-    max-height: 400px;
+    min-height: 0;
 }
 
 .message {
@@ -6285,21 +3547,12 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     color: white !important;
 }
 
-/* Editable transcription text */
+/* Transcription text display */
 .user-message #live-user-text {
     outline: none;
-    cursor: text;
+    cursor: default;
     min-height: 1.5em;
     position: relative;
-    transition: box-shadow 0.2s ease;
-}
-
-.user-message #live-user-text:focus,
-.user-message #live-user-text.editing {
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
-    border-radius: 4px;
-    padding: 4px;
-    background: rgba(255, 255, 255, 0.05);
 }
 
 .user-message #live-user-text:empty:before {
@@ -6308,23 +3561,7 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     font-style: italic;
 }
 
-/* Edit hint */
-.edit-hint {
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.6);
-    margin-top: 0.25rem;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-
-.user-message:hover .edit-hint {
-    opacity: 1;
-}
-
-#live-user-text:focus + .edit-hint {
-    opacity: 1;
-    color: rgba(255, 255, 255, 0.8);
-}
+/* Edit hint removed - transcription is view-only */
 
 .message-content {
     flex: 1;
@@ -6401,97 +3638,34 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
 
 .voice-interface,
 .text-interface {
-    padding: 2rem;
+    padding: 1.5rem 1rem;
     border-top: 1px solid var(--border);
     background: var(--background);
     flex-shrink: 0; /* Prevents the text interface from being pushed out of view */
+    height: auto;
+    display: flex;
 }
 
 .voice-recording-area {
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
 }
 
 .voice-instruction {
-    font-size: 1.125rem;
+    font-size: 1rem;
     color: var(--text-primary);
-    margin-bottom: 1.5rem;
+    margin: 0;
     font-weight: 500;
+    display: none; /* Hide instruction in compact mode */
 }
 
 .voice-visual {
     margin-bottom: 1.5rem;
 }
 
-.voice-orb {
-    position: relative;
-    width: 80px;
-    height: 80px;
-    margin: 0 auto;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.orb-inner {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary-color), #1d4ed8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    box-shadow: 0 8px 30px rgba(37, 99, 235, 0.3);
-    transition: all 0.3s ease;
-    position: relative;
-    z-index: 2;
-}
-
-.orb-inner .mic-icon {
-    width: 32px;
-    height: 32px;
-}
-
-.orb-pulse {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(37, 99, 235, 0.4), transparent);
-    opacity: 0;
-    transform: scale(1);
-    animation: none;
-}
-
-.voice-orb.recording .orb-pulse {
-    animation: orbPulse 2s infinite;
-}
-
-.voice-orb.recording .orb-inner {
-    background: linear-gradient(135deg, var(--error-color), #dc2626);
-    animation: orbGlow 2s infinite;
-}
-
-@keyframes orbPulse {
-    0% {
-        opacity: 0.7;
-        transform: scale(1);
-    }
-    100% {
-        opacity: 0;
-        transform: scale(1.8);
-    }
-}
-
-@keyframes orbGlow {
-    0%, 100% {
-        box-shadow: 0 8px 30px rgba(239, 68, 68, 0.4);
-    }
-    50% {
-        box-shadow: 0 8px 40px rgba(239, 68, 68, 0.6);
-    }
-}
 
 .voice-controls {
     display: flex;
@@ -6534,6 +3708,21 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     box-shadow: 0 8px 30px rgba(37, 99, 235, 0.4);
 }
 
+.voice-btn:disabled,
+.voice-btn.primary:disabled {
+    background: linear-gradient(135deg, #94a3b8, #64748b);
+    color: rgba(255, 255, 255, 0.6);
+    cursor: not-allowed;
+    opacity: 0.7;
+    box-shadow: none;
+}
+
+.voice-btn:disabled:hover,
+.voice-btn.primary:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
 .voice-btn.secondary {
     background: var(--surface);
     color: var(--text-secondary);
@@ -6557,14 +3746,14 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
 }
 
 .voice-btn.large {
-    padding: 1rem 2rem;
-    font-size: 1.125rem;
-    min-width: 200px;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9375rem;
+    min-width: 180px;
 }
 
 .voice-btn.large .btn-icon {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
     margin-right: 0.5rem;
 }
 
@@ -6652,14 +3841,18 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
 
 /* Compact Recording Interface */
 .voice-recording-compact {
-    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
 }
 
 .recording-bar {
     background: var(--background);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 1rem;
+    padding: 1rem 1.25rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -6730,7 +3923,9 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
 .recording-label {
     font-size: 0.875rem;
     font-weight: 500;
-    color: var(--text-primary);
+    color: var(--text-secondary);
+    margin: 0;
+    display: block;
 }
 
 .recording-timer {
@@ -6770,13 +3965,15 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
 .recording-controls-section {
     display: flex;
     gap: 0.5rem;
+    align-items: center;
+    margin-left: auto;
 }
 
 .compact-btn {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem 1rem;
+    padding: 0.625rem 1.125rem;
     border: none;
     border-radius: 8px;
     font-size: 0.875rem;
@@ -7165,8 +4362,7 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
 
 /* AI Assistant Ultra-Compact Review Styles */
 .ai-response.ultra-compact-review {
-    padding: 0.75rem;
-    max-height: 70vh;
+    padding: 0.5rem;
     display: flex;
     flex-direction: column;
     font-size: 0.875rem;
@@ -7174,8 +4370,8 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
 
 .response-header-compact {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 1rem;
     padding-bottom: 0.5rem;
     margin-bottom: 0.5rem;
     border-bottom: 1px solid var(--border);
@@ -7191,6 +4387,7 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     align-items: center;
     gap: 0.375rem;
     font-size: 0.75rem;
+    margin-left: auto;
 }
 
 .confidence-indicator-compact .confidence-bar {
@@ -7200,34 +4397,131 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
 
 .scrollable-entries-compact {
     flex: 1;
-    overflow-y: auto;
     padding-right: 0.25rem;
 }
 
-.scrollable-entries-compact::-webkit-scrollbar {
-    width: 4px;
-}
-
-.scrollable-entries-compact::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.scrollable-entries-compact::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: 2px;
-}
+/* Removed scrollbar styling since scrolling is now handled by messages-container */
 
 /* Ultra-compact narrative items */
 .ultra-compact-narrative {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 6px;
-    padding: 0.75rem;
-    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
 }
 
 .ultra-compact-narrative:last-child {
     margin-bottom: 0;
+}
+
+/* Inline Select All styling */
+.select-all-inline {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: normal;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.select-all-inline input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+}
+
+.select-all-inline:hover {
+    color: var(--text-primary);
+}
+
+.narrative-checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    padding-top: 0.25rem;
+}
+
+.narrative-checkbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+}
+
+.narrative-content-wrapper {
+    flex: 1;
+    transition: opacity 0.2s ease;
+}
+
+.narrative-content-wrapper.unchecked {
+    opacity: 0.5;
+    filter: grayscale(50%);
+}
+
+/* Inline Apply Form styling */
+.apply-to-selected-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.inline-apply-form {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.inline-apply-form.hidden {
+    display: none;
+}
+
+.inline-apply-input {
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    width: 100px;
+    background: var(--surface);
+    color: var(--text-primary);
+}
+
+.inline-apply-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.inline-apply-btn,
+.inline-cancel-btn {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid var(--border);
+}
+
+.inline-apply-btn {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.inline-apply-btn:hover {
+    background: var(--primary-color-dark);
+}
+
+.inline-cancel-btn {
+    background: var(--surface);
+    color: var(--text-primary);
+}
+
+.inline-cancel-btn:hover {
+    background: var(--background);
 }
 
 .narrative-main-row {
@@ -7260,6 +4554,37 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     border-radius: 10px;
     flex-shrink: 0;
 }
+.narrative-hours-input {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.25rem 0.375rem;
+    background: var(--background);
+    transition: border-color 0.2s;
+}
+.narrative-hours-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgb(59 130 246 / 0.1);
+}
+.narrative-text-input {
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    background: var(--background);
+    transition: border-color 0.2s;
+    font-family: inherit;
+}
+.narrative-text-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgb(59 130 246 / 0.1);
+}
 
 .narrative-inputs-row {
     display: flex;
@@ -7267,28 +4592,9 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     align-items: center;
 }
 
-.ultra-compact-input {
-    flex: 1;
-    padding: 0.25rem 0.5rem;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    font-size: 0.75rem;
-    background: var(--background);
-    transition: all 0.15s ease;
-    height: 28px;
-}
 
-.ultra-compact-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    background: white;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
-}
 
-.ultra-compact-input::placeholder {
-    color: var(--text-secondary);
-    font-size: 0.75rem;
-}
+
 
 /* Inline apply all button */
 .inline-apply-all-btn {
@@ -7389,7 +4695,7 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     opacity: 1;
 }
 
-/* AI Assistant Compact Review Styles - Legacy */
+/* AI Assistant Compact Review Styles */
 .ai-response.compact-review {
     padding: 1rem;
     max-height: 60vh;
@@ -7496,128 +4802,6 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     font-size: 0.8125rem;
 }
 
-/* Bulk Apply Section */
-.bulk-apply-section {
-    padding-top: 0.75rem;
-    border-top: 1px solid var(--border);
-    margin-top: 0.75rem;
-    text-align: center;
-}
-
-.bulk-apply-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    padding: 0.375rem 0.75rem;
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    font-size: 0.8125rem;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.bulk-apply-btn:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-    background: rgba(37, 99, 235, 0.05);
-}
-
-/* Bulk Apply Modal */
-.bulk-apply-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10000;
-    animation: fadeIn 0.2s ease;
-}
-
-.bulk-apply-content {
-    background: var(--surface);
-    border-radius: 12px;
-    padding: 1.5rem;
-    width: 90%;
-    max-width: 400px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-    animation: slideIn 0.2s ease;
-}
-
-.bulk-apply-content h3 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.125rem;
-    color: var(--text-primary);
-}
-
-.bulk-apply-content p {
-    margin: 0 0 1rem 0;
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-}
-
-.bulk-apply-fields {
-    display: flex;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-}
-
-.bulk-apply-input {
-    flex: 1;
-    padding: 0.625rem 0.875rem;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-size: 0.875rem;
-}
-
-.bulk-apply-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.bulk-apply-actions {
-    display: flex;
-    gap: 0.75rem;
-    justify-content: flex-end;
-}
-
-.apply-bulk-btn {
-    padding: 0.5rem 1.25rem;
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.apply-bulk-btn:hover {
-    background: var(--primary-color-dark);
-}
-
-.cancel-bulk-btn {
-    padding: 0.5rem 1.25rem;
-    background: none;
-    color: var(--text-secondary);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    font-size: 0.875rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.cancel-bulk-btn:hover {
-    border-color: var(--text-secondary);
-    background: var(--background);
-}
 
 /* Compact Actions */
 .suggested-actions.compact-actions {
@@ -7670,739 +4854,22 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     -webkit-overflow-scrolling: touch;
 }
 
-/* Mobile optimizations for ultra-compact review */
-@media (max-width: 768px) {
-    .ai-response.ultra-compact-review {
-        padding: 0.5rem;
-        max-height: 80vh;
-    }
-    
-    .response-header-compact {
-        padding-bottom: 0.375rem;
-        margin-bottom: 0.375rem;
-    }
-    
-    .response-header-compact > span {
-        font-size: 0.8125rem;
-    }
-    
-    .confidence-indicator-compact {
-        font-size: 0.6875rem;
-    }
-    
-    .ultra-compact-narrative {
-        padding: 0.625rem;
-        margin-bottom: 0.625rem;
-    }
-    
-    .narrative-main-row {
-        flex-wrap: wrap;
-        gap: 0.25rem;
-    }
-    
-    .narrative-hours-inline {
-        font-size: 0.875rem;
-    }
-    
-    .narrative-text-inline {
-        font-size: 0.875rem;
-        flex-basis: 100%;
-        order: 2;
-    }
-    
-    .narrative-inputs-row {
-        gap: 0.25rem;
-    }
-    
-    .ultra-compact-input {
-        font-size: 0.6875rem;
-        padding: 0.1875rem 0.375rem;
-        height: 26px;
-    }
-    
-    .inline-apply-all-btn {
-        width: 26px;
-        height: 26px;
-    }
-    
-    .inline-apply-all-btn svg {
-        width: 14px;
-        height: 14px;
-    }
-    
-    /* Integrated actions on mobile */
-    .integrated-actions {
-        padding: 0.5rem 0.375rem 0.375rem;
-        gap: 0.25rem;
-        flex-wrap: wrap;
-    }
-    
-    .unified-action-btn {
-        padding: 0.3125rem 0.5rem;
-        font-size: 0.7rem;
-        gap: 0.1875rem;
-    }
-    
-    .unified-action-btn svg {
-        width: 12px;
-        height: 12px;
-    }
-    
-    .unified-action-btn span {
-        font-size: 0.7rem;
-    }
+/* Ultra-compact review styles - desktop only, no responsive design */
+
+
+/* Table actions - always visible in desktop-only design */
+.condensed-table .table-actions {
+    display: flex;
+    flex-direction: row;
+    gap: 0.25rem;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    header {
-        flex-direction: column;
-        gap: 1rem;
-    }
-    
-    main {
-        padding: 0 1rem;
-        margin: 0.5rem 0;
-    }
-    
-    .main-filter-row {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0.75rem;
-        padding: 1rem;
-    }
-    
-    .quick-time-filters {
-        order: 2;
-        justify-content: center;
-    }
-    
-    /* Add padding to entries container */
-    .entries-container {
-        padding: 0 1rem;
-    }
-    
-    /* Add margin to table wrapper */
-    .condensed-table-wrapper {
-        margin: 0 1rem 1.5rem 1rem;
-    }
-    
-    /* Time Period container mobile styles */
-    .time-period-container {
-        margin: 0 1rem 1.5rem 1rem;
-    }
-    
-    /* Date header rows in table */
-    .table-grouped-row td {
-        padding-left: 1.5rem;
-        padding-right: 1.5rem;
-    }
-    
-    /* Make table more compact on mobile */
-    .condensed-table th,
-    .condensed-table td {
-        padding: 0.25rem 0.375rem;
-    }
-    
-    /* Keep description cells with adequate padding */
-    .condensed-table td.condensed-description {
-        padding-bottom: 0.5rem;
-    }
-    
-    /* Further reduce client/matter column widths on mobile */
-    .condensed-table th.condensed-client,
-    .condensed-table th.condensed-matter {
-        width: auto;
-        min-width: 60px;
-    }
-    
-    /* Reduce time column width */
-    .condensed-table th.condensed-time {
-        width: 50px;
-        min-width: 50px;
-    }
-    
-    .date-range-picker {
-        order: 3;
-        flex-direction: column;
-        align-items: stretch;
-        padding: 0.75rem;
-        gap: 0.75rem;
-    }
-    
-    .date-input {
-        min-width: auto;
-        width: 100%;
-    }
-    
-    .date-separator {
-        text-align: center;
-    }
-    
-    .status-filter {
-        order: 4;
-        min-width: auto;
-        width: 100%;
-    }
-    
-    .filter-btn {
-        order: 5;
-        justify-content: center;
-    }
-    
-    .view-toggle {
-        order: 6;
-        justify-content: center;
-    }
-    
-    #add-time-entry {
-        order: 7;
-        justify-content: center;
-    }
-    
-    .advanced-filters-panel {
-        margin-top: 0.75rem;
-    }
-    
-    .filter-section {
-        grid-template-columns: 1fr;
-        gap: 0.75rem;
-    }
-    
-    .filter-actions {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    #search {
-        order: 1;
-        min-width: auto;
-        width: 100%;
-    }
-    
-    .entry-metadata {
-        grid-template-columns: 1fr;
-    }
-    
-    /* Ultra-compact adjustments for mobile */
-    .ultra-compact-view .entry-meta {
-        flex-wrap: wrap;
-    }
-    
-    .ultra-compact-view .entry-description {
-        width: 100%;
-        margin-left: 0;
-        margin-top: 0.25rem;
-    }
-    
-    .results-header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 1rem;
-    }
-    
-    .batch-inputs {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .batch-inputs input {
-        width: 100%;
-    }
-    
-    .entry-metadata-inputs {
-        grid-template-columns: 1fr;
-    }
-    
-    .modal-content {
-        padding: 1.5rem;
-    }
-    
-    #calendar {
-        grid-template-columns: repeat(7, 1fr);
-        font-size: 0.875rem;
-    }
-    
-    .calendar-day {
-        min-height: 115px;
-        height: 115px;
-        max-height: 115px;
-        padding: 0.5rem;
-    }
-    
-    .assistant-container {
-        width: 98%;
-        max-height: 95vh;
-        border-radius: 12px;
-    }
-    
-    .assistant-header {
-        padding: 1rem 1.5rem;
-    }
-    
-    .messages-container,
-    .voice-interface,
-    .text-interface {
-        padding: 1.5rem;
-    }
-    
-    .voice-orb {
-        width: 100px;
-        height: 100px;
-    }
-    
-    .suggested-actions {
-        flex-direction: column;
-    }
-    
-    .suggestion-btn {
-        width: 100%;
-        justify-content: center;
-    }
-    
-    /* True mobile list view - High information density */
-    .condensed-table-wrapper {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        padding: 0;
-    }
-    
-    .condensed-table {
-        width: 100%;
-        min-width: 100%;
-        border-collapse: collapse;
-    }
-    
-    /* Keep table headers but make them smaller */
-    .condensed-table thead {
-        position: sticky;
-        top: 0;
-        background: var(--surface);
-        z-index: 10;
-    }
-    
-    .condensed-table th {
-        font-size: 0.75rem;
-        padding: 0.125rem 0.25rem;
-        text-transform: uppercase;
-        letter-spacing: 0.025em;
-        font-weight: 600;
-        color: var(--text-secondary);
-        white-space: nowrap;
-    }
-    
-    /* Maintain header alignments on mobile */
-    .condensed-table th.condensed-client {
-        text-align: left;
-        padding-left: 0.0625rem;
-        padding-right: 0.03125rem;
-    }
-    
-    .condensed-table th.condensed-time {
-        text-align: right;
-        padding-left: 0.03125rem;
-        padding-right: 0.0625rem;
-    }
-    
-    .condensed-table th.condensed-actions,
-    .condensed-table th.condensed-status {
-        text-align: center;
-    }
-    
-    
-    /* Ensure consistent padding between headers and cells - mobile override */
-    .condensed-table th,
-    .condensed-table td {
-        padding: 0.125rem 0.25rem;
-    }
-    
-    /* Reduce vertical padding for client/matter cells */
-    .condensed-table td.condensed-client {
-        padding-top: 0.0625rem;
-        padding-bottom: 0.0625rem;
-        padding-left: 0.0625rem;
-        padding-right: 0.03125rem;
-    }
-    
-    /* Compact table rows */
-    .condensed-table tbody tr {
-        border-bottom: 1px solid var(--border);
-        background: var(--surface);
-    }
-    
-    .condensed-table tbody tr:nth-child(even) {
-        background: rgba(0, 0, 0, 0.015);
-    }
-    
-    .condensed-table td {
-        padding: 0.125rem 0.25rem;
-        font-size: 0.875rem;
-        vertical-align: middle;
-        line-height: 1.1;
-    }
-    
-    /* Date column - very compact */
-    .condensed-table td.condensed-date {
-        width: 2.5rem;
-        white-space: nowrap;
-        padding-right: 0.125rem;
-    }
-    
-    .condensed-table td.condensed-date .date-time {
-        display: flex;
-        flex-direction: column;
-        gap: 0;
-    }
-    
-    .condensed-table td.condensed-date .date-main {
-        font-size: 0.8125rem;
-        font-weight: 500;
-        color: var(--text-primary);
-    }
-    
-    .condensed-table td.condensed-date .time-subtext {
-        font-size: 0.7rem;
-        color: var(--text-secondary);
-    }
-    
-    /* Client-matter stacked styles for mobile */
-    .condensed-table td.condensed-client .client-matter {
-        display: flex;
-        flex-direction: column;
-        gap: 0;
-        align-items: flex-start;
-    }
-    
-    .condensed-table td.condensed-client .client-main {
-        font-size: 0.7rem;
-        font-weight: 600;
-        color: var(--text-primary);
-        line-height: 1.1;
-    }
-    
-    .condensed-table td.condensed-client .matter-subtext {
-        font-size: 0.65rem;
-        color: var(--text-secondary);
-        line-height: 1;
-        margin-top: 0;
-    }
-    
-    /* Client column - truncate if needed */
-    .condensed-table td.condensed-client {
-        max-width: 3rem;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        padding-left: 0.0625rem;
-        padding-right: 0.03125rem;
-    }
-    
-    .condensed-table td.condensed-client .client-field {
-        font-size: 0.875rem;
-    }
-    
-    /* Hours column - compact and closer to client/matter */
-    .condensed-table td.condensed-time {
-        width: 2rem;
-        text-align: right;
-        font-weight: 600;
-        color: var(--primary-color);
-        padding-left: 0.03125rem;
-        padding-right: 0.0625rem;
-    }
-    
-    .condensed-table td.condensed-time .hours-field {
-        font-size: 0.8125rem;
-    }
-    
-    /* Description - three lines with ellipsis on mobile, maximized width */
-    .condensed-table td.condensed-description {
-        width: auto;
-        min-width: 0;
-        background: transparent;
-        overflow: visible;
-        padding-left: 0.0625rem;
-    }
-    
-    .condensed-table td.condensed-description .description-content {
-        background: transparent;
-        overflow: visible;
-    }
-    
-    .condensed-table td.condensed-description .description-text {
-        font-size: 0.8125rem;
-        line-height: 1.2;
-        color: var(--text-primary);
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: normal;
-        background: transparent;
-        word-break: break-word;
-    }
-    
-    /* No hover expansion on mobile - keep descriptions stable */
-    
-    /* Actions - accommodate all action buttons on mobile */
-    .condensed-table td.condensed-actions {
-        width: 6.5rem;
-        padding: 0.25rem;
-    }
-    
-    /* Mobile: show all action buttons with tight spacing */
-    .condensed-table .table-actions {
-        display: flex;
-        gap: 0.0625rem;
-    }
-    
-    .condensed-table .mobile-action-menu {
-        display: none;
-    }
-    
-    .condensed-table .table-action-btn {
-        padding: 0.375rem;
-        background: transparent;
-        border: none;
-        cursor: pointer;
-        color: var(--text-secondary);
-        border-radius: 0.25rem;
-        transition: all 0.2s;
-        min-width: 2rem;
-        min-height: 2rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .condensed-table .table-action-btn:active {
-        background: var(--background);
-    }
-    
-    .condensed-table .table-action-btn svg {
-        width: 14px;
-        height: 14px;
-    }
-    
-    .mobile-action-menu {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .mobile-action-menu button {
-        padding: 0.25rem;
-        background: transparent;
-        border: none;
-        cursor: pointer;
-        color: var(--text-secondary);
-    }
-    
-    .mobile-action-menu button svg {
-        width: 16px;
-        height: 16px;
-    }
-    
-    /* Status - compact badge */
-    .condensed-table td.condensed-status {
-        width: 3.5rem;
-        text-align: center;
-    }
-    
-    .condensed-table .status-display {
-        display: inline-block;
-    }
-    
-    .condensed-table .status-badge {
-        font-size: 0.75rem;
-        padding: 0.125rem 0.375rem;
-        border-radius: 0.25rem;
-    }
-    
-    /* Day separator - very minimal */
-    .condensed-table tr.day-separator {
-        background: var(--background);
-    }
-    
-    .condensed-table tr.day-separator td {
-        padding: 0.25rem 0;
-        text-align: center;
-        border-bottom: 1px solid var(--border);
-    }
-    
-    .day-separator-content {
-        display: inline-block;
-        padding: 0.125rem 0.5rem;
-        background: var(--background);
-        border-radius: 0.75rem;
-    }
-    
-    .day-separator-text {
-        font-size: 0.625rem;
-        font-weight: 600;
-        color: var(--text-secondary);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-    
-    /* Remove all card-like styling */
-    .condensed-table tr {
-        border: none;
-        border-radius: 0;
-        box-shadow: none;
-        margin-bottom: 0;
-        padding: 0;
-        display: table-row;
-        min-height: auto;
-    }
-    
-    /* Time filter bar - adjust for mobile */
-    .time-filter-bar {
-        padding: 0.5rem 1rem;
-        margin: 0 1rem -1px 1rem;
-    }
-    
-    /* Hide inline editing on mobile for cleaner look */
-    .condensed-table .editable-field {
-        padding: 0;
-    }
-    
-    .condensed-table .editable-field .edit-icon {
-        display: none;
-    }
-    
-    /* Make checkbox smaller */
-    .condensed-table td.select-column {
-        padding: 0.25rem;
-        width: 24px;
-    }
-    
-    .condensed-table td.select-column input[type="checkbox"] {
-        width: 12px;
-        height: 12px;
-    }
-    
-    /* Mobile dropdown menu */
-    .mobile-dropdown-menu {
-        position: absolute;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 0.5rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        overflow: hidden;
-        z-index: 1000;
-        min-width: 150px;
-    }
-    
-    .mobile-dropdown-item {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        width: 100%;
-        padding: 0.75rem 1rem;
-        background: none;
-        border: none;
-        border-bottom: 1px solid var(--border);
-        font-size: 0.875rem;
-        color: var(--text-primary);
-        cursor: pointer;
-        transition: background 0.2s;
-        text-align: left;
-    }
-    
-    .mobile-dropdown-item:last-child {
-        border-bottom: none;
-    }
-    
-    .mobile-dropdown-item:active {
-        background: var(--background);
-    }
-    
-    .mobile-dropdown-item.delete {
-        color: var(--error-color);
-    }
-    
-    .mobile-dropdown-item svg {
-        width: 16px;
-        height: 16px;
-        flex-shrink: 0;
-    }
-    
-    /* Visual hierarchy improvements */
-    .condensed-table tbody tr:nth-child(even):not(.day-separator) {
-        background: rgba(0, 0, 0, 0.01);
-    }
-    
-    .condensed-table tbody tr:not(.day-separator):hover {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        transform: translateY(-1px);
-    }
-    
-    /* Remove old expansion styles - not needed for hybrid view */
-    
-    .time-filter-container {
-        gap: 0.75rem;
-    }
-    
-    .time-filter-label {
-        font-size: 0.8125rem;
-    }
-    
-    .time-filter-buttons {
-        gap: 0.25rem;
-        padding: 0.125rem;
-        flex-shrink: 0;
-    }
-    
-    .time-filter-btn {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.75rem;
-        flex: 0 0 auto;
-    }
-    
-    /* Further reduce vertical spacing for mobile */
-    .day-separator {
-        margin: 0.5rem 0;
-        font-size: 0.7rem;
-    }
-    
-    /* Tighten up entry spacing */
-    .condensed-table tbody tr {
-        min-height: auto;
-    }
-    
-    /* Reduce font sizes slightly for more content */
-    .condensed-table .description-text {
-        font-size: 0.8125rem;
-        line-height: 1.15;
-    }
-    
-    .condensed-table .editable-field {
-        padding: 0.125rem 0.25rem;
-    }
-    
-    .condensed-table .editable-field .edit-icon {
-        width: 12px;
-        height: 12px;
-        margin-left: 0.25rem;
-    }
+/* Hide mobile menu - desktop only application */
+.mobile-action-menu {
+    display: none;
 }
 
-/* Desktop: show all action buttons */
-@media (min-width: 769px) {
-    .condensed-table .table-actions {
-        display: flex !important;
-        flex-direction: row;
-        gap: 0.25rem;
-    }
-    
-    .condensed-table .mobile-action-menu {
-        display: none !important;
-    }
-}
-
-/* Status Dropdown for Card View */
+/* Status Dropdown */
 .status-dropdown {
     position: relative;
     display: inline-block;
@@ -8450,97 +4917,8 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     color: #7c3aed;
 }
 
-/* Bulk Assignment Controls */
-.bulk-assignment-controls {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 0.5rem;
-    margin-bottom: 1rem;
-    box-shadow: var(--shadow);
-}
-
-.bulk-assignment-section {
-    padding: 1rem;
-}
-
-.bulk-assignment-header {
-    margin-bottom: 1rem;
-}
-
-.bulk-assignment-header h3 {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0 0 0.25rem 0;
-}
-
-.bulk-assignment-header p {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    margin: 0;
-}
-
-.bulk-assignment-fields {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-}
-
-.bulk-field-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.bulk-field-group label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--text-primary);
-}
-
-.bulk-assignment-input {
-    padding: 0.5rem 0.75rem;
-    border: 1px solid var(--border);
-    border-radius: 0.375rem;
-    font-size: 0.875rem;
-    background: var(--background);
-    transition: border-color 0.2s ease;
-}
-
-.bulk-assignment-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
-}
-
-.bulk-apply-btn {
-    padding: 0.5rem 1rem;
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 0.375rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.bulk-apply-btn:hover {
-    background: #1d4ed8;
-    transform: translateY(-1px);
-}
-
-.bulk-apply-btn:disabled {
-    background: var(--text-secondary);
-    cursor: not-allowed;
-    transform: none;
-}
 
 /* Apply to All Modal - Redesigned Styles */
-.edit-modal-content.compact {
-    max-width: 500px;
-    padding: 1.5rem;
-}
 
 .modal-description {
     color: var(--text-secondary);
@@ -8674,12 +5052,6 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     border-color: var(--success-color);
 }
 
-/* Ultra-compact view status toggle styling */
-.ultra-compact-view .status-toggle-single {
-    padding: 0.125rem 0.5rem;
-    font-size: 0.625rem;
-    min-width: 50px;
-}
 
 /* Mixed status indicator */
 .status-single-toggle.mixed-status {
@@ -8726,24 +5098,6 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     background: transparent;
     color: #6b7280;
     border-color: #d1d5db;
-}
-
-.status-badge.exported {
-    background: transparent;
-    color: #6366f1;
-    border-color: #c7d2fe;
-}
-
-/* Hover state for subtle interactivity */
-.entry-card:hover .status-badge {
-    opacity: 1;
-}
-
-/* Ultra-compact view status badge styling */
-.ultra-compact-view .status-badge {
-    padding: 0.1rem 0.4rem;
-    font-size: 0.625rem;
-    min-width: 45px;
 }
 
 /* Apply to All Modal Styles */
@@ -8826,250 +5180,5 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     transform: translateY(-1px);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .bulk-assignment-fields {
-        grid-template-columns: 1fr;
-    }
-    
-    .apply-form-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .entry-actions {
-        flex-wrap: wrap;
-        gap: 0.25rem;
-    }
-    
-    .apply-to-all-btn {
-        font-size: 0.8125rem;
-        padding: 0.3125rem 0.625rem;
-    }
-    
-    /* Apply to All Modal - Mobile */
-    .apply-fields-grid {
-        grid-template-columns: 1fr;
-        gap: 0.75rem;
-    }
-    
-    .apply-mode {
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-    
-    .edit-modal-content.compact {
-        padding: 1rem;
-        width: 95%;
-    }
-    
-    /* Inline Editing - Mobile Optimized */
-    .inline-input {
-        padding: 0.5rem 0.75rem;
-        font-size: 16px; /* Prevents zoom on iOS */
-        min-height: 44px; /* iOS recommended touch target */
-        touch-action: manipulation; /* Improves touch responsiveness */
-    }
-    
-    .inline-textarea {
-        padding: 0.75rem;
-        font-size: 16px; /* Prevents zoom on iOS */
-        min-height: 100px; /* More space for mobile typing */
-        line-height: 1.5;
-        touch-action: manipulation;
-        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-    }
-    
-    .inline-actions {
-        flex-wrap: wrap; /* Allow wrapping on very small screens */
-        gap: 0.75rem; /* More space between buttons */
-        margin-top: 0.75rem;
-        padding-bottom: 0.5rem; /* Extra space at bottom */
-    }
-    
-    .inline-save-btn,
-    .inline-cancel-btn {
-        min-height: 44px; /* iOS recommended touch target */
-        min-width: 80px; /* Ensure readable button text */
-        padding: 0.625rem 1rem; /* More generous padding */
-        font-size: 16px; /* Consistent with inputs */
-        flex: 1; /* Equal width buttons on mobile */
-        max-width: 200px; /* Prevent overly wide buttons */
-        -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1); /* Subtle tap feedback */
-        touch-action: manipulation;
-    }
-    
-    /* Improve contrast for outdoor visibility */
-    .inline-save-btn {
-        background: #2563eb;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    
-    .inline-save-btn:active {
-        background: #1d4ed8;
-        transform: scale(0.98);
-    }
-    
-    .inline-cancel-btn:active {
-        transform: scale(0.98);
-    }
-    
-    /* Better focus states for mobile */
-    .inline-input:focus,
-    .inline-textarea:focus {
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
-        border-color: #2563eb;
-    }
-    
-    /* Ensure edit icons are easily tappable */
-    .edit-icon {
-        min-width: 44px;
-        min-height: 44px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: -0.5rem; /* Negative margin to increase tap area */
-        padding: 0.5rem;
-    }
-    
-    /* Better spacing for editable fields on mobile */
-    .editable-field {
-        min-height: 44px;
-        display: flex;
-        align-items: center;
-    }
-    
-    /* Landscape orientation adjustments */
-    @media (max-width: 768px) and (orientation: landscape) {
-        .inline-textarea {
-            min-height: 80px; /* Smaller in landscape */
-        }
-        
-        .inline-actions {
-            position: sticky;
-            bottom: 0;
-            background: var(--background);
-            padding: 0.5rem 0;
-            margin-left: -0.5rem;
-            margin-right: -0.5rem;
-            padding-left: 0.5rem;
-            padding-right: 0.5rem;
-            border-top: 1px solid var(--border);
-        }
-    }
-}
 
-/* Calendar Responsive Styles */
-@media (max-width: 768px) {
-    #calendar-view {
-        padding: 0 0.5rem;
-    }
-    
-    .calendar-header {
-        padding: 0.5rem 0.75rem;
-    }
-    
-    .calendar-header h2 {
-        font-size: 1rem;
-    }
-    
-    .calendar-nav {
-        padding: 0.25rem 0.375rem;
-        font-size: 0.75rem;
-    }
-    
-    .calendar-export-controls {
-        padding: 0.375rem 0.75rem;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-    
-    #calendar-selection-text {
-        font-size: 0.7rem;
-    }
-    
-    .export-actions {
-        flex-wrap: wrap;
-        gap: 0.375rem;
-    }
-    
-    .calendar-preset-btn {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.7rem;
-    }
-    
-    .calendar-export-btn {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.7rem;
-    }
-    
-    .calendar-day {
-        height: 110px;
-        max-height: 110px;
-    }
-    
-    .calendar-entry {
-        padding: 1px 3px;
-        min-height: 12px;
-    }
-    
-    .entry-time {
-        font-size: 0.5625rem;
-    }
-    
-    .entry-client-name {
-        display: none; /* Hide client name on mobile */
-    }
-    
-    .calendar-entry {
-        justify-content: center; /* Center hours when client name is hidden */
-    }
-    
-    .calendar-day-total {
-        display: none; /* Hide on mobile to save space */
-    }
-    
-    .calendar-day-header {
-        padding: 0.25rem;
-        font-size: 0.625rem;
-    }
-    
-    .calendar-day-content {
-        padding: 0.125rem;
-    }
-    
-    .calendar-day-number {
-        font-size: 0.6875rem;
-    }
-    
-    .calendar-entry {
-        font-size: 0.625rem;
-    }
-    
-    .calendar-more-entries {
-        font-size: 0.5625rem;
-    }
-}
 
-/* Responsive styles for edit modal date in header */
-@media (max-width: 768px) {
-    .edit-narrative-header {
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-    
-    .narrative-date-header {
-        order: 2;
-        width: 100%;
-        min-width: unset;
-        margin: 0.5rem 0 0 0;
-    }
-    
-    .edit-narrative-header .activity-title {
-        order: 0;
-    }
-    
-    .edit-narrative-header .activity-hours {
-        order: 1;
-        margin-left: auto;
-    }
-}

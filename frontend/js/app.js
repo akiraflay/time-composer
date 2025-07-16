@@ -2,7 +2,6 @@
 let currentView = 'dashboard';
 let currentEntries = [];
 let currentEntry = null;
-let viewMode = 'expanded'; // expanded, condensed
 let dateFilter = '';
 let statusFilter = '';
 let clientFilter = '';
@@ -11,9 +10,6 @@ let hoursFilter = '';
 let taskFilter = '';
 let customDateRange = null;
 let quickTimeFilter = 'all';
-let advancedFiltersVisible = false;
-let datePickerVisible = false;
-let bulkSelectionMode = false;
 let selectedEntries = new Set();
 
 // Helper function to determine entry status based on narratives
@@ -57,35 +53,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Initialize database
     try {
         await initDB();
-        console.log('Database initialized');
+        // console.log('Database initialized');
         
-        // Clean up any entries with invalid IDs on startup
-        const cleanedCount = await dbOperations.cleanupInvalidEntries();
-        if (cleanedCount > 0) {
-            console.log(`Cleaned up ${cleanedCount} entries with invalid IDs`);
-        }
+        // Database initialized successfully
     } catch (err) {
         console.error('Failed to initialize database:', err);
     }
     
-    // Initialize network status
-    networkStatus.init();
-    
-    // Start auto-sync
-    syncManager.startAutoSync();
+    // Network status no longer needed (no sync)
     
     // Set up event listeners
     setupEventListeners();
     
     
-    // Initialize view toggle icon to show current state
-    const listIcon = document.getElementById('list-view-icon');
-    const cardIcon = document.getElementById('card-view-icon');
-    if (listIcon && cardIcon) {
-        // viewMode starts as 'expanded' (card view), so show card icon
-        listIcon.style.display = 'none';
-        cardIcon.style.display = 'block';
-    }
+    // View toggle removed - always use list view
     
     // Load initial view
     loadDashboard();
@@ -101,8 +82,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const wasMobile = previousWidth <= 768;
             const isMobile = currentWidth <= 768;
             
-            // Only reload if crossing the mobile breakpoint and in list view
-            if (viewMode === 'condensed' && currentView === 'dashboard' && wasMobile !== isMobile) {
+            // Only reload if crossing the mobile breakpoint
+            if (currentView === 'dashboard' && wasMobile !== isMobile) {
                 previousWidth = currentWidth;
                 loadDashboard();
             } else {
@@ -115,28 +96,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Event listeners - Streamlined
 function setupEventListeners() {
     // Navigation
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const view = e.target.dataset.view;
-            switchView(view);
+    // Handle export button click
+    const exportBtn = document.querySelector('.nav-btn[data-view="export"]');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            handleExportClick();
         });
-    });
+    }
     
-    // App title navigation - always go to dashboard in card view
+    // App title navigation - always go to dashboard
     const appTitle = document.getElementById('app-title');
     if (appTitle) {
         appTitle.addEventListener('click', (e) => {
             e.preventDefault();
-            // Set to card view (expanded mode)
-            viewMode = 'expanded';
-            // Update the view toggle button to show correct state
-            const listIcon = document.getElementById('list-view-icon');
-            const cardIcon = document.getElementById('card-view-icon');
-            if (listIcon && cardIcon) {
-                // Show card icon when in expanded/card mode
-                listIcon.style.display = 'none';
-                cardIcon.style.display = 'block';
-            }
             // Switch to dashboard
             switchView('dashboard');
         });
@@ -144,8 +117,6 @@ function setupEventListeners() {
     
     // Streamlined controls
     const searchInput = document.getElementById('search');
-    const viewToggleBtn = document.getElementById('view-toggle');
-    const filtersBtn = document.getElementById('filters-btn');
     const addButton = document.getElementById('add-time-entry');
     
     // Search functionality
@@ -153,12 +124,7 @@ function setupEventListeners() {
         searchInput.addEventListener('input', debounce(() => loadDashboard(), 300));
     }
     
-    // View toggle - single button that switches between modes
-    if (viewToggleBtn) {
-        viewToggleBtn.addEventListener('click', () => {
-            toggleViewMode();
-        });
-    }
+    // View toggle removed - always use list view
     
     // Status filter dropdown
     const statusFilterBtn = document.getElementById('status-filter-btn');
@@ -221,25 +187,9 @@ function setupEventListeners() {
     
     
     
-    // Bulk actions
-    const bulkDuplicateBtn = document.getElementById('bulk-duplicate');
-    const bulkDeleteBtn = document.getElementById('bulk-delete');
-    const bulkCancelBtn = document.getElementById('bulk-cancel');
-    
-    if (bulkDuplicateBtn) {
-        bulkDuplicateBtn.addEventListener('click', bulkDuplicateEntries);
-    }
-    
-    if (bulkDeleteBtn) {
-        bulkDeleteBtn.addEventListener('click', bulkDeleteEntries);
-    }
-    
-    if (bulkCancelBtn) {
-        bulkCancelBtn.addEventListener('click', cancelBulkSelection);
-    }
     
     // Advanced filters panel controls
-    const statusFilter = document.getElementById('status-filter');
+    const statusFilterElement = document.getElementById('status-filter');
     const clientFilterEl = document.getElementById('client-filter');
     const matterFilterEl = document.getElementById('matter-filter');
     const hoursFilterEl = document.getElementById('hours-filter');
@@ -247,8 +197,8 @@ function setupEventListeners() {
     const clearAllFiltersBtn = document.getElementById('clear-all-filters');
     const applyFiltersBtn = document.getElementById('apply-filters');
     
-    if (statusFilter) {
-        statusFilter.addEventListener('change', () => {
+    if (statusFilterElement) {
+        statusFilterElement.addEventListener('change', () => {
             loadDashboard();
             updateActiveFiltersCount();
         });
@@ -297,83 +247,10 @@ function setupEventListeners() {
         });
     }
     
-    // Export controls
-    const exportButton = document.getElementById('export-btn');
-    if (exportButton) {
-        exportButton.addEventListener('click', () => exportEntries());
-    }
     
-    // Calendar navigation
-    const prevMonth = document.getElementById('prev-month');
-    const nextMonth = document.getElementById('next-month');
     
-    if (prevMonth) {
-        prevMonth.addEventListener('click', () => navigateCalendar(-1));
-    }
     
-    if (nextMonth) {
-        nextMonth.addEventListener('click', () => navigateCalendar(1));
-    }
     
-    // Prevent text selection during calendar drag
-    document.addEventListener('selectstart', (e) => {
-        if (isDraggingDateRange) {
-            e.preventDefault();
-        }
-    });
-    
-    // Modal functionality for fallback
-    const modal = document.getElementById('add-modal');
-    const closeButton = document.getElementById('close-modal');
-    const cancelButton = document.getElementById('cancel-modal');
-    const saveButton = document.getElementById('save-entries');
-    
-    if (closeButton) {
-        closeButton.addEventListener('click', () => closeModal());
-    }
-    
-    if (cancelButton) {
-        cancelButton.addEventListener('click', () => closeModal());
-    }
-    
-    if (saveButton) {
-        saveButton.addEventListener('click', () => saveEntries());
-    }
-    
-    modal?.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            closeModal();
-        }
-    });
-    
-    // Edit modal event listeners
-    const editModal = document.getElementById('edit-modal');
-    const closeEditBtn = document.getElementById('close-edit-modal');
-    const cancelEditBtn = document.getElementById('cancel-edit');
-    const saveEditBtn = document.getElementById('save-edit');
-    const addPresetBtn = document.getElementById('add-preset-btn');
-    
-    if (closeEditBtn) {
-        closeEditBtn.addEventListener('click', closeEditModal);
-    }
-    
-    if (cancelEditBtn) {
-        cancelEditBtn.addEventListener('click', closeEditModal);
-    }
-    
-    if (saveEditBtn) {
-        saveEditBtn.addEventListener('click', saveEditChanges);
-    }
-    
-    if (addPresetBtn) {
-        addPresetBtn.addEventListener('click', addNewPreset);
-    }
-    
-    editModal?.addEventListener('click', (e) => {
-        if (e.target === editModal) {
-            closeEditModal();
-        }
-    });
     
     // Apply to All modal event listeners
     const applyToAllModal = document.getElementById('apply-to-all-modal');
@@ -410,175 +287,20 @@ function setupEventListeners() {
         }
     });
     
-    // Bulk assignment event listeners
-    const bulkApplyClientBtn = document.getElementById('bulk-apply-client');
-    const bulkApplyMatterBtn = document.getElementById('bulk-apply-matter');
-    
-    if (bulkApplyClientBtn) {
-        bulkApplyClientBtn.addEventListener('click', bulkAssignClient);
-    }
-    
-    if (bulkApplyMatterBtn) {
-        bulkApplyMatterBtn.addEventListener('click', bulkAssignMatter);
-    }
 }
 
-// View switching
+// View switching - simplified to only dashboard
 async function switchView(view) {
-    currentView = view;
-    
-    // Update navigation
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.view === view);
-    });
-    
-    // Update views
-    document.querySelectorAll('.view').forEach(v => {
-        v.classList.toggle('active', v.id === `${view}-view`);
-    });
-    
-    // Load view data
-    switch (view) {
-        case 'dashboard':
-            loadDashboard();
-            break;
-        case 'calendar':
-            await loadCalendar();
-            break;
-        case 'export':
-            loadExport();
-            break;
-    }
-}
-
-// View mode management - Streamlined
-function toggleViewMode() {
-    // Toggle between expanded and condensed
-    viewMode = viewMode === 'expanded' ? 'condensed' : 'expanded';
-    
-    // Update the view toggle button icons
-    const listIcon = document.getElementById('list-view-icon');
-    const cardIcon = document.getElementById('card-view-icon');
-    const viewToggleBtn = document.getElementById('view-toggle');
-    
-    if (listIcon && cardIcon) {
-        if (viewMode === 'condensed') {
-            // Show list icon when in condensed/list mode (current state)
-            listIcon.style.display = 'block';
-            cardIcon.style.display = 'none';
-        } else {
-            // Show card icon when in expanded/card mode (current state)
-            listIcon.style.display = 'none';
-            cardIcon.style.display = 'block';
-        }
-    }
-    
-    // Update tooltip
-    if (viewToggleBtn) {
-        viewToggleBtn.title = viewMode === 'condensed' ? 'Switch to card view' : 'Switch to list view';
-    }
-    
-    // Update container classes
-    const container = document.getElementById('entries-list');
-    if (container) {
-        if (viewMode === 'condensed') {
-            container.className = 'entries-condensed';
-        } else {
-            container.className = 'entries-container';
-        }
-    }
-    
-    // Show/hide bulk assignment controls based on view mode
-    if (viewMode === 'expanded') {
-        showBulkAssignmentControls();
-    } else {
-        hideBulkAssignmentControls();
-    }
-    
-    loadDashboard();
-}
-
-// Legacy function for compatibility
-function setViewMode(mode) {
-    viewMode = mode;
-    
-    // Update container classes
-    const container = document.getElementById('entries-list');
-    if (container) {
-        if (mode === 'condensed') {
-            container.className = 'entries-condensed';
-        } else {
-            container.className = 'entries-container';
-        }
-    }
-    
-    loadDashboard();
-}
-
-// Date picker functionality
-function toggleDatePicker() {
-    datePickerVisible = !datePickerVisible;
-    const popover = document.getElementById('date-picker-popover');
-    const btn = document.getElementById('date-picker-btn');
-    
-    if (popover) {
-        popover.classList.toggle('hidden', !datePickerVisible);
-    }
-    if (btn) {
-        btn.classList.toggle('active', datePickerVisible);
-    }
-}
-
-function updateDateDisplay() {
-    const display = document.getElementById('date-display');
-    if (!display) return;
-    
-    if (customDateRange && (customDateRange.start || customDateRange.end)) {
-        const start = customDateRange.start || 'Start';
-        const end = customDateRange.end || 'End';
-        display.textContent = `${start} to ${end}`;
-    } else {
-        const displayText = {
-            'all': 'All Time',
-            'today': 'Today',
-            'week': 'This Week',
-            'month': 'This Month'
-        };
-        display.textContent = displayText[quickTimeFilter] || 'All Time';
-    }
-}
-
-function updateCustomDateRange() {
-    const startInput = document.getElementById('custom-start');
-    const endInput = document.getElementById('custom-end');
-    
-    if (startInput?.value || endInput?.value) {
-        customDateRange = {
-            start: startInput?.value || null,
-            end: endInput?.value || null
-        };
-        
-        // Clear quick filter selection when using custom dates
-        quickTimeFilter = 'all';
-        document.querySelectorAll('.quick-date-btn').forEach(b => b.classList.remove('active'));
-        
-        updateDateDisplay();
+    // Only dashboard view exists now
+    if (view === 'dashboard') {
+        currentView = 'dashboard';
         loadDashboard();
     }
 }
 
-function toggleAdvancedFilters() {
-    advancedFiltersVisible = !advancedFiltersVisible;
-    const panel = document.getElementById('advanced-filters');
-    const btn = document.getElementById('more-filters-btn');
-    const btnMobile = document.getElementById('more-filters-btn-mobile');
-    
-    if (panel) {
-        panel.classList.toggle('hidden', !advancedFiltersVisible);
-    }
-    
-    updateActiveFiltersCount();
-}
+
+
+
 
 function updateActiveFiltersCount() {
     let activeCount = 0;
@@ -594,15 +316,7 @@ function updateActiveFiltersCount() {
     if (hoursFilter) activeCount++;
     if (taskFilter) activeCount++;
     
-    const countElement = document.getElementById('active-filters-count');
-    if (countElement) {
-        if (activeCount > 0) {
-            countElement.textContent = activeCount;
-            countElement.classList.remove('hidden');
-        } else {
-            countElement.classList.add('hidden');
-        }
-    }
+    // Active filters count element doesn't exist in HTML, removed
 }
 
 function getQuickTimeRange(period) {
@@ -672,15 +386,13 @@ function clearAllFilters() {
         if (allStatusItem) allStatusItem.classList.add('active');
     }
     
-    // Reset time filter buttons (only in condensed view)
-    if (viewMode === 'condensed') {
-        document.querySelectorAll('.time-filter-btn').forEach(btn => {
-            btn.classList.remove('active');
-            if (btn.dataset.filter === 'all') {
-                btn.classList.add('active');
-            }
-        });
-    }
+    // Reset time filter buttons
+    document.querySelectorAll('.time-filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.filter === 'all') {
+            btn.classList.add('active');
+        }
+    });
     
     // Update display and reload
     updateActiveFiltersCount();
@@ -760,26 +472,18 @@ async function loadDashboard() {
         const search = document.getElementById('search')?.value || '';
         const status = statusFilter || document.getElementById('status-filter')?.value || '';
         
-        // Get entries from IndexedDB
-        let entries = await dbOperations.getEntries({ search, status });
-        
-        // Apply client filter
-        if (clientFilter) {
-            entries = entries.filter(entry => entry.client_code === clientFilter);
-        }
-        
-        // Apply matter filter
-        if (matterFilter) {
-            entries = entries.filter(entry => 
-                entry.matter_number === matterFilter ||
-                (entry.narratives && entry.narratives.some(n => n.matter_number === matterFilter))
-            );
-        }
+        // Get narratives from IndexedDB
+        let narratives = await dbOperations.getNarratives({ 
+            search, 
+            status,
+            clientCode: clientFilter,
+            matterNumber: matterFilter
+        });
         
         // Apply hours filter
         if (hoursFilter) {
-            entries = entries.filter(entry => {
-                const hours = entry.total_hours || 0;
+            narratives = narratives.filter(narrative => {
+                const hours = narrative.hours || 0;
                 switch (hoursFilter) {
                     case '0.5-1':
                         return hours >= 0.5 && hours <= 1.0;
@@ -798,10 +502,8 @@ async function loadDashboard() {
         // Apply task filter
         if (taskFilter) {
             const taskLower = taskFilter.toLowerCase();
-            entries = entries.filter(entry => 
-                entry.narratives && entry.narratives.some(n => 
-                    n.task_code && n.task_code.toLowerCase().includes(taskLower)
-                )
+            narratives = narratives.filter(narrative => 
+                narrative.taskCode && narrative.taskCode.toLowerCase().includes(taskLower)
             );
         }
         
@@ -814,10 +516,10 @@ async function loadDashboard() {
             switch (quickTimeFilter) {
                 case 'today':
                     filterDate = today;
-                    entries = entries.filter(entry => {
-                        const entryDate = new Date(entry.created_at);
-                        const entryday = new Date(entryDate.getFullYear(), entryDate.getMonth(), entryDate.getDate());
-                        return entryday.getTime() === filterDate.getTime();
+                    narratives = narratives.filter(narrative => {
+                        const narrativeDate = new Date(narrative.createdAt);
+                        const narrativeDay = new Date(narrativeDate.getFullYear(), narrativeDate.getMonth(), narrativeDate.getDate());
+                        return narrativeDay.getTime() === filterDate.getTime();
                     });
                     break;
                 case 'week':
@@ -825,55 +527,39 @@ async function loadDashboard() {
                     weekStart.setDate(today.getDate() - today.getDay());
                     const weekEnd = new Date(weekStart);
                     weekEnd.setDate(weekStart.getDate() + 6);
-                    entries = entries.filter(entry => {
-                        const entryDate = new Date(entry.created_at);
-                        return entryDate >= weekStart && entryDate <= weekEnd;
+                    narratives = narratives.filter(narrative => {
+                        const narrativeDate = new Date(narrative.createdAt);
+                        return narrativeDate >= weekStart && narrativeDate <= weekEnd;
                     });
                     break;
                 case 'month':
                     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
                     const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-                    entries = entries.filter(entry => {
-                        const entryDate = new Date(entry.created_at);
-                        return entryDate >= monthStart && entryDate <= monthEnd;
+                    narratives = narratives.filter(narrative => {
+                        const narrativeDate = new Date(narrative.createdAt);
+                        return narrativeDate >= monthStart && narrativeDate <= monthEnd;
                     });
                     break;
             }
         }
         
-        currentEntries = entries;
+        currentEntries = narratives;
         
         // Update stats
-        updateDashboardStats(entries);
+        updateDashboardStats(narratives);
         
         // Update filter options
-        updateClientFilter(entries);
-        updateMatterFilter(entries);
+        updateClientFilter(narratives);
+        updateMatterFilter(narratives);
         
         const container = document.getElementById('entries-list');
         if (!container) return;
         
         container.innerHTML = '';
+        container.className = 'entries-condensed'; // Always use list view class
         
-        // Always render view structure first
-        if (viewMode === 'condensed') {
-            // For list view, always show time filter bar
-            renderCondensedView(entries, container);
-        } else if (entries.length === 0) {
-            // For card view, show empty state
-            container.innerHTML = `
-                <div class="empty-state">
-                    <p>No entries found. Click "Add New Time Entry" to get started.</p>
-                </div>
-            `;
-            return;
-        } else {
-            // Entries are now naturally grouped by session in the backend
-            entries.forEach(entry => {
-                const card = createEntryCard(entry);
-                container.appendChild(card);
-            });
-        }
+        // Always render list view
+        renderCondensedView(narratives, container);
         
     } catch (err) {
         console.error('Error loading dashboard:', err);
@@ -881,26 +567,26 @@ async function loadDashboard() {
     }
 }
 
-function updateDashboardStats(entries) {
+function updateDashboardStats(narratives) {
     const totalEntries = document.getElementById('total-entries');
     const totalHours = document.getElementById('total-hours');
     
     if (totalEntries) {
-        totalEntries.textContent = entries.length;
+        totalEntries.textContent = narratives.length;
     }
     
     if (totalHours) {
-        const hours = entries.reduce((sum, entry) => sum + (entry.total_hours || 0), 0);
+        const hours = narratives.reduce((sum, narrative) => sum + (narrative.hours || 0), 0);
         totalHours.textContent = hours.toFixed(1);
     }
 }
 
-function updateClientFilter(entries) {
+function updateClientFilter(narratives) {
     const clientFilterEl = document.getElementById('client-filter');
     if (!clientFilterEl) return;
     
     // Get unique clients
-    const clients = [...new Set(entries.map(e => e.client_code).filter(Boolean))];
+    const clients = [...new Set(narratives.map(n => n.clientCode).filter(Boolean))];
     
     // Preserve current selection
     const currentValue = clientFilterEl.value;
@@ -918,22 +604,15 @@ function updateClientFilter(entries) {
     clientFilterEl.value = currentValue;
 }
 
-function updateMatterFilter(entries) {
+function updateMatterFilter(narratives) {
     const matterFilterEl = document.getElementById('matter-filter');
     if (!matterFilterEl) return;
     
-    // Get unique matter numbers from both entry level and narrative level
+    // Get unique matter numbers from narratives
     const matters = new Set();
-    entries.forEach(entry => {
-        if (entry.matter_number) {
-            matters.add(entry.matter_number);
-        }
-        if (entry.narratives) {
-            entry.narratives.forEach(narrative => {
-                if (narrative.matter_number) {
-                    matters.add(narrative.matter_number);
-                }
-            });
+    narratives.forEach(narrative => {
+        if (narrative.matterNumber) {
+            matters.add(narrative.matterNumber);
         }
     });
     
@@ -954,154 +633,7 @@ function updateMatterFilter(entries) {
 }
 
 
-function createEntryCard(entry) {
-    const card = document.createElement('div');
-    card.className = 'entry-card';
-    card.dataset.entryId = entry.id;
-    
-    // Add bulk selection checkbox
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.className = 'bulk-checkbox';
-    checkbox.dataset.entryId = entry.id;
-    checkbox.addEventListener('change', updateBulkSelection);
-    card.appendChild(checkbox);
-    
-    const totalHours = entry.total_hours || 0;
-    const date = new Date(entry.created_at);
-    const dateStr = date.toLocaleDateString();
-    const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    
-    const narrativesHtml = (entry.narratives || []).map((n, index) => {
-        return `
-        <div class="narrative-item ${n.status === 'exported' ? 'narrative-exported' : 'narrative-draft'}" data-narrative-index="${index}">
-            <div class="narrative-header">
-                <span class="editable-field editable-hours" data-field="hours" data-entry-id="${entry.id}" data-narrative-index="${index}">
-                    ${n.hours} hours
-                </span>
-            </div>
-            <div class="narrative-text editable-field editable-narrative" data-field="text" data-entry-id="${entry.id}" data-narrative-index="${index}">
-                ${n.text}
-                <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
-                </svg>
-            </div>
-            <div class="narrative-meta">
-                <div class="narrative-client editable-field editable-client" data-field="client_code" data-entry-id="${entry.id}" data-narrative-index="${index}">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
-                        <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/>
-                    </svg>
-                    ${n.client_code || entry.client_code || 'No Client'}
-                </div>
-                <div class="narrative-matter editable-field editable-matter" data-field="matter_number" data-entry-id="${entry.id}" data-narrative-index="${index}">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
-                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-                    </svg>
-                    ${n.matter_number || entry.matter_number || 'No Matter'}
-                </div>
-            </div>
-        </div>
-    `;}).join('');
-    
-    // Add click handler for card interaction
-    card.addEventListener('click', (e) => {
-        // Check if clicked element is interactive
-        const isInteractive = e.target.matches('button, input, select, textarea, .editable-field, .editable-field *, .dropdown-trigger, .dropdown-menu, .dropdown-menu *, .bulk-checkbox, .status-dropdown, .status-dropdown *');
-        
-        if (!isInteractive) {
-            if (viewMode === 'compact' || viewMode === 'ultra-compact') {
-                // In compact/ultra-compact mode, toggle expansion
-                card.classList.toggle('expanded');
-            } else {
-                // In normal mode, open edit modal
-                openEditModal(entry.id);
-            }
-        }
-    });
-    
-    // Create different layouts based on view mode
-    if (viewMode === 'ultra-compact') {
-        // Ultra-compact layout: single line with essential info
-        const firstNarrative = (entry.narratives && entry.narratives.length > 0) ? entry.narratives[0].text : 'No description';
-        const truncatedText = firstNarrative.length > 200 ? firstNarrative.substring(0, 200) + '...' : firstNarrative;
-        
-        card.innerHTML = `
-            <div class="entry-header">
-                <div class="entry-meta">
-                    <span class="entry-meta-item">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
-                            <path d="M19,3H18V1H16V3H8V1H6V3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,19H5V8H19V19M5,6V5H19V6H5Z"/>
-                        </svg>
-                        ${dateStr}
-                    </span>
-                    <span class="entry-meta-item">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
-                            <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/>
-                        </svg>
-                        ${entry.client_code || 'No Client'}
-                    </span>
-                    <span class="entry-meta-item">
-                        <strong>${totalHours}h</strong>
-                    </span>
-                    <span class="entry-description">${truncatedText}</span>
-                </div>
-                ${createStatusDropdown(entry.id, entry.status || 'draft', entry)}
-            </div>
-            <div class="narrative-item expanded-content hidden">
-                ${narrativesHtml}
-            </div>
-            <div class="entry-actions">
-                <button class="edit-btn" onclick="openEditModal(${entry.id})">Edit</button>
-                <button class="delete-btn" onclick="deleteEntry(${entry.id})">Delete</button>
-                <button class="duplicate-btn" onclick="duplicateEntry(${entry.id})">Duplicate</button>
-                ${(entry.narratives && entry.narratives.length > 1) ? 
-                    `<button class="apply-to-all-btn" onclick="openApplyToAllModal(${entry.id})">Apply to All</button>` : 
-                    ''
-                }
-            </div>
-        `;
-    } else {
-        // Standard and compact layouts
-        card.innerHTML = `
-            <div class="entry-header">
-                <div class="entry-meta">
-                    <span class="entry-meta-item">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                            <path d="M19,3H18V1H16V3H8V1H6V3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,19H5V8H19V19M5,6V5H19V6H5Z"/>
-                        </svg>
-                        <span class="editable-field editable-date" data-field="created_at" data-entry-id="${entry.id}">
-                            ${dateStr} ${timeStr}
-                        </span>
-                    </span>
-                    <span class="entry-meta-item">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                            <path d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"/>
-                        </svg>
-                        <span class="total-hours-display">
-                            ${totalHours} hours
-                        </span>
-                    </span>
-                </div>
-                ${createStatusDropdown(entry.id, entry.status || 'draft', entry)}
-            </div>
-            ${narrativesHtml}
-            <div class="entry-actions">
-                <button class="edit-btn" onclick="openEditModal(${entry.id})">Edit</button>
-                <button class="delete-btn" onclick="deleteEntry(${entry.id})">Delete</button>
-                <button class="duplicate-btn" onclick="duplicateEntry(${entry.id})">Duplicate</button>
-                ${(entry.narratives && entry.narratives.length > 1) ? 
-                    `<button class="apply-to-all-btn" onclick="openApplyToAllModal(${entry.id})">Apply to All</button>` : 
-                    ''
-                }
-            </div>
-        `;
-    }
-    
-    // Add inline editing event listeners
-    setupInlineEditing(card);
-    
-    return card;
-}
+// Card view removed - always use list view
 
 // Inline editing functionality
 function setupInlineEditing(card) {
@@ -1160,7 +692,7 @@ async function startInlineEdit(field) {
         } else {
             currentValue = field.textContent.trim();
         }
-    } else if (fieldType === 'client_code' || fieldType === 'matter_number') {
+    } else if (fieldType === 'clientCode' || fieldType === 'matterNumber' || fieldType === 'narrative') {
         // Extract text content excluding the SVG
         // First try to find text nodes
         const textNodes = Array.from(field.childNodes).filter(node => node.nodeType === Node.TEXT_NODE);
@@ -1184,19 +716,44 @@ async function startInlineEdit(field) {
     
     // Create input element
     let inputElement;
-    if (fieldType === 'text') {
+    if (fieldType === 'text' || fieldType === 'narrative') {
         inputElement = document.createElement('textarea');
         inputElement.className = 'inline-textarea seamless';
         inputElement.value = currentValue;
         inputElement.rows = 1;
-        // Copy computed styles from the original element
+        inputElement.name = `narrative-${entryId}-${narrativeIndex || 0}`;
+        inputElement.autocomplete = 'off';
+        
+        // Copy computed styles from the original element for seamless transition
         const computedStyle = window.getComputedStyle(field);
-        inputElement.style.lineHeight = computedStyle.lineHeight;
+        // For narrative fields in tables, use fixed line-height for consistency
+        if (field.closest('.condensed-table')) {
+            inputElement.style.lineHeight = '1.4';
+        } else {
+            inputElement.style.lineHeight = computedStyle.lineHeight;
+        }
         inputElement.style.fontSize = computedStyle.fontSize;
         inputElement.style.fontFamily = computedStyle.fontFamily;
         inputElement.style.fontWeight = computedStyle.fontWeight;
         inputElement.style.letterSpacing = computedStyle.letterSpacing;
-        // Auto-resize will happen after appending to DOM
+        inputElement.style.color = computedStyle.color;
+        
+        // Pre-calculate height to prevent jump
+        const tempDiv = document.createElement('div');
+        tempDiv.style.position = 'absolute';
+        tempDiv.style.visibility = 'hidden';
+        tempDiv.style.width = field.offsetWidth + 'px';
+        tempDiv.style.lineHeight = '1.4'; // Match the CSS line-height
+        tempDiv.style.fontSize = computedStyle.fontSize;
+        tempDiv.style.fontFamily = computedStyle.fontFamily;
+        tempDiv.style.whiteSpace = 'pre-wrap';
+        tempDiv.style.wordBreak = 'break-word';
+        tempDiv.style.padding = '0'; // No padding in measurement
+        tempDiv.textContent = currentValue || '\u00A0'; // Use non-breaking space for empty content
+        document.body.appendChild(tempDiv);
+        const calculatedHeight = Math.max(tempDiv.scrollHeight, parseFloat(computedStyle.fontSize) * 1.4); // Ensure minimum height
+        document.body.removeChild(tempDiv);
+        inputElement.style.height = calculatedHeight + 'px';
     } else {
         inputElement = document.createElement('input');
         inputElement.className = 'inline-input seamless';
@@ -1205,40 +762,44 @@ async function startInlineEdit(field) {
             inputElement.type = 'number';
             inputElement.step = '0.1';
             inputElement.min = '0';
+            inputElement.name = `hours-${entryId}`;
         } else {
             inputElement.type = 'text';
+            // Add name and autocomplete based on field type
+            if (fieldType === 'client') {
+                inputElement.name = `client-${entryId}`;
+                inputElement.autocomplete = 'organization';
+            } else if (fieldType === 'matter') {
+                inputElement.name = `matter-${entryId}`;
+                inputElement.autocomplete = 'off';
+            } else {
+                inputElement.name = `${fieldType}-${entryId}`;
+                inputElement.autocomplete = 'off';
+            }
         }
         
         inputElement.value = currentValue;
     }
     
-    // Replace content (no action buttons)
+    // Replace content smoothly - input already has value
     field.innerHTML = '';
     field.appendChild(inputElement);
     
-    // Ensure value is set after DOM update
-    inputElement.value = currentValue;
-    
-    // Focus and select input
+    // Focus and select immediately (no delay needed)
     inputElement.focus();
     if (inputElement.select) inputElement.select();
     
     // Auto-resize textarea on input
-    if (fieldType === 'text') {
+    if (fieldType === 'text' || fieldType === 'narrative') {
         const autoResize = () => {
+            // Store scroll position to prevent jump
+            const scrollTop = inputElement.scrollTop;
             inputElement.style.height = 'auto';
-            // Add extra pixels to prevent text cutoff
-            const scrollHeight = inputElement.scrollHeight;
-            const computedStyle = window.getComputedStyle(inputElement);
-            const lineHeight = parseFloat(computedStyle.lineHeight);
-            // Add a small buffer (about 1/4 line height) to prevent cutoff
-            inputElement.style.height = (scrollHeight + lineHeight * 0.25) + 'px';
+            inputElement.style.height = inputElement.scrollHeight + 'px';
+            inputElement.scrollTop = scrollTop;
         };
         
         inputElement.addEventListener('input', autoResize);
-        
-        // Initial resize after DOM update
-        setTimeout(autoResize, 0);
     }
     
     // Handle blur (auto-save)
@@ -1267,10 +828,10 @@ async function startInlineEdit(field) {
             e.stopPropagation();
             // Cancel editing without saving
             cancelInlineEditWithoutReload(field, currentValue, fieldType);
-        } else if (e.key === 'Enter' && !e.shiftKey && fieldType !== 'text') {
+        } else if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             e.stopPropagation();
-            // Save changes on Enter
+            // Save changes on Enter for all field types
             const newValue = inputElement.value.trim();
             if (newValue !== currentValue) {
                 saveInlineEdit(field, inputElement, entryId, fieldType, narrativeIndex);
@@ -1296,27 +857,22 @@ async function saveInlineEdit(field, inputElement, entryId, fieldType, narrative
         // Show saving state
         field.classList.add('saving');
         
-        // Get current entry data
-        const entry = await dbOperations.getEntry(parseInt(entryId));
-        if (!entry) {
-            throw new Error('Entry not found');
+        // Get current narrative data
+        const narrative = await dbOperations.getNarrative(entryId);
+        if (!narrative) {
+            throw new Error('Narrative not found');
         }
         
         // Check if the value actually changed
         let currentValue = '';
-        if (fieldType === 'total_hours') {
-            currentValue = entry.total_hours?.toString() || '0';
-        } else if (narrativeIndex !== undefined && entry.narratives && entry.narratives[narrativeIndex]) {
-            const narrative = entry.narratives[narrativeIndex];
-            if (fieldType === 'hours') {
-                currentValue = narrative.hours?.toString() || '0';
-            } else if (fieldType === 'text') {
-                currentValue = narrative.text || '';
-            } else if (fieldType === 'client_code') {
-                currentValue = narrative.client_code || entry.client_code || '';
-            } else if (fieldType === 'matter_number') {
-                currentValue = narrative.matter_number || entry.matter_number || '';
-            }
+        if (fieldType === 'hours') {
+            currentValue = narrative.hours?.toString() || '0';
+        } else if (fieldType === 'narrative') {
+            currentValue = narrative.narrative || '';
+        } else if (fieldType === 'clientCode') {
+            currentValue = narrative.clientCode || '';
+        } else if (fieldType === 'matterNumber') {
+            currentValue = narrative.matterNumber || '';
         }
         
         // If no change, just cancel editing without showing error
@@ -1329,29 +885,10 @@ async function saveInlineEdit(field, inputElement, entryId, fieldType, narrative
         
         // Prepare updates object
         let updates = {};
-        
-        if (fieldType === 'total_hours') {
-            updates.total_hours = parseFloat(newValue) || 0;
-        } else if (narrativeIndex !== undefined) {
-            // For narrative fields, we need to update the entire narratives array
-            if (!entry.narratives) entry.narratives = [];
-            if (!entry.narratives[narrativeIndex]) entry.narratives[narrativeIndex] = {};
-            
-            if (fieldType === 'hours') {
-                entry.narratives[narrativeIndex].hours = parseFloat(newValue) || 0;
-            } else if (fieldType === 'text') {
-                entry.narratives[narrativeIndex].text = newValue;
-            } else if (fieldType === 'client_code') {
-                entry.narratives[narrativeIndex].client_code = newValue;
-            } else if (fieldType === 'matter_number') {
-                entry.narratives[narrativeIndex].matter_number = newValue;
-            }
-            
-            updates.narratives = entry.narratives;
-        }
+        updates[fieldType] = fieldType === 'hours' ? (parseFloat(newValue) || 0) : newValue;
         
         // Save to database
-        await dbOperations.updateEntry(parseInt(entryId), updates);
+        await dbOperations.updateNarrative(entryId, updates);
         
         // Update display
         updateFieldDisplay(field, fieldType, newValue);
@@ -1360,34 +897,13 @@ async function saveInlineEdit(field, inputElement, entryId, fieldType, narrative
         field.classList.remove('editing', 'saving');
         delete field.dataset.originalValue;
         
-        // If we updated narrative hours, recalculate and update total hours display
-        if (fieldType === 'hours' && narrativeIndex !== undefined) {
-            const updatedEntry = await dbOperations.getEntry(parseInt(entryId));
-            if (updatedEntry && updatedEntry.narratives) {
-                const newTotalHours = updatedEntry.narratives.reduce((sum, n) => sum + (n.hours || 0), 0);
-                
-                // Find the card element
-                const card = field.closest('.entry-card');
-                if (card) {
-                    const totalHoursDisplay = card.querySelector('.total-hours-display');
-                    if (totalHoursDisplay) {
-                        totalHoursDisplay.textContent = `${newTotalHours} hours`;
-                    }
-                }
-                
-                // Also update the entry's total_hours in the database
-                await dbOperations.updateEntry(parseInt(entryId), { total_hours: newTotalHours });
-            }
+        // Update the in-memory array
+        const index = currentEntries.findIndex(n => n.id === entryId);
+        if (index !== -1) {
+            currentEntries[index][fieldType] = updates[fieldType];
         }
         
-        // Sync with server
-        try {
-            if (window.syncManager && typeof syncManager.syncWithServer === 'function') {
-                syncManager.syncWithServer();
-            }
-        } catch (syncError) {
-            console.warn('Sync failed, but changes were saved locally:', syncError);
-        }
+        // Changes saved successfully to IndexedDB
         
     } catch (error) {
         console.error('Failed to save inline edit:', error);
@@ -1521,7 +1037,7 @@ function setupInlineEditingForField(field) {
 }
 
 // Condensed table view rendering
-function renderCondensedView(entries, container) {
+function renderCondensedView(narratives, container) {
     // Add time filter bar above table
     const timeFilterBar = document.createElement('div');
     timeFilterBar.className = 'time-filter-bar';
@@ -1564,7 +1080,7 @@ function renderCondensedView(entries, container) {
                 <th class="condensed-client">Client</th>
                 <th class="condensed-matter">Matter</th>
                 <th class="condensed-time">Time</th>
-                <th class="condensed-description">Description</th>
+                <th class="condensed-narrative">Narrative</th>
                 <th class="condensed-actions actions-column">Actions</th>
                 <th class="condensed-status">Status</th>
             </tr>
@@ -1575,7 +1091,7 @@ function renderCondensedView(entries, container) {
     const tbody = table.querySelector('tbody');
     
     // Handle empty state
-    if (entries.length === 0) {
+    if (narratives.length === 0) {
         tbody.innerHTML = `
             <tr>
                 <td colspan="7" class="empty-state-cell">
@@ -1591,29 +1107,8 @@ function renderCondensedView(entries, container) {
         return;
     }
     
-    // Create flat list of all narratives with their entries
-    const flatRows = [];
-    entries.forEach(entry => {
-        if (entry.narratives && entry.narratives.length > 0) {
-            entry.narratives.forEach((narrative, index) => {
-                flatRows.push({
-                    entry: entry,
-                    narrative: narrative,
-                    narrativeIndex: index
-                });
-            });
-        } else {
-            // Fallback for entries without narratives
-            flatRows.push({
-                entry: entry,
-                narrative: null,
-                narrativeIndex: null
-            });
-        }
-    });
-    
-    // Sort by date (newest first)
-    flatRows.sort((a, b) => new Date(b.entry.created_at) - new Date(a.entry.created_at));
+    // Sort narratives by date (newest first)
+    narratives.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     
     // Group by day for separators
     let lastDate = null;
@@ -1625,9 +1120,9 @@ function renderCondensedView(entries, container) {
         day: 'numeric'
     });
     
-    flatRows.forEach(row => {
-        const entryDate = new Date(row.entry.created_at);
-        const dateStr = entryDate.toLocaleDateString('en-US', { 
+    narratives.forEach(narrative => {
+        const narrativeDate = new Date(narrative.createdAt);
+        const dateStr = narrativeDate.toLocaleDateString('en-US', { 
             weekday: 'long',
             year: 'numeric',
             month: 'long',
@@ -1642,7 +1137,7 @@ function renderCondensedView(entries, container) {
         }
         
         // Create and add the row
-        const tableRow = createCondensedRow(row.entry, row.narrative, row.narrativeIndex);
+        const tableRow = createCondensedRow(narrative);
         tbody.appendChild(tableRow);
     });
     
@@ -1679,15 +1174,12 @@ function renderTableView(entries, container) {
 }
 
 // Create a single row for condensed view
-function createCondensedRow(entry, narrative, narrativeIndex) {
+function createCondensedRow(narrative) {
     const row = document.createElement('tr');
-    row.className = 'condensed-row';
-    row.dataset.entryId = entry.id;
-    if (narrativeIndex !== null) {
-        row.dataset.narrativeIndex = narrativeIndex;
-    }
+    row.className = 'condensed-row' + (selectedEntries.has(narrative.id) ? ' selected' : '');
+    row.dataset.entryId = narrative.id;
     
-    const date = new Date(entry.created_at);
+    const date = new Date(narrative.createdAt);
     const dateStr = date.toLocaleDateString('en-US', { 
         month: '2-digit', 
         day: '2-digit', 
@@ -1695,12 +1187,12 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
     });
     const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     
-    // Use narrative data if available, otherwise entry data
-    const clientCode = narrative?.client_code || entry.client_code || 'No Client';
-    const matterNumber = narrative?.matter_number || entry.matter_number || '';
-    const hours = narrative ? narrative.hours : (entry.total_hours || 0);
-    const description = narrative ? narrative.text : (entry.original_text || 'No description');
-    const status = entry.status || 'draft';
+    // Use narrative data
+    const clientCode = narrative.clientCode || 'No Client';
+    const matterNumber = narrative.matterNumber || '';
+    const hours = narrative.hours || 0;
+    const description = narrative.narrative || 'No description';
+    const status = narrative.status || 'draft';
     
     // Truncate description for display
     const maxDescLength = 150;
@@ -1718,9 +1210,8 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
         <td class="condensed-client">
             <div class="client-matter">
                 <span class="editable-field client-field client-main" 
-                      data-field="client_code" 
-                      data-entry-id="${entry.id}"
-                      ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}>
+                      data-field="clientCode" 
+                      data-entry-id="${narrative.id}">
                     ${clientCode}
                     <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
@@ -1728,9 +1219,8 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
                 </span>
                 <div class="matter-subtext">
                     <span class="editable-field matter-field" 
-                          data-field="matter_number" 
-                          data-entry-id="${entry.id}"
-                          ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}>
+                          data-field="matterNumber" 
+                          data-entry-id="${narrative.id}">
                         ${matterNumber || '-'}
                         <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
@@ -1741,9 +1231,8 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
         </td>
         <td class="condensed-matter">
             <span class="editable-field matter-field" 
-                  data-field="matter_number" 
-                  data-entry-id="${entry.id}"
-                  ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}>
+                  data-field="matterNumber" 
+                  data-entry-id="${narrative.id}">
                 ${matterNumber || '-'}
                 <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
@@ -1752,61 +1241,47 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
         </td>
         <td class="condensed-time">
             <span class="editable-field hours-field" 
-                  data-field="${narrative ? 'hours' : 'total_hours'}" 
-                  data-entry-id="${entry.id}"
-                  ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}>
+                  data-field="hours" 
+                  data-entry-id="${narrative.id}">
                 ${hours}
             </span>
         </td>
-        <td class="condensed-description">
-            <div class="description-content ${description.length > maxDescLength ? 'has-more' : ''}">
-                <span class="editable-field description-text" 
-                      data-field="text" 
-                      data-entry-id="${entry.id}"
-                      ${narrativeIndex !== null ? `data-narrative-index="${narrativeIndex}"` : ''}
+        <td class="condensed-narrative">
+            <div class="narrative-content ${description.length > maxDescLength ? 'has-more' : ''}">
+                <span class="editable-field narrative-text" 
+                      data-field="narrative" 
+                      data-entry-id="${narrative.id}"
                       title="${description}">
                     ${description}
                 </span>
             </div>
-            <!-- Actions for mobile view -->
-            <div class="description-actions">
-                <button class="table-action-btn edit-btn" onclick="openEditModal(${entry.id})" title="Edit">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                        <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
-                    </svg>
-                </button>
-                <button class="table-action-btn duplicate-btn" onclick="duplicateEntry(${entry.id})" title="Duplicate">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                        <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"/>
-                    </svg>
-                </button>
-                <button class="table-action-btn delete-btn" onclick="deleteEntry(${entry.id})" title="Delete">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                        <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
-                    </svg>
-                </button>
-            </div>
         </td>
         <td class="condensed-actions">
             <div class="table-actions">
-                <button class="table-action-btn edit-btn" onclick="openEditModal(${entry.id})" title="Edit">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                        <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
-                    </svg>
-                </button>
-                <button class="table-action-btn duplicate-btn" onclick="duplicateEntry(${entry.id})" title="Duplicate">
+                <button class="table-action-btn duplicate-btn" onclick="duplicateNarrative('${narrative.id}')" title="Duplicate">
                     <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                         <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"/>
                     </svg>
                 </button>
-                <button class="table-action-btn delete-btn" onclick="deleteEntry(${entry.id})" title="Delete">
+                <button class="table-action-btn delete-btn" onclick="deleteNarrative('${narrative.id}')" title="Delete">
                     <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                         <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
                     </svg>
                 </button>
+                <button class="table-action-btn checkbox-btn" 
+                        onclick="toggleEntrySelection('${narrative.id}')" 
+                        title="Select entry"
+                        data-entry-id="${narrative.id}">
+                    <input type="checkbox" 
+                           class="table-action-checkbox" 
+                           data-entry-id="${narrative.id}"
+                           ${selectedEntries.has(narrative.id) ? 'checked' : ''}
+                           onclick="event.stopPropagation()"
+                           tabindex="-1">
+                </button>
             </div>
             <div class="mobile-action-menu">
-                <button onclick="toggleMobileMenu(this, ${entry.id})" title="Actions">
+                <button onclick="toggleMobileMenu(this, '${narrative.id}')" title="Actions">
                     <svg viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12,16A2,2 0 0,1 14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18A2,2 0 0,1 12,16M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M12,4A2,2 0 0,1 14,6A2,2 0 0,1 12,8A2,2 0 0,1 10,6A2,2 0 0,1 12,4Z"/>
                     </svg>
@@ -1814,7 +1289,7 @@ function createCondensedRow(entry, narrative, narrativeIndex) {
             </div>
         </td>
         <td class="condensed-status">
-            ${createStatusDropdown(entry.id, status, entry)}
+            ${createStatusDropdown(narrative.id, status, narrative)}
         </td>
     `;
     
@@ -1849,7 +1324,7 @@ function createMobileExpandedRow(entry, narrative, narrativeIndex) {
                     <span class="mobile-detail-value">${status.toUpperCase()}</span>
                 </div>
                 <div class="mobile-detail">
-                    <span class="mobile-detail-label">FULL DESCRIPTION</span>
+                    <span class="mobile-detail-label">FULL NARRATIVE</span>
                     <span class="mobile-detail-value">${narrative ? narrative.text : (entry.original_text || 'No description')}</span>
                 </div>
             </div>
@@ -1902,903 +1377,148 @@ function createTableRow(entry) {
     return row;
 }
 
-// Calendar functionality
-let currentCalendarDate = new Date();
-let calendarSelectedDates = { start: null, end: null };
-let isDraggingDateRange = false;
-let isSelectingDateRange = false;
-
-async function loadCalendar() {
-    const calendarView = document.getElementById('calendar-view');
-    const calendar = document.getElementById('calendar');
-    const monthHeader = document.getElementById('calendar-month');
-    
-    if (!calendar || !monthHeader) return;
-    
-    // Fetch all entries for the calendar
-    const entries = await dbOperations.getEntries();
-    
-    const year = currentCalendarDate.getFullYear();
-    const month = currentCalendarDate.getMonth();
-    
-    monthHeader.textContent = new Date(year, month).toLocaleDateString('en-US', { 
-        month: 'long', 
-        year: 'numeric' 
-    });
-    
-    // Add export controls if not present
-    let exportControls = document.getElementById('calendar-export-controls');
-    if (!exportControls) {
-        exportControls = document.createElement('div');
-        exportControls.id = 'calendar-export-controls';
-        exportControls.className = 'calendar-export-controls';
-        exportControls.innerHTML = `
-            <div class="export-selection-info">
-                <span id="calendar-selection-text">Click and drag to select dates for export</span>
-            </div>
-            <div class="export-actions">
-                <button class="calendar-preset-btn" data-preset="this-week">This Week</button>
-                <button class="calendar-preset-btn" data-preset="last-week">Last Week</button>
-                <button id="calendar-add-entry-btn" class="calendar-add-entry-btn">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
-                        <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
-                    </svg>
-                    Add Entry
-                </button>
-                <button id="calendar-export-btn" class="calendar-export-btn" disabled>
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
-                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M16,11L12,15L8,11L10.17,9L11,9.83V7H13V9.83L13.83,9L16,11Z"/>
-                    </svg>
-                    Export
-                </button>
-            </div>
-        `;
+async function handleExportClick() {
+    if (selectedEntries.size > 0) {
+        // Export selected entries
+        await exportSelectedEntries();
+    } else {
+        // Check if there are any draft narratives first
+        let narratives = await dbOperations.getNarratives({ status: 'draft' });
         
-        // Insert after calendar header
-        const calendarHeader = document.querySelector('.calendar-header');
-        if (calendarHeader && calendarHeader.parentNode) {
-            if (calendarHeader.nextSibling) {
-                calendarHeader.parentNode.insertBefore(exportControls, calendarHeader.nextSibling);
-            } else {
-                calendarHeader.parentNode.appendChild(exportControls);
+        if (narratives.length === 0) {
+            // No draft narratives available
+            alert("No draft entries detected - use Add Entry.");
+        } else {
+            // Show dialog to confirm exporting all draft entries
+            const dialog = confirm("No entries selected. Do you want to export all Draft entries?");
+            if (dialog) {
+                await exportAllDraftEntries();
             }
         }
-        
-        // Add event listeners for preset buttons
-        exportControls.querySelectorAll('.calendar-preset-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => selectCalendarPreset(e.target.dataset.preset));
-        });
-        
-        // Add export button listener
-        document.getElementById('calendar-export-btn').addEventListener('click', exportCalendarSelection);
-        
-        // Add entry button listener
-        document.getElementById('calendar-add-entry-btn').addEventListener('click', () => {
-            openCalendarAddEntry();
-        });
-    }
-    
-    // Build calendar
-    calendar.innerHTML = '';
-    
-    // Day headers
-    const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    dayHeaders.forEach(day => {
-        const header = document.createElement('div');
-        header.className = 'calendar-day-header';
-        header.textContent = day;
-        calendar.appendChild(header);
-    });
-    
-    // Get first day of month and number of days
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const today = new Date();
-    
-    // Add empty cells for days before month starts
-    for (let i = 0; i < firstDay; i++) {
-        const emptyDay = document.createElement('div');
-        emptyDay.className = 'calendar-day other-month';
-        calendar.appendChild(emptyDay);
-    }
-    
-    // Add days of month
-    for (let day = 1; day <= daysInMonth; day++) {
-        const dayCell = document.createElement('div');
-        dayCell.className = 'calendar-day';
-        dayCell.dataset.date = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        
-        const currentDate = new Date(year, month, day);
-        if (currentDate.toDateString() === today.toDateString()) {
-            dayCell.classList.add('today');
-        }
-        
-        // Get entries for this day
-        const dayEntries = entries.filter(entry => {
-            const entryDate = new Date(entry.created_at);
-            return entryDate.getDate() === day && 
-                   entryDate.getMonth() === month && 
-                   entryDate.getFullYear() === year;
-        });
-        
-        // Add day content container
-        const dayContent = document.createElement('div');
-        dayContent.className = 'calendar-day-content';
-        
-        // Calculate total hours for the day
-        const dayTotalHours = dayEntries.reduce((sum, entry) => sum + (entry.total_hours || 0), 0);
-        
-        dayContent.innerHTML = `
-            <div class="calendar-day-header-row">
-                <div class="calendar-day-number">${day}</div>
-                ${dayTotalHours > 0 ? `<div class="calendar-day-total">${dayTotalHours.toFixed(1)}h</div>` : ''}
-            </div>
-        `;
-        
-        // Create entries container
-        const entriesContainer = document.createElement('div');
-        entriesContainer.className = 'calendar-entries-container';
-        
-        // Show up to 4 entries if there are exactly 4, otherwise show 3
-        const maxEntriesToShow = dayEntries.length === 4 ? 4 : 3;
-        const entriesToShow = dayEntries.slice(0, maxEntriesToShow);
-        
-        entriesToShow.forEach(entry => {
-            const entryEl = document.createElement('div');
-            entryEl.className = 'calendar-entry';
-            entryEl.innerHTML = `
-                <span class="entry-time">${entry.total_hours || 0}h</span>
-                <span class="entry-client-name">${entry.client_code || 'No Client'}</span>
-            `;
-            entryEl.title = `${entry.client_code || 'No Client'}${entry.matter_number ? ' - ' + entry.matter_number : ''}\n${entry.narratives && entry.narratives[0] ? entry.narratives[0].text : ''}`;
-            entryEl.onclick = (e) => {
-                e.stopPropagation();
-                openEditModal(entry.id);
-            };
-            entriesContainer.appendChild(entryEl);
-        });
-        
-        // Add "more" indicator if there are more than 4 entries
-        if (dayEntries.length > 4) {
-            const moreEl = document.createElement('div');
-            moreEl.className = 'calendar-more-entries';
-            // On mobile (<=768px), show just "+X", on larger screens show "+X more"
-            const isMobile = window.innerWidth <= 768;
-            moreEl.textContent = isMobile 
-                ? `+${dayEntries.length - maxEntriesToShow}` 
-                : `+${dayEntries.length - maxEntriesToShow} more`;
-            moreEl.onclick = (e) => {
-                e.stopPropagation();
-                showDayEntriesModal(currentDate, dayEntries);
-            };
-            entriesContainer.appendChild(moreEl);
-        }
-        
-        dayContent.appendChild(entriesContainer);
-        dayCell.appendChild(dayContent);
-        
-        // Add date selection handlers
-        dayCell.addEventListener('mousedown', (e) => startDateSelection(e, currentDate));
-        dayCell.addEventListener('mouseenter', (e) => updateDateSelection(e, currentDate));
-        dayCell.addEventListener('mouseup', (e) => endDateSelection(e, currentDate));
-        
-        calendar.appendChild(dayCell);
-    }
-    
-    // Update selection display if dates are selected
-    updateCalendarSelectionDisplay();
-}
-
-async function navigateCalendar(direction) {
-    currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
-    // Clear selection when navigating months
-    calendarSelectedDates = { start: null, end: null };
-    isSelectingDateRange = false;
-    await loadCalendar();
-}
-
-// Calendar date selection functions
-function startDateSelection(e, date) {
-    e.preventDefault();
-    
-    // Check if this is a click or drag
-    if (!isSelectingDateRange && !calendarSelectedDates.start) {
-        // First click - start selection
-        isSelectingDateRange = true;
-        calendarSelectedDates.start = date;
-        calendarSelectedDates.end = null;
-        updateCalendarSelectionDisplay();
-    } else if (isSelectingDateRange && calendarSelectedDates.start && !isDraggingDateRange) {
-        // Second click - complete selection
-        calendarSelectedDates.end = date;
-        
-        // Ensure start is before end
-        if (calendarSelectedDates.start > calendarSelectedDates.end) {
-            [calendarSelectedDates.start, calendarSelectedDates.end] = 
-            [calendarSelectedDates.end, calendarSelectedDates.start];
-        }
-        
-        isSelectingDateRange = false;
-        updateCalendarSelectionDisplay();
-    } else {
-        // Starting a drag
-        isDraggingDateRange = true;
-        calendarSelectedDates.start = date;
-        calendarSelectedDates.end = date;
-        isSelectingDateRange = false;
-        updateCalendarSelectionDisplay();
-        
-        // Add mouse move listener to document for drag selection
-        document.addEventListener('mousemove', handleDateSelectionDrag);
     }
 }
 
-function updateDateSelection(e, date) {
-    if (isDraggingDateRange && calendarSelectedDates.start) {
-        calendarSelectedDates.end = date;
-        updateCalendarSelectionDisplay();
-    } else if (isSelectingDateRange && calendarSelectedDates.start) {
-        // Show hover preview during click selection
-        calendarSelectedDates.end = date;
-        updateCalendarSelectionDisplay(true); // true = preview mode
-    }
-}
-
-function endDateSelection(e, date) {
-    if (isDraggingDateRange) {
-        isDraggingDateRange = false;
-        calendarSelectedDates.end = date;
-        
-        // Ensure start is before end
-        if (calendarSelectedDates.start > calendarSelectedDates.end) {
-            [calendarSelectedDates.start, calendarSelectedDates.end] = 
-            [calendarSelectedDates.end, calendarSelectedDates.start];
-        }
-        
-        updateCalendarSelectionDisplay();
-        
-        // Remove mouse move listener
-        document.removeEventListener('mousemove', handleDateSelectionDrag);
-    }
-}
-
-function handleDateSelectionDrag(e) {
-    // Handle drag selection across calendar cells
-    const dayCell = document.elementFromPoint(e.clientX, e.clientY);
-    if (dayCell && dayCell.classList.contains('calendar-day') && dayCell.dataset.date) {
-        const [year, month, day] = dayCell.dataset.date.split('-').map(Number);
-        const date = new Date(year, month - 1, day);
-        updateDateSelection(e, date);
-    }
-}
-
-function selectCalendarPreset(preset) {
-    const today = new Date();
-    const currentMonth = currentCalendarDate.getMonth();
-    const currentYear = currentCalendarDate.getFullYear();
-    
-    switch (preset) {
-        case 'this-week':
-            // Get current week in the displayed month
-            const startOfWeek = new Date(today);
-            startOfWeek.setDate(today.getDate() - today.getDay());
-            const endOfWeek = new Date(startOfWeek);
-            endOfWeek.setDate(startOfWeek.getDate() + 6);
-            
-            calendarSelectedDates.start = startOfWeek;
-            calendarSelectedDates.end = endOfWeek;
-            break;
-            
-        case 'last-week':
-            // Get last week
-            const startOfLastWeek = new Date(today);
-            startOfLastWeek.setDate(today.getDate() - today.getDay() - 7);
-            const endOfLastWeek = new Date(startOfLastWeek);
-            endOfLastWeek.setDate(startOfLastWeek.getDate() + 6);
-            
-            calendarSelectedDates.start = startOfLastWeek;
-            calendarSelectedDates.end = endOfLastWeek;
-            break;
-    }
-    
-    updateCalendarSelectionDisplay();
-}
-
-function updateCalendarSelectionDisplay(isPreview = false) {
-    const calendar = document.getElementById('calendar');
-    if (!calendar) return;
-    
-    // Clear existing selection
-    calendar.querySelectorAll('.calendar-day').forEach(day => {
-        day.classList.remove('selected', 'selection-start', 'selection-end', 'selection-pending');
-    });
-    
-    // Apply new selection
-    if (calendarSelectedDates.start) {
-        const start = calendarSelectedDates.start;
-        const end = calendarSelectedDates.end || start;
-        
-        calendar.querySelectorAll('.calendar-day').forEach(day => {
-            if (day.dataset.date) {
-                const [year, month, dayNum] = day.dataset.date.split('-').map(Number);
-                const dayDate = new Date(year, month - 1, dayNum);
-                
-                // Normalize dates for comparison (remove time component)
-                const dayDateNorm = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate());
-                const startNorm = new Date(start.getFullYear(), start.getMonth(), start.getDate());
-                const endNorm = new Date(end.getFullYear(), end.getMonth(), end.getDate());
-                
-                // Ensure start is before end for display
-                const displayStart = startNorm <= endNorm ? startNorm : endNorm;
-                const displayEnd = startNorm <= endNorm ? endNorm : startNorm;
-                
-                if (dayDateNorm >= displayStart && dayDateNorm <= displayEnd) {
-                    day.classList.add('selected');
-                    if (dayDateNorm.getTime() === displayStart.getTime()) {
-                        day.classList.add('selection-start');
-                    }
-                    if (dayDateNorm.getTime() === displayEnd.getTime()) {
-                        day.classList.add('selection-end');
-                    }
-                } else if (isSelectingDateRange && dayDateNorm.getTime() === startNorm.getTime() && !calendarSelectedDates.end) {
-                    // Show pending selection state for first click
-                    day.classList.add('selection-pending');
-                }
-            }
-        });
-        
-        // Update selection text and enable export button
-        const selectionText = document.getElementById('calendar-selection-text');
-        const exportBtn = document.getElementById('calendar-export-btn');
-        
-        if (selectionText && exportBtn) {
-            if (calendarSelectedDates.end) {
-                const days = Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1;
-                const startStr = start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                const endStr = end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                
-                selectionText.textContent = `${startStr} - ${endStr} (${days} days selected)`;
-                exportBtn.disabled = false;
-            } else {
-                // First click state
-                const startStr = start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                selectionText.textContent = `${startStr} - Click another date to complete selection`;
-                exportBtn.disabled = true;
-            }
-        }
-    } else {
-        // Reset to default state
-        const selectionText = document.getElementById('calendar-selection-text');
-        const exportBtn = document.getElementById('calendar-export-btn');
-        
-        if (selectionText) {
-            selectionText.textContent = 'Click and drag to select dates for export';
-        }
-        if (exportBtn) {
-            exportBtn.disabled = true;
-        }
-    }
-}
-
-function openCalendarAddEntry() {
-    // Get the selected date(s)
-    let selectedDate = null;
-    
-    if (calendarSelectedDates.start) {
-        // If a range is selected, use the end date (latest date)
-        selectedDate = calendarSelectedDates.end || calendarSelectedDates.start;
-    } else {
-        // If no date is selected, use today
-        selectedDate = new Date();
-    }
-    
-    // Open the AI assistant with the selected date
-    if (window.aiAssistant) {
-        window.aiAssistant.openWithDate(selectedDate);
-    } else {
-        // Fallback to old modal if AI assistant isn't loaded
-        showNotification('AI Assistant not available', 'error');
-    }
-}
-
-async function exportCalendarSelection() {
-    if (!calendarSelectedDates.start || !calendarSelectedDates.end) {
-        showNotification('Please select a date range to export', 'error');
-        return;
-    }
-    
+async function exportSelectedEntries() {
     try {
-        showLoading('Exporting entries...');
+        showLoading('Exporting selected entries...');
         
-        // Get all entries
-        let entries = await dbOperations.getEntries();
+        const narrativeIds = Array.from(selectedEntries);
         
-        // Format dates for comparison
-        const startDate = calendarSelectedDates.start.toISOString().split('T')[0];
-        const endDate = calendarSelectedDates.end.toISOString().split('T')[0];
+        // Get narratives data
+        const narratives = [];
+        for (const id of narrativeIds) {
+            const narrative = await dbOperations.getNarrative(id);
+            if (narrative) {
+                narratives.push(narrative);
+            }
+        }
         
-        // Filter entries by selected date range
-        entries = entries.filter(entry => {
-            const entryDate = new Date(entry.created_at).toISOString().split('T')[0];
-            return entryDate >= startDate && entryDate <= endDate;
-        });
-        
-        if (entries.length === 0) {
+        if (narratives.length === 0) {
             hideLoading();
-            showNotification('No entries found in selected date range', 'warning');
+            showNotification('No entries to export', 'warning');
             return;
         }
         
-        // Generate filename with date range
-        const startStr = calendarSelectedDates.start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        const endStr = calendarSelectedDates.end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        const filename = `time-entries-${startDate}-to-${endDate}`;
+        // Generate filename
+        const dateStr = new Date().toISOString().split('T')[0];
+        const filename = `time-entries-${dateStr}.csv`;
         
-        // Export entries
-        const entryIds = entries.map(e => e.id);
-        await api.exportEntries(entryIds, filename);
-        
-        // Update status of exported entries to 'exported'
-        for (const entry of entries) {
-            // Update all narratives to exported status
-            if (entry.narratives && entry.narratives.length > 0) {
-                entry.narratives = entry.narratives.map(narrative => ({
-                    ...narrative,
-                    status: 'exported'
-                }));
-            }
-            
-            // Update entry status
-            entry.status = 'exported';
-            
-            // Save to local database
-            await dbOperations.saveEntry(entry);
-            
-            // Update backend if it's a real entry
-            if (typeof entry.id === 'number') {
-                try {
-                    await api.updateEntry(entry.id, entry);
-                } catch (error) {
-                    console.error('Failed to update backend for entry', entry.id, error);
-                }
-            }
-        }
-        
-        hideLoading();
-        showNotification(`Successfully exported ${entries.length} entries from ${startStr} to ${endStr}`, 'success');
-        
-        // Refresh the calendar to show updated statuses
-        loadCalendar();
-        
-    } catch (error) {
-        console.error('Export failed:', error);
-        hideLoading();
-        showNotification('Failed to export entries', 'error');
-    }
-}
-
-function showDayEntriesModal(date, entries) {
-    // Create modal to show all entries for a specific day
-    const modal = document.createElement('div');
-    modal.className = 'day-entries-modal';
-    modal.innerHTML = `
-        <div class="day-entries-content">
-            <div class="day-entries-header">
-                <h3>${date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</h3>
-                <button class="close-btn" onclick="this.closest('.day-entries-modal').remove()">&times;</button>
-            </div>
-            <div class="day-entries-list">
-                ${entries.map(entry => `
-                    <div class="day-entry-item" onclick="openEditModal(${entry.id}); this.closest('.day-entries-modal').remove();">
-                        <div class="entry-time">${new Date(entry.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</div>
-                        <div class="entry-details">
-                            <div class="entry-hours-client">
-                                <span class="entry-hours">${entry.total_hours || 0}h</span>
-                                <span class="entry-client">${entry.client_code || 'No Client'}</span>
-                                ${entry.matter_number ? `<span class="entry-matter">${entry.matter_number}</span>` : ''}
-                            </div>
-                            <div class="entry-description">${entry.narratives && entry.narratives[0] ? entry.narratives[0].text : entry.original_text || 'No description'}</div>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
-    
-    // Close on backdrop click
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.remove();
-        }
-    });
-}
-
-// Export functionality
-function loadExport() {
-    // Remove any existing event listeners first to prevent duplicates
-    const exportBtn = document.getElementById('export-btn');
-    const startInput = document.getElementById('export-start');
-    const endInput = document.getElementById('export-end');
-    const filenameInput = document.getElementById('export-filename');
-    const nonExportedCheckbox = document.getElementById('export-non-exported-only');
-    
-    // Clone elements to remove all event listeners
-    if (exportBtn) {
-        const newExportBtn = exportBtn.cloneNode(true);
-        exportBtn.parentNode.replaceChild(newExportBtn, exportBtn);
-        newExportBtn.addEventListener('click', exportEntries);
-    }
-    
-    // Initialize date presets
-    initializeDatePresets();
-    
-    // Set default to this month
-    setDatePreset('this-month');
-    
-    // Mark this-month button as active
-    const thisMonthBtn = document.querySelector('.preset-btn[data-preset="this-month"]');
-    if (thisMonthBtn) {
-        document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
-        thisMonthBtn.classList.add('active');
-    }
-    
-    // Date inputs are always visible now, no need to hide them
-    
-    // Add event listeners with proper cleanup
-    if (startInput) {
-        startInput.removeEventListener('change', updateExportPreview);
-        startInput.addEventListener('change', updateExportPreview);
-    }
-    if (endInput) {
-        endInput.removeEventListener('change', updateExportPreview);
-        endInput.addEventListener('change', updateExportPreview);
-    }
-    if (filenameInput) {
-        filenameInput.removeEventListener('input', updateExportPreview);
-        filenameInput.addEventListener('input', updateExportPreview);
-    }
-    if (nonExportedCheckbox) {
-        nonExportedCheckbox.removeEventListener('change', updateExportPreview);
-        nonExportedCheckbox.addEventListener('change', updateExportPreview);
-    }
-    
-    // Initial preview update
-    updateExportPreview();
-}
-
-function initializeDatePresets() {
-    const presetButtons = document.querySelectorAll('.preset-btn');
-    presetButtons.forEach(btn => {
-        // Clone to remove existing listeners
-        const newBtn = btn.cloneNode(true);
-        btn.parentNode.replaceChild(newBtn, btn);
-        
-        newBtn.addEventListener('click', (e) => {
-            const preset = e.currentTarget.dataset.preset;
-            setDatePreset(preset);
-            
-            // Update active state
-            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-            e.currentTarget.classList.add('active');
+        // Call new export endpoint
+        const response = await fetch('http://localhost:5001/api/export/narratives', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ narratives, format: 'csv' })
         });
-    });
-    
-    // Add event listeners to date inputs to clear preset selection when manually changed
-    const startInput = document.getElementById('export-start');
-    const endInput = document.getElementById('export-end');
-    
-    const clearPresetSelection = () => {
-        document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-    };
-    
-    if (startInput) {
-        startInput.addEventListener('input', clearPresetSelection);
-    }
-    if (endInput) {
-        endInput.addEventListener('input', clearPresetSelection);
+        
+        if (!response.ok) {
+            throw new Error('Export failed');
+        }
+        
+        // Download the file
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        
+        // Update status of exported narratives
+        const batchId = generateUUID();
+        await dbOperations.markAsExported(narrativeIds, batchId);
+        
+        hideLoading();
+        showNotification(`${narratives.length} entries exported successfully`, 'success');
+        
+        // Clear selection
+        selectedEntries.clear();
+        updateExportButtonLabel();
+        
+        // Refresh dashboard
+        await loadDashboard();
+        
+    } catch (err) {
+        console.error('Export failed:', err);
+        hideLoading();
+        showNotification(`Export failed: ${err.message}`, 'error');
     }
 }
 
-function setDatePreset(preset) {
-    const startInput = document.getElementById('export-start');
-    const endInput = document.getElementById('export-end');
-    const today = new Date();
-    let startDate, endDate;
-    
-    switch (preset) {
-        case 'today':
-            startDate = endDate = today;
-            break;
-            
-        case 'this-week':
-            startDate = new Date(today);
-            startDate.setDate(today.getDate() - today.getDay()); // Start of week (Sunday)
-            endDate = new Date(startDate);
-            endDate.setDate(startDate.getDate() + 6); // End of week (Saturday)
-            break;
-            
-        case 'this-month':
-            startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-            endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-            break;
-            
-        case 'last-month':
-            startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-            endDate = new Date(today.getFullYear(), today.getMonth(), 0);
-            break;
-    }
-    
-    // Format dates for input
-    if (startInput && startDate) {
-        startInput.valueAsDate = startDate;
-    }
-    if (endInput && endDate) {
-        endInput.valueAsDate = endDate;
-    }
-    
-    // Update preview
-    updateExportPreview();
-}
-
-async function updateExportPreview() {
+async function exportAllDraftEntries() {
     try {
-        const startDate = document.getElementById('export-start').value;
-        const endDate = document.getElementById('export-end').value;
-        const nonExportedOnly = document.getElementById('export-non-exported-only').checked;
+        showLoading('Exporting all draft entries...');
         
-        // Show loading state
-        const preview = document.getElementById('export-preview');
-        preview.innerHTML = `
-            <div class="export-loading">
-                <div class="spinner"></div>
-                <span>Loading preview...</span>
-            </div>
-        `;
+        // Get all draft narratives
+        const narratives = await dbOperations.getNarratives({ status: 'draft' });
         
-        // Get all entries first
-        let entries = await dbOperations.getEntries();
-        
-        // Apply date filtering
-        if (startDate || endDate) {
-            entries = entries.filter(entry => {
-                const entryDate = new Date(entry.created_at).toISOString().split('T')[0];
-                if (startDate && entryDate < startDate) return false;
-                if (endDate && entryDate > endDate) return false;
-                return true;
-            });
-        }
-        
-        // Filter out exported entries if checkbox is checked
-        if (nonExportedOnly) {
-            entries = entries.filter(entry => {
-                // Use the helper function to determine effective status
-                const effectiveStatus = determineEntryStatus(entry);
-                return effectiveStatus !== 'exported';
-            });
-        }
-        
-        // Update statistics BEFORE generating the table
-        updateExportStats(entries, startDate, endDate);
-        
-        // Generate preview table
-        if (entries.length === 0) {
-            const message = nonExportedOnly ? 
-                'No non-exported entries found for the selected date range' : 
-                'No entries found for the selected date range';
-            preview.innerHTML = `
-                <div class="export-empty-state">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3M19,5V19H5V5H19Z"/>
-                    </svg>
-                    <p>${message}</p>
-                </div>
-            `;
-        } else {
-            preview.innerHTML = generatePreviewTable(entries);
-        }
-        
-        // Update preview count
-        const previewCount = document.getElementById('preview-count');
-        if (previewCount) {
-            previewCount.textContent = `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}`;
-        }
-        
-    } catch (error) {
-        console.error('Error updating export preview:', error);
-        const preview = document.getElementById('export-preview');
-        preview.innerHTML = `
-            <div class="export-empty-state">
-                <p>Error loading preview</p>
-            </div>
-        `;
-        // Reset statistics on error
-        updateExportStats([], null, null);
-    }
-}
-
-function updateExportStats(entries, startDate, endDate) {
-    // Update entry count
-    const statEntries = document.getElementById('stat-entries');
-    if (statEntries) {
-        statEntries.textContent = entries.length;
-    }
-    
-    // Update total hours
-    const statHours = document.getElementById('stat-hours');
-    if (statHours) {
-        const totalHours = entries.reduce((sum, e) => sum + (e.total_hours || 0), 0);
-        statHours.textContent = totalHours.toFixed(1);
-    }
-    
-    // Update date range
-    const statDateRange = document.getElementById('stat-date-range');
-    if (statDateRange) {
-        if (startDate && endDate) {
-            const start = new Date(startDate).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-            });
-            const end = new Date(endDate).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric', 
-                year: 'numeric'
-            });
-            statDateRange.textContent = start === end ? start : `${start} - ${end}`;
-        } else if (startDate) {
-            const start = new Date(startDate).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-            });
-            statDateRange.textContent = `From ${start}`;
-        } else if (endDate) {
-            const end = new Date(endDate).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-            });
-            statDateRange.textContent = `Until ${end}`;
-        } else {
-            statDateRange.textContent = 'All dates';
-        }
-    }
-}
-
-function generatePreviewTable(entries) {
-    const rows = entries.map(entry => {
-        const dateObj = new Date(entry.created_at);
-        const dateTime = `${dateObj.toLocaleDateString('en-US', { 
-            month: '2-digit', 
-            day: '2-digit' 
-        })} ${dateObj.toLocaleTimeString([], { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-        })}`;
-        
-        const narratives = entry.narratives || [];
-        const description = narratives.map(n => n.text).join('; ') || entry.original_text || '';
-        const hours = entry.total_hours || 0;
-        const clientCode = entry.client_code || '-';
-        const matterNumber = entry.matter_number || '-';
-        const effectiveStatus = determineEntryStatus(entry);
-        
-        return `
-            <tr>
-                <td>${dateTime}</td>
-                <td><span class="export-description" title="${description.replace(/"/g, '&quot;')}">${description}</span></td>
-                <td style="text-align: center;">${hours.toFixed(1)}</td>
-                <td style="text-align: center;">${clientCode}</td>
-                <td style="text-align: center;">${matterNumber}</td>
-                <td style="text-align: center;"><span class="status-badge ${effectiveStatus}">${effectiveStatus.toUpperCase()}</span></td>
-            </tr>
-        `;
-    }).join('');
-    
-    return `
-        <table>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Description</th>
-                    <th>Hours</th>
-                    <th>Client</th>
-                    <th>Matter</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${rows}
-            </tbody>
-        </table>
-    `;
-}
-
-async function exportEntries() {
-    try {
-        console.log('Export button clicked');
-        showLoading('Exporting entries...');
-        
-        const startDate = document.getElementById('export-start').value;
-        const endDate = document.getElementById('export-end').value;
-        const nonExportedOnly = document.getElementById('export-non-exported-only').checked;
-        let filename = document.getElementById('export-filename').value.trim();
-        
-        console.log('Export params:', { startDate, endDate, filename, nonExportedOnly });
-        
-        // Get all entries first
-        let entries = await dbOperations.getEntries();
-        
-        // Apply date filtering
-        if (startDate || endDate) {
-            entries = entries.filter(entry => {
-                const entryDate = new Date(entry.created_at).toISOString().split('T')[0];
-                if (startDate && entryDate < startDate) return false;
-                if (endDate && entryDate > endDate) return false;
-                return true;
-            });
-        }
-        
-        // Filter out exported entries if checkbox is checked
-        if (nonExportedOnly) {
-            entries = entries.filter(entry => {
-                // Use the helper function to determine effective status
-                const effectiveStatus = determineEntryStatus(entry);
-                return effectiveStatus !== 'exported';
-            });
-        }
-        
-        const entryIds = entries.map(e => e.id);
-        
-        console.log(`Exporting ${entries.length} entries`);
-        
-        if (entries.length === 0) {
+        if (narratives.length === 0) {
             hideLoading();
-            const message = nonExportedOnly ? 
-                'No non-exported entries to export' : 
-                'No entries to export';
-            showNotification(message, 'warning');
+            showNotification('No draft entries to export', 'warning');
             return;
         }
         
-        // Generate filename if not provided
-        if (!filename) {
-            const dateStr = new Date().toISOString().split('T')[0];
-            filename = `time-entries-${dateStr}`;
+        // Generate filename
+        const dateStr = new Date().toISOString().split('T')[0];
+        const filename = `time-entries-${dateStr}.csv`;
+        
+        // Call new export endpoint
+        const response = await fetch('http://localhost:5001/api/export/narratives', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ narratives, format: 'csv' })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Export failed');
         }
         
-        // Ensure filename doesn't include .csv extension (we'll add it)
-        filename = filename.replace(/\.csv$/i, '');
+        // Download the file
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
         
-        await api.exportEntries(entryIds, filename);
-        
-        // Update status of exported entries to 'exported'
-        for (const entry of entries) {
-            // Update all narratives to exported status
-            if (entry.narratives) {
-                entry.narratives.forEach(narrative => {
-                    narrative.status = 'exported';
-                });
-            }
-            
-            // Update the entry with exported status
-            await dbOperations.updateEntry(entry.id, {
-                status: 'exported',
-                narratives: entry.narratives
-            });
-        }
+        // Update status of exported narratives
+        const narrativeIds = narratives.map(n => n.id);
+        const batchId = generateUUID();
+        await dbOperations.markAsExported(narrativeIds, batchId);
         
         hideLoading();
-        showNotification('Export completed successfully', 'success');
+        showNotification(`${narratives.length} draft entries exported successfully`, 'success');
         
-        // Refresh the current view to show updated statuses
-        if (currentView === 'dashboard') {
-            await loadDashboard();
-        } else if (currentView === 'export') {
-            await updateExportPreview();
-        }
+        // Refresh dashboard
+        await loadDashboard();
         
     } catch (err) {
         console.error('Export failed:', err);
@@ -2813,6 +1533,7 @@ function openModal() {
     modal.classList.add('active');
     resetModal();
 }
+
 
 function closeModal() {
     const modal = document.getElementById('add-modal');
@@ -2858,7 +1579,7 @@ async function saveEntries() {
             });
         } else {
             // Get recent entries that were created during recording
-            const entries = await dbOperations.getEntries();
+            const entries = await dbOperations.getNarratives();
             const recentEntries = entries.slice(0, result.narratives.length);
             
             // Update each entry with its metadata
@@ -2882,179 +1603,93 @@ async function saveEntries() {
 }
 
 // Entry actions
-async function editEntry(id) {
-    try {
-        const entry = await dbOperations.getEntry(id);
-        if (!entry) return;
-        
-        currentEntry = entry;
-        
-        // Open modal with entry data
-        openModal();
-        
-        // Populate fields (handled by displayEnhancedResults for new interface)
-        // Legacy support for old interface
-        const legacyClientCode = document.getElementById('client-code');
-        const legacyMatterNumber = document.getElementById('matter-number');
-        if (legacyClientCode) legacyClientCode.value = entry.client_code || '';
-        if (legacyMatterNumber) legacyMatterNumber.value = entry.matter_number || '';
-        
-        // Show transcription and results
-        document.getElementById('transcription').classList.remove('hidden');
-        document.getElementById('transcription-text').textContent = entry.original_text;
-        
-        displayEnhancedResults({
-            narratives: entry.narratives,
-            cleaned: entry.cleaned_text,
-            total_hours: entry.total_hours
-        });
-        
-    } catch (err) {
-        console.error('Error editing entry:', err);
-        showNotification('Failed to load entry', 'error');
-    }
-}
 
 async function deleteEntry(id) {
+    // Legacy function - redirects to deleteNarrative
+    return deleteNarrative(id);
+}
+
+async function deleteNarrative(id) {
     if (!confirm('Are you sure you want to delete this entry?')) return;
     
     try {
-        await dbOperations.deleteEntry(id);
+        // Delete from local IndexedDB only (no backend)
+        await dbOperations.deleteNarrative(id);
+        
         loadDashboard();
         showNotification('Entry deleted', 'success');
     } catch (err) {
-        console.error('Error deleting entry:', err);
+        console.error('Error deleting narrative:', err);
         showNotification('Failed to delete entry', 'error');
     }
 }
 
+function toggleEntrySelection(entryId) {
+    if (selectedEntries.has(entryId)) {
+        selectedEntries.delete(entryId);
+    } else {
+        selectedEntries.add(entryId);
+    }
+    
+    // Update the Export button label
+    updateExportButtonLabel();
+    
+    // Update row highlighting
+    const rows = document.querySelectorAll(`tr[data-entry-id="${entryId}"]`);
+    rows.forEach(row => {
+        row.classList.toggle('selected', selectedEntries.has(entryId));
+    });
+    
+    // Update checkbox state
+    const checkboxes = document.querySelectorAll(`.table-action-checkbox[data-entry-id="${entryId}"]`);
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectedEntries.has(entryId);
+    });
+}
+
+function updateExportButtonLabel() {
+    const exportBtn = document.querySelector('.nav-btn[data-view="export"]');
+    if (exportBtn) {
+        const count = selectedEntries.size;
+        if (count > 0) {
+            exportBtn.textContent = `Export (${count})`;
+        } else {
+            exportBtn.textContent = 'Export';
+        }
+    }
+}
+
 async function duplicateEntry(id) {
+    // Legacy function - redirects to duplicateNarrative
+    return duplicateNarrative(id);
+}
+
+async function duplicateNarrative(id) {
     try {
-        const originalEntry = await dbOperations.getEntry(parseInt(id));
-        if (!originalEntry) {
-            throw new Error('Entry not found');
+        const originalNarrative = await dbOperations.getNarrative(id);
+        if (!originalNarrative) {
+            throw new Error('Narrative not found');
         }
         
-        // Create a new entry with the same data but new timestamp
-        const duplicatedEntry = {
-            ...originalEntry,
-            id: undefined, // Let the database generate a new ID
-            created_at: new Date().toISOString(),
-            status: 'draft' // Reset status to draft for duplicated entries
+        // Create a new narrative with the same data but new ID and timestamp
+        const duplicatedNarrative = {
+            ...originalNarrative,
+            id: generateUUID(),
+            groupId: generateUUID(), // Generate new groupId to ensure independence
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            status: 'draft' // Reset status to draft for duplicated narratives
         };
         
-        // Remove the id field completely
-        delete duplicatedEntry.id;
-        
-        await dbOperations.saveEntry(duplicatedEntry);
+        await dbOperations.saveNarrative(duplicatedNarrative);
         loadDashboard();
         showNotification('Entry duplicated successfully', 'success');
     } catch (err) {
-        console.error('Error duplicating entry:', err);
+        console.error('Error duplicating narrative:', err);
         showNotification('Failed to duplicate entry', 'error');
     }
 }
 
-// Bulk Selection Functions
-function toggleBulkSelection() {
-    bulkSelectionMode = !bulkSelectionMode;
-    const container = document.getElementById('entries-list');
-    const bulkSelectBtn = document.getElementById('bulk-select-btn');
-    const btnText = bulkSelectBtn.querySelector('.btn-text');
-    
-    if (bulkSelectionMode) {
-        container.classList.add('bulk-selection-mode');
-        btnText.textContent = 'Cancel';
-    } else {
-        container.classList.remove('bulk-selection-mode');
-        btnText.textContent = 'Select';
-        selectedEntries.clear();
-        updateBulkActionsDisplay();
-        
-        // Clear all checkboxes
-        document.querySelectorAll('.bulk-checkbox').forEach(cb => {
-            cb.checked = false;
-        });
-    }
-}
-
-function updateBulkSelection() {
-    const entryId = parseInt(this.dataset.entryId);
-    
-    if (this.checked) {
-        selectedEntries.add(entryId);
-    } else {
-        selectedEntries.delete(entryId);
-    }
-    
-    updateBulkActionsDisplay();
-}
-
-function updateBulkActionsDisplay() {
-    const bulkActions = document.getElementById('bulk-actions');
-    const bulkCount = document.getElementById('bulk-count');
-    
-    if (selectedEntries.size > 0) {
-        bulkActions.classList.add('active');
-        bulkCount.textContent = `${selectedEntries.size} selected`;
-    } else {
-        bulkActions.classList.remove('active');
-    }
-}
-
-function cancelBulkSelection() {
-    toggleBulkSelection();
-}
-
-async function bulkDeleteEntries() {
-    if (selectedEntries.size === 0) return;
-    
-    const count = selectedEntries.size;
-    if (!confirm(`Are you sure you want to delete ${count} entries?`)) return;
-    
-    try {
-        const promises = Array.from(selectedEntries).map(id => dbOperations.deleteEntry(parseInt(id)));
-        await Promise.all(promises);
-        
-        selectedEntries.clear();
-        updateBulkActionsDisplay();
-        loadDashboard();
-        showNotification(`${count} entries deleted successfully`, 'success');
-    } catch (err) {
-        console.error('Error deleting entries:', err);
-        showNotification('Failed to delete some entries', 'error');
-    }
-}
-
-async function bulkDuplicateEntries() {
-    if (selectedEntries.size === 0) return;
-    
-    try {
-        const promises = Array.from(selectedEntries).map(async (id) => {
-            const originalEntry = await dbOperations.getEntry(parseInt(id));
-            if (originalEntry) {
-                const duplicatedEntry = {
-                    ...originalEntry,
-                    created_at: new Date().toISOString(),
-                    status: 'draft'
-                };
-                delete duplicatedEntry.id;
-                return dbOperations.saveEntry(duplicatedEntry);
-            }
-        });
-        
-        await Promise.all(promises);
-        
-        const count = selectedEntries.size;
-        selectedEntries.clear();
-        updateBulkActionsDisplay();
-        loadDashboard();
-        showNotification(`${count} entries duplicated successfully`, 'success');
-    } catch (err) {
-        console.error('Error duplicating entries:', err);
-        showNotification('Failed to duplicate some entries', 'error');
-    }
-}
 
 // Utility functions
 function debounce(func, wait) {
@@ -3105,146 +1740,10 @@ function applyPreset(preset) {
     });
 }
 
-function addNewPreset() {
-    const client = prompt('Enter client code:');
-    if (!client) return;
-    
-    const matter = prompt('Enter matter number (optional):') || '';
-    
-    const preset = {
-        client_code: client,
-        matter_number: matter
-    };
-    
-    clientMatterPresets.push(preset);
-    savePresets();
-    loadPresets();
-}
 
 // Edit Modal Functions
 let currentEditingEntry = null;
 
-function openEditModal(entryId) {
-    // Find the entry
-    const entry = currentEntries.find(e => e.id == entryId);
-    if (!entry) {
-        console.error('Entry not found:', entryId);
-        return;
-    }
-    
-    currentEditingEntry = entry;
-    
-    // Populate the modal
-    populateEditModal(entry);
-    
-    // Show the modal
-    document.getElementById('edit-modal').classList.add('active');
-}
-
-function closeEditModal() {
-    document.getElementById('edit-modal').classList.remove('active');
-    currentEditingEntry = null;
-}
-
-function populateEditModal(entry) {
-    
-    // Populate narratives
-    const container = document.getElementById('edit-narratives-container');
-    container.innerHTML = '';
-    
-    (entry.narratives || []).forEach((narrative, index) => {
-        const narrativeItem = document.createElement('div');
-        narrativeItem.className = 'edit-narrative-item';
-        narrativeItem.innerHTML = `
-            <div class="edit-narrative-header">
-                <span class="activity-title">Activity ${index + 1}</span>
-                <span class="activity-hours">${narrative.hours} hours</span>
-            </div>
-            <div class="edit-form-grid">
-                <div class="edit-form-group compact">
-                    <label>Hours</label>
-                    <input type="number" step="0.1" min="0" class="narrative-hours-input" value="${narrative.hours}" data-index="${index}">
-                </div>
-                <div class="edit-form-group compact">
-                    <label>Client Code</label>
-                    <input type="text" class="narrative-client-input" value="${narrative.client_code || entry.client_code || ''}" data-index="${index}" placeholder="e.g., ABC123">
-                </div>
-                <div class="edit-form-group compact">
-                    <label>Matter Number</label>
-                    <input type="text" class="narrative-matter-input" value="${narrative.matter_number || entry.matter_number || ''}" data-index="${index}" placeholder="e.g., 2024-001">
-                </div>
-                <div class="edit-form-group compact">
-                    <label>Status</label>
-                    <select class="narrative-status-input" data-index="${index}">
-                        <option value="draft" ${(narrative.status || entry.status || 'draft') === 'draft' ? 'selected' : ''}>Draft</option>
-                        <option value="exported" ${(narrative.status || entry.status || 'draft') === 'exported' || (narrative.status || entry.status || 'draft') === 'billed' ? 'selected' : ''}>Exported</option>
-                    </select>
-                </div>
-            </div>
-            <div class="edit-form-grid narrative-row">
-                <div class="edit-form-group">
-                    <label>Narrative Text</label>
-                    <textarea rows="2" class="narrative-text-input auto-resize" data-index="${index}" placeholder="Describe the billable activity...">${narrative.text}</textarea>
-                </div>
-                <button type="button" class="details-toggle subtle" data-index="${index}">
-                    ⋯
-                </button>
-            </div>
-            <div class="details-section" data-index="${index}">
-                <div class="edit-form-grid details-grid">
-                    <div class="edit-form-group">
-                        <label>Task Code</label>
-                        <input type="text" class="narrative-task-input" value="${narrative.task_code || ''}" data-index="${index}" placeholder="e.g., RESEARCH">
-                    </div>
-                </div>
-            </div>
-        `;
-        container.appendChild(narrativeItem);
-    });
-    
-    // Add event listeners for details toggles
-    document.querySelectorAll('.details-toggle').forEach(toggle => {
-        toggle.addEventListener('click', function() {
-            const index = this.dataset.index;
-            const detailsSection = document.querySelector(`.details-section[data-index="${index}"]`);
-            const isExpanded = detailsSection.classList.contains('expanded');
-            
-            if (isExpanded) {
-                detailsSection.classList.remove('expanded');
-                this.textContent = 'Details';
-                this.classList.remove('active');
-            } else {
-                detailsSection.classList.add('expanded');
-                this.textContent = 'Hide';
-                this.classList.add('active');
-            }
-        });
-    });
-    
-    // Add auto-resize functionality for textareas
-    document.querySelectorAll('.auto-resize').forEach(textarea => {
-        textarea.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-        });
-        
-        // Trigger resize on load
-        textarea.style.height = 'auto';
-        textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
-    });
-    
-    // Update hours display when hours input changes
-    document.querySelectorAll('.narrative-hours-input').forEach(input => {
-        input.addEventListener('input', function() {
-            const index = this.dataset.index;
-            const hoursDisplay = document.querySelector(`.edit-narrative-item:nth-child(${parseInt(index) + 1}) .activity-hours`);
-            if (hoursDisplay) {
-                const hours = parseFloat(this.value) || 0;
-                hoursDisplay.textContent = `${hours} hour${hours !== 1 ? 's' : ''}`;
-            }
-        });
-    });
-}
 
 // Apply to All Modal Functions
 let currentApplyToAllEntry = null;
@@ -3366,20 +1865,13 @@ async function applyToAllNarratives() {
             });
         }
         
-        // Save to database
-        const response = await api.updateEntry(updatedEntry.id, updatedEntry);
+        // Save to IndexedDB (no backend storage)
+        await dbOperations.saveEntry(updatedEntry);
         
-        // Update IndexedDB with the response from backend
-        if (response) {
-            // Mark as synced since it just came from the backend
-            response.sync_status = 'synced';
-            await dbOperations.saveEntry(response);
-        }
-        
-        // Update the in-memory entries array with the actual response
+        // Update the in-memory entries array
         const entryIndex = currentEntries.findIndex(e => e.id === updatedEntry.id);
         if (entryIndex !== -1) {
-            currentEntries[entryIndex] = response || updatedEntry;
+            currentEntries[entryIndex] = updatedEntry;
         }
         
         // Close modal and refresh display
@@ -3395,56 +1887,6 @@ async function applyToAllNarratives() {
     }
 }
 
-async function saveEditChanges() {
-    if (!currentEditingEntry) return;
-    
-    try {
-        // Collect the updated data
-        const updatedEntry = {
-            ...currentEditingEntry,
-            narratives: []
-        };
-        
-        // Collect narratives data
-        const narrativeItems = document.querySelectorAll('.edit-narrative-item');
-        narrativeItems.forEach((item, index) => {
-            const narrative = {
-                hours: parseFloat(item.querySelector('.narrative-hours-input').value) || 0,
-                task_code: item.querySelector('.narrative-task-input').value,
-                client_code: item.querySelector('.narrative-client-input').value,
-                matter_number: item.querySelector('.narrative-matter-input').value,
-                text: item.querySelector('.narrative-text-input').value,
-                status: item.querySelector('.narrative-status-input').value
-            };
-            updatedEntry.narratives.push(narrative);
-        });
-        
-        // Recalculate total hours
-        updatedEntry.total_hours = updatedEntry.narratives.reduce((sum, n) => sum + n.hours, 0);
-        
-        // Determine entry-level status based on individual narrative statuses
-        // Use the least advanced status (draft < exported)
-        const statuses = updatedEntry.narratives.map(n => n.status);
-        if (statuses.includes('draft')) {
-            updatedEntry.status = 'draft';
-        } else {
-            updatedEntry.status = 'exported';
-        }
-        
-        // Save to database
-        await dbOperations.updateEntry(updatedEntry.id, updatedEntry);
-        
-        // Close modal and refresh dashboard
-        closeEditModal();
-        loadDashboard();
-        
-        showNotification('Entry updated successfully', 'success');
-        
-    } catch (error) {
-        console.error('Error saving changes:', error);
-        showNotification('Failed to save changes', 'error');
-    }
-}
 
 // Status change function for card view
 async function changeEntryStatus(entryId, newStatus) {
@@ -3493,12 +1935,6 @@ async function changeNarrativeStatus(entryId, narrativeIndex, newStatus) {
             
             // Save to database
             await dbOperations.updateEntry(entryId, entry);
-            
-            // Update in-memory entries array
-            const entryIndex = entries.findIndex(e => e.id === entryId);
-            if (entryIndex !== -1) {
-                entries[entryIndex] = entry;
-            }
             
             // Refresh dashboard to reflect changes
             loadDashboard();
@@ -3748,303 +2184,39 @@ function updateEntryStatusInDOM(entryId, entry) {
 
 
 // Make functions available globally
-window.editEntry = editEntry;
 window.deleteEntry = deleteEntry;
-window.openEditModal = openEditModal;
-window.closeEditModal = closeEditModal;
-window.saveEditChanges = saveEditChanges;
 window.toggleNarrativeStatus = toggleNarrativeStatus;
 window.toggleEntryStatus = toggleEntryStatus;
 window.safeToggleNarrativeStatus = safeToggleNarrativeStatus;
 window.safeToggleEntryStatus = safeToggleEntryStatus;
 window.openApplyToAllModal = openApplyToAllModal;
-window.addNewPreset = addNewPreset;
 window.duplicateEntry = duplicateEntry;
-window.toggleDescription = toggleDescription;
+window.toggleNarrative = toggleNarrative;
 window.changeEntryStatus = changeEntryStatus;
 
-// Bulk assignment functions
-function showBulkAssignmentControls() {
-    const controls = document.getElementById('bulk-assignment-controls');
-    if (controls) {
-        controls.classList.remove('hidden');
-    }
-}
 
-function hideBulkAssignmentControls() {
-    const controls = document.getElementById('bulk-assignment-controls');
-    if (controls) {
-        controls.classList.add('hidden');
-    }
-}
-
-async function bulkAssignClient() {
-    const clientInput = document.getElementById('bulk-client-input');
-    const clientCode = clientInput.value.trim();
-    
-    if (!clientCode) {
-        showNotification('Please enter a client code', 'error');
-        return;
-    }
-    
-    // Show confirmation dialog
-    const confirmed = await showBulkAssignmentDialog('client', clientCode);
-    if (!confirmed) return;
-    
-    try {
-        // Get all visible entries
-        const visibleEntries = getVisibleEntries();
-        
-        if (visibleEntries.length === 0) {
-            showNotification('No entries found to update', 'error');
-            return;
-        }
-        
-        // Update each entry
-        for (const entry of visibleEntries) {
-            entry.client_code = clientCode;
-            
-            // Also update narratives
-            if (entry.narratives && entry.narratives.length > 0) {
-                entry.narratives.forEach(narrative => {
-                    narrative.client_code = clientCode;
-                });
-            }
-            
-            await dbOperations.updateEntry(entry.id, entry);
-        }
-        
-        // Clear input and refresh dashboard
-        clientInput.value = '';
-        loadDashboard();
-        
-        showNotification(`Client code "${clientCode}" applied to ${visibleEntries.length} entries`, 'success');
-        
-    } catch (error) {
-        console.error('Error applying bulk client assignment:', error);
-        showNotification('Failed to apply client code', 'error');
-    }
-}
-
-async function bulkAssignMatter() {
-    const matterInput = document.getElementById('bulk-matter-input');
-    const matterNumber = matterInput.value.trim();
-    
-    if (!matterNumber) {
-        showNotification('Please enter a matter number', 'error');
-        return;
-    }
-    
-    // Show confirmation dialog
-    const confirmed = await showBulkAssignmentDialog('matter', matterNumber);
-    if (!confirmed) return;
-    
-    try {
-        // Get all visible entries
-        const visibleEntries = getVisibleEntries();
-        
-        if (visibleEntries.length === 0) {
-            showNotification('No entries found to update', 'error');
-            return;
-        }
-        
-        // Update each entry
-        for (const entry of visibleEntries) {
-            entry.matter_number = matterNumber;
-            
-            // Also update narratives
-            if (entry.narratives && entry.narratives.length > 0) {
-                entry.narratives.forEach(narrative => {
-                    narrative.matter_number = matterNumber;
-                });
-            }
-            
-            await dbOperations.updateEntry(entry.id, entry);
-        }
-        
-        // Clear input and refresh dashboard
-        matterInput.value = '';
-        loadDashboard();
-        
-        showNotification(`Matter number "${matterNumber}" applied to ${visibleEntries.length} entries`, 'success');
-        
-    } catch (error) {
-        console.error('Error applying bulk matter assignment:', error);
-        showNotification('Failed to apply matter number', 'error');
-    }
-}
-
-function getVisibleEntries() {
-    // Get all entry cards currently visible in the DOM
-    const entryCards = document.querySelectorAll('.entry-card[data-entry-id]');
-    const entries = [];
-    
-    entryCards.forEach(card => {
-        const entryId = parseInt(card.dataset.entryId);
-        // Find the entry data from the current loaded entries
-        const entry = window.currentEntries?.find(e => e.id === entryId);
-        if (entry) {
-            entries.push(entry);
-        }
-    });
-    
-    return entries;
-}
-
-// Confirmation dialog for bulk assignments
-function showBulkAssignmentDialog(type, value) {
-    return new Promise((resolve) => {
-        // Create modal HTML
-        const modal = document.createElement('div');
-        modal.className = 'bulk-assignment-modal';
-        modal.innerHTML = `
-            <div class="bulk-assignment-dialog">
-                <div class="bulk-assignment-dialog-header">
-                    <h3>Confirm Bulk Assignment</h3>
-                </div>
-                <div class="bulk-assignment-dialog-content">
-                    <p>Are you sure you want to apply <strong>${type} code "${value}"</strong> to all visible entries?</p>
-                    <p class="warning-text">This action will update all entries currently displayed in the card view and cannot be undone.</p>
-                </div>
-                <div class="bulk-assignment-dialog-actions">
-                    <button class="bulk-cancel-btn" onclick="closeBulkDialog(false)">Cancel</button>
-                    <button class="bulk-confirm-btn" onclick="closeBulkDialog(true)">Apply to All</button>
-                </div>
-            </div>
-        `;
-        
-        // Add to page
-        document.body.appendChild(modal);
-        
-        // Store resolve function globally so buttons can access it
-        window.bulkDialogResolve = resolve;
-        
-        // Add styles if not already added
-        if (!document.getElementById('bulk-modal-styles')) {
-            const styles = document.createElement('style');
-            styles.id = 'bulk-modal-styles';
-            styles.textContent = `
-                .bulk-assignment-modal {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: rgba(0, 0, 0, 0.5);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    z-index: 10000;
-                }
-                
-                .bulk-assignment-dialog {
-                    background: var(--surface);
-                    border-radius: 0.5rem;
-                    padding: 1.5rem;
-                    max-width: 500px;
-                    width: 90%;
-                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-                }
-                
-                .bulk-assignment-dialog-header h3 {
-                    margin: 0 0 1rem 0;
-                    color: var(--text-primary);
-                    font-size: 1.25rem;
-                }
-                
-                .bulk-assignment-dialog-content p {
-                    margin: 0 0 1rem 0;
-                    color: var(--text-primary);
-                    line-height: 1.5;
-                }
-                
-                .warning-text {
-                    color: var(--warning-color);
-                    font-size: 0.875rem;
-                }
-                
-                .bulk-assignment-dialog-actions {
-                    display: flex;
-                    gap: 0.75rem;
-                    justify-content: flex-end;
-                    margin-top: 1.5rem;
-                }
-                
-                .bulk-cancel-btn, .bulk-confirm-btn {
-                    padding: 0.5rem 1rem;
-                    border: none;
-                    border-radius: 0.375rem;
-                    font-size: 0.875rem;
-                    font-weight: 500;
-                    cursor: pointer;
-                    transition: all 0.2s ease;
-                }
-                
-                .bulk-cancel-btn {
-                    background: var(--background);
-                    color: var(--text-secondary);
-                    border: 1px solid var(--border);
-                }
-                
-                .bulk-cancel-btn:hover {
-                    background: var(--surface);
-                    color: var(--text-primary);
-                }
-                
-                .bulk-confirm-btn {
-                    background: var(--primary-color);
-                    color: white;
-                }
-                
-                .bulk-confirm-btn:hover {
-                    background: #1d4ed8;
-                }
-            `;
-            document.head.appendChild(styles);
-        }
-    });
-}
-
-function closeBulkDialog(confirmed) {
-    // Remove modal
-    const modal = document.querySelector('.bulk-assignment-modal');
-    if (modal) {
-        modal.remove();
-    }
-    
-    // Resolve promise
-    if (window.bulkDialogResolve) {
-        window.bulkDialogResolve(confirmed);
-        delete window.bulkDialogResolve;
-    }
-}
-
-window.bulkAssignClient = bulkAssignClient;
-window.bulkAssignMatter = bulkAssignMatter;
-window.closeBulkDialog = closeBulkDialog;
-
-// Helper function for description expansion
-function toggleDescription(btn) {
-    const descriptionContent = btn.closest('.description-content');
-    const descriptionText = descriptionContent.querySelector('.description-text');
-    const fullText = descriptionText.getAttribute('title');
+// Helper function for narrative expansion
+function toggleNarrative(btn) {
+    const narrativeContent = btn.closest('.narrative-content');
+    const narrativeText = narrativeContent.querySelector('.narrative-text');
+    const fullText = narrativeText.getAttribute('title');
     
     if (btn.textContent === 'more') {
-        descriptionText.textContent = fullText;
+        narrativeText.textContent = fullText;
         btn.textContent = 'less';
-        descriptionContent.classList.add('expanded');
+        narrativeContent.classList.add('expanded');
     } else {
         const maxLength = 150;
-        descriptionText.textContent = fullText.substring(0, maxLength) + '...';
+        narrativeText.textContent = fullText.substring(0, maxLength) + '...';
         btn.textContent = 'more';
-        descriptionContent.classList.remove('expanded');
+        narrativeContent.classList.remove('expanded');
     }
 }
 
 // Mobile-specific functions
-function toggleMobileDescription(btn, entryId, narrativeIndex) {
+function toggleMobileNarrative(btn, entryId, narrativeIndex) {
     const row = btn.closest('tr');
-    const descriptionDiv = row.querySelector('.description-text');
+    const narrativeDiv = row.querySelector('.narrative-text');
     
     // Get the full entry data
     const entry = currentEntries.find(e => e.id === entryId);
@@ -4052,14 +2224,14 @@ function toggleMobileDescription(btn, entryId, narrativeIndex) {
     
     const narrative = narrativeIndex !== null && entry.narratives ? 
         entry.narratives[narrativeIndex] : null;
-    const fullText = narrative ? narrative.text : (entry.original_text || 'No description');
+    const fullText = narrative ? narrative.text : (entry.original_text || 'No narrative');
     
     if (btn.textContent === 'show more') {
-        descriptionDiv.textContent = fullText;
+        narrativeDiv.textContent = fullText;
         btn.textContent = 'show less';
     } else {
         const maxLength = 100;
-        descriptionDiv.textContent = fullText.substring(0, maxLength) + '...';
+        narrativeDiv.textContent = fullText.substring(0, maxLength) + '...';
         btn.textContent = 'show more';
     }
 }

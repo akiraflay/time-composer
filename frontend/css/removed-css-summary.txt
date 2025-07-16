@@ -1,0 +1,38 @@
+Summary of Removed CSS from styles.css
+=====================================
+
+After the removal of Card View, Calendar Page, and Export Page features, the following CSS sections were removed:
+
+1. EXPORT-RELATED STYLES (Lines ~486-870)
+   - .export-card:hover
+   - .export-preview-card:hover
+   - .card-header (generic card styling)
+   - .header-title-group
+   - .card-header h3
+   - .card-body
+   - .export-stats-card (and all stat-related classes)
+   - .export-preview-table (and all table-related classes)
+   - .export-description
+   - .export-empty-state
+   - .export-loading
+
+2. REMOVED COMMENTS
+   - "/* Entry Cards - Removed (using list view only) */"
+   - "/* Entry card styles - Removed (using list view only) */"
+
+3. DUPLICATE STYLES
+   - .entry-card:hover .status-badge (referenced removed card view)
+
+STYLES KEPT:
+- .entry-card and related styles (still used by recording interface in recording.js)
+- All list view and table view styles
+- All inline editing styles
+- Export button/modal styles (export functionality still exists as a modal)
+
+TOTAL LINES REMOVED: Approximately 350+ lines of CSS
+
+Note: The application still uses:
+- Dashboard view with list/table display
+- AI Assistant interface
+- Export functionality (as a modal, not a dedicated page)
+- Recording interface (which uses .entry-card styles)

@@ -3,6 +3,9 @@ class AIAssistant {
     constructor() {
         this.isRecording = false;
         this.isPaused = false;
+        this.isRecognitionActive = false;
+        this.isIntentionalStop = false;
+        this.isStartingRecording = false; // Prevent double activation
         this.mediaRecorder = null;
         this.audioChunks = [];
         this.startTime = null;
@@ -27,12 +30,13 @@ class AIAssistant {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             this.recognition = new SpeechRecognition();
             
-            this.recognition.continuous = true;
+            this.recognition.continuous = false; // Stop after silence
             this.recognition.interimResults = true;
             this.recognition.lang = 'en-US';
             
             this.recognition.onstart = () => {
-                console.log('Speech recognition started');
+                // console.log('Speech recognition started');
+                this.isRecognitionActive = true;
                 this.showLiveTranscription();
             };
             
@@ -41,15 +45,32 @@ class AIAssistant {
             };
             
             this.recognition.onerror = (event) => {
-                console.error('Speech recognition error:', event.error);
-                if (event.error === 'no-speech' && this.isRecording) {
-                    this.restartRecognition();
+                // Ignore no-speech errors - attorneys may pause while thinking
+                if (event.error === 'no-speech') {
+                    return;
                 }
+                console.error('Speech recognition error:', event.error);
             };
             
             this.recognition.onend = () => {
-                if (this.isRecording && !this.isPaused) {
-                    this.restartRecognition();
+                // console.log('Speech recognition ended');
+                this.isRecognitionActive = false;
+                
+                // Restart recognition if we're still recording and it wasn't an intentional stop
+                if (this.isRecording && !this.isIntentionalStop && !this.isPaused) {
+                    // console.log('Restarting recognition to continue listening...');
+                    setTimeout(() => {
+                        if (this.recognition && this.isRecording && !this.isIntentionalStop) {
+                            try {
+                                this.recognition.start();
+                                this.isRecognitionActive = true;
+                            } catch (e) {
+                                // console.log('Could not restart recognition:', e);
+                            }
+                        }
+                    }, 100);
+                } else {
+                    this.hideLiveTranscription();
                 }
             };
         }
@@ -71,11 +92,11 @@ class AIAssistant {
         // Voice interface controls
         document.getElementById('voice-record-btn')?.addEventListener('click', () => this.toggleRecording());
         document.getElementById('voice-pause-btn')?.addEventListener('click', () => this.togglePause());
-        document.getElementById('voice-stop-btn')?.addEventListener('click', () => this.stopRecording());
+        document.getElementById('voice-stop-btn')?.addEventListener('click', () => {
+            this.isIntentionalStop = true;
+            this.stopRecording();
+        });
         
-        // Text interface controls
-        document.getElementById('text-submit-btn')?.addEventListener('click', () => this.processTextInput());
-        document.getElementById('text-clear-btn')?.addEventListener('click', () => this.clearTextInput());
         
         // Voice orb click
         document.getElementById('voice-orb')?.addEventListener('click', () => this.toggleRecording());
@@ -98,6 +119,11 @@ class AIAssistant {
         this.updateStatus('Ready to capture your billable time');
         this.resetInterface();
         this.selectedDate = null;
+        
+        // Automatically start voice recording
+        setTimeout(() => {
+            this.switchToVoiceMode();
+        }, 300);
     }
 
     openWithDate(date) {
@@ -122,6 +148,11 @@ class AIAssistant {
         if (initialMessage) {
             initialMessage.textContent = `What billable work did you accomplish on ${dateStr}? I'll help you turn it into professional time entries.`;
         }
+        
+        // Automatically start voice recording
+        setTimeout(() => {
+            this.switchToVoiceMode();
+        }, 300);
     }
 
     async close() {
@@ -137,63 +168,37 @@ class AIAssistant {
             case 'voice':
                 this.switchToVoiceMode();
                 break;
-            case 'type':
-                this.switchToTextMode();
-                break;
             default:
-                console.log('Unknown action:', action);
+                // console.log('Unknown action:', action);
         }
     }
 
     async switchToVoiceMode() {
         this.currentMode = 'voice';
-        this.hideAllInterfaces();
+        // hideAllInterfaces already called by resetInterface in open()
         document.getElementById('voice-interface').classList.remove('hidden');
         this.updateStatus('Voice mode active');
+        
+        // Only add the message if we don't already have messages
+        if (document.querySelectorAll('#messages-container .message').length === 0) {
+            this.addAssistantMessage('What work did you accomplish today? I\'ll help you turn it into professional time entries.');
+        }
+        
+        // Check if already recording or starting to record
+        if (this.isRecording || this.isRecognitionActive || this.isStartingRecording) {
+            // console.log('Recording already active or starting, skipping duplicate start');
+            return;
+        }
         
         try {
             // Automatically start recording
             await this.startRecording();
-            // Add assistant message only if recording started successfully
-            this.addAssistantMessage('Recording started! Tell me about your billable activities.');
         } catch (err) {
             console.error('Failed to start recording:', err);
             this.showError('Unable to start recording. Please check your microphone permissions.');
         }
     }
 
-    switchToTextMode() {
-        console.log('Switching to text mode...');
-        this.currentMode = 'text';
-        this.hideAllInterfaces();
-        
-        const textInterface = document.getElementById('text-interface');
-        if (textInterface) {
-            textInterface.classList.remove('hidden');
-            console.log('Text interface hidden class removed, should be visible');
-            console.log('Text interface classes:', textInterface.className);
-            console.log('Text interface display style:', window.getComputedStyle(textInterface).display);
-        } else {
-            console.error('Text interface element not found!');
-        }
-        
-        this.updateStatus('Text mode active');
-        
-        // Add message to conversation
-        this.addUserMessage('I\'ll type my work details');
-        this.addAssistantMessage('Great! Type your work details below.');
-        
-        // Focus on text input
-        setTimeout(() => {
-            const textInput = document.getElementById('text-input');
-            if (textInput) {
-                textInput.focus();
-                console.log('Text input focused');
-            } else {
-                console.error('Text input element not found!');
-            }
-        }, 100);
-    }
 
     async toggleRecording() {
         if (this.isRecording) {
@@ -204,7 +209,14 @@ class AIAssistant {
     }
 
     async startRecording() {
+        // Prevent multiple simultaneous starts
+        if (this.isStartingRecording) {
+            // console.log('Already starting recording, skipping duplicate call');
+            return;
+        }
+        
         try {
+            this.isStartingRecording = true;
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             
             // Try to use webm/opus format which is widely supported
@@ -221,7 +233,13 @@ class AIAssistant {
                 }
             };
             
-            this.mediaRecorder.onstop = () => this.processRecording();
+            this.mediaRecorder.onstop = () => {
+                if (this.isIntentionalStop) {
+                    this.processRecording();
+                }
+                // Reset the flag
+                this.isIntentionalStop = false;
+            };
             
             // Set up audio analysis for visual feedback
             this.setupAudioAnalysis(stream);
@@ -236,21 +254,32 @@ class AIAssistant {
             this.lastSpeechTime = Date.now();
             
             // Start speech recognition for live transcription
-            if (this.recognition) {
+            if (this.recognition && !this.isRecognitionActive) {
                 try {
                     this.recognition.start();
                 } catch (e) {
-                    console.error('Failed to start recognition:', e);
+                    // If recognition is already started, this is not an error
+                    if (e.name === 'InvalidStateError' && e.message.includes('already started')) {
+                        // console.log('Recognition already active');
+                        this.isRecognitionActive = true;
+                    } else {
+                        console.error('Failed to start recognition:', e);
+                    }
                 }
+            } else if (this.isRecognitionActive) {
+                // console.log('Recognition already active, skipping start');
             }
             
             this.updateRecordingUI();
             this.startTimer();
             this.updateStatus('Recording... Tell me about your billable work');
+            console.log('🎤 Recording started');
             
         } catch (err) {
             console.error('Error accessing microphone:', err);
             this.showError('Please allow microphone access to record');
+        } finally {
+            this.isStartingRecording = false;
         }
     }
     
@@ -326,7 +355,11 @@ class AIAssistant {
             this.pausedTime += Date.now() - this.startTime;
             
             if (this.recognition) {
-                this.recognition.stop();
+                try {
+                    this.recognition.stop();
+                } catch (e) {
+                    // console.log('Recognition already stopped');
+                }
             }
             
             this.updateRecordingUI();
@@ -359,7 +392,7 @@ class AIAssistant {
     async stopRecording() {
         // Prevent concurrent stop operations
         if (this.isStopping) {
-            console.log('Already stopping recording, ignoring duplicate call');
+            // console.log('Already stopping recording, ignoring duplicate call');
             return;
         }
         
@@ -377,7 +410,11 @@ class AIAssistant {
                 this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
                 
                 if (this.recognition) {
-                    this.recognition.stop();
+                    try {
+                        this.recognition.stop();
+                    } catch (e) {
+                        // console.log('Recognition already stopped');
+                    }
                 }
                 
                 // Clean up audio context
@@ -390,6 +427,7 @@ class AIAssistant {
                 
                 this.clearTimer();
                 this.updateRecordingUI();
+                console.log('⏹️ Recording stopped');
                 this.updateStatus('Processing your recording...');
                 
                 // Hide live transcription and show processing
@@ -421,7 +459,12 @@ class AIAssistant {
     async processRecording() {
         try {
             this.currentMode = 'processing';
-            this.hideAllInterfaces();
+            
+            // Disable the main button during processing
+            const recordBtn = document.getElementById('voice-record-btn');
+            if (recordBtn) {
+                recordBtn.disabled = true;
+            }
             
             // Sync any final edits
             this.syncEditedTranscription();
@@ -443,7 +486,9 @@ class AIAssistant {
             
             try {
                 // Process with enhancement API
+                console.log('🔄 Processing recorded text...');
                 const response = await api.enhance(this.finalTranscript);
+                console.log('✅ Enhancement complete');
                 
                 // Store original text in response for later use
                 response.original_text = this.finalTranscript;
@@ -452,6 +497,7 @@ class AIAssistant {
                 this.showConversationalResults(response);
             } catch (apiError) {
                 console.error('API enhancement failed:', apiError);
+                // console.log('Falling back to mock response');
                 
                 // Create a mock response for demo purposes
                 const mockResponse = this.createMockResponse(this.finalTranscript);
@@ -462,6 +508,12 @@ class AIAssistant {
             console.error('Error processing recording:', err);
             this.clearThinking();
             this.showError(err.message || 'Failed to process recording. Please try again.');
+            
+            // Re-enable the button on error
+            const recordBtn = document.getElementById('voice-record-btn');
+            if (recordBtn) {
+                recordBtn.disabled = false;
+            }
         }
     }
     
@@ -479,7 +531,7 @@ class AIAssistant {
             const parts = text.split(/[,;]|and then|after that|also/i);
             parts.forEach((part, index) => {
                 const partTimeMatch = part.match(/(\d+\.?\d*)\s*(hours?|hrs?|minutes?|mins?)/i);
-                const hours = partTimeMatch ? parseFloat(partTimeMatch[1]) : 0.5;
+                const hours = partTimeMatch ? this.parseTimeToHours(partTimeMatch[1], partTimeMatch[2]) : 0.5;
                 const cleanText = part.replace(/(\d+\.?\d*)\s*(hours?|hrs?|minutes?|mins?)/i, '').trim();
                 
                 if (cleanText) {
@@ -492,7 +544,7 @@ class AIAssistant {
             });
         } else {
             // Single activity
-            const hours = times[0] ? parseFloat(times[0][1]) : 0.5;
+            const hours = times[0] ? this.parseTimeToHours(times[0][1], times[0][2]) : 0.5;
             narratives.push({
                 text: text.trim(),
                 hours: hours,
@@ -503,24 +555,33 @@ class AIAssistant {
         const totalHours = narratives.reduce((sum, n) => sum + n.hours, 0);
         
         return {
+            groupId: generateUUID(),
+            originalText: text,
+            cleanedText: text,
+            narratives: narratives,
+            totalHours: totalHours,
+            // For backward compatibility with UI
             entry: {
-                id: `local_${Date.now()}`, // Temporary local ID
                 narratives: narratives,
-                total_hours: totalHours,
-                created_at: this.selectedDate ? this.selectedDate.toISOString() : new Date().toISOString()
+                total_hours: totalHours
             },
             total_narratives: narratives.length,
-            total_hours: totalHours,
-            cleaned_text: text,
-            original_text: text
+            total_hours: totalHours
         };
+    }
+
+    parseTimeToHours(value, unit) {
+        const num = parseFloat(value);
+        if (unit.match(/min/i)) {
+            return num / 60;
+        }
+        return num;
     }
 
     async simulateAIProcessing() {
         const steps = [
-            { message: 'Processing your transcribed speech...', delay: 600 },
-            { message: 'Grammar Agent: Cleaning up the text and expanding abbreviations...', delay: 600 },
-            { message: 'Separator Agent: Identifying distinct billable activities...', delay: 700 },
+            { message: 'Processing your input...', delay: 600 },
+            { message: 'Separator Agent: Cleaning text and identifying billable activities...', delay: 700 },
             { message: 'Refiner Agent: Crafting professional billing narratives...', delay: 800 }
         ];
         
@@ -538,9 +599,13 @@ class AIAssistant {
         // Initialize assignment mode - default to individual for better UX
         this.assignmentMode = 'individual'; // 'bulk' or 'individual'
         
+        // Handle both old and new response formats
+        const narratives = response.narratives || (response.entry && response.entry.narratives) || [];
+        const totalHours = response.totalHours || response.total_hours || 0;
+        
         // Add analysis message
-        const narrativeCount = response.entry.narratives.length;
-        const summary = `I've identified ${narrativeCount} billable ${narrativeCount === 1 ? 'activity' : 'activities'} totaling ${response.total_hours} hours:`;
+        const narrativeCount = narratives.length;
+        const summary = `I've identified ${narrativeCount} billable ${narrativeCount === 1 ? 'activity' : 'activities'} totaling ${totalHours.toFixed(1)} hours:`;
         this.addAssistantMessage(summary);
         
         // Add each narrative as part of a single entry message - ultra-compact design with integrated actions
@@ -548,6 +613,10 @@ class AIAssistant {
             <div class="ai-response ultra-compact-review">
                 <div class="response-header-compact">
                     <span>Time Entries</span>
+                    <label class="select-all-inline">
+                        <input type="checkbox" id="select-all-narratives" checked onchange="window.aiAssistant.toggleSelectAll()">
+                        <span>Select All</span>
+                    </label>
                     <div class="confidence-indicator-compact">
                         <span>Confidence:</span>
                         <div class="confidence-bar">
@@ -556,41 +625,51 @@ class AIAssistant {
                     </div>
                 </div>
                 <div class="entry-content scrollable-entries-compact" id="ai-entry-content">
-                    ${response.entry.narratives.map((narrative, index) => `
+                    ${narratives.map((narrative, index) => `
                         <div class="narrative-item ultra-compact-narrative" data-narrative-index="${index}">
-                            <div class="narrative-main-row">
-                                <span class="narrative-hours-inline">${narrative.hours} hours</span>
-                                <span class="narrative-text-inline">${narrative.text}</span>
-                                <span class="narrative-index-inline">#${index + 1}</span>
+                            <div class="narrative-checkbox-wrapper">
+                                <input type="checkbox" id="select-narrative-${index}" class="narrative-checkbox" checked onchange="window.aiAssistant.updateNarrativeSelection(${index})">
+                            </div>
+                            <div class="narrative-content-wrapper">
+                                <div class="narrative-main-row">
+                                    <input type="number" 
+                                       id="narrative-hours-${index}" 
+                                       name="narrative-hours-${index}"
+                                       class="narrative-hours-input" 
+                                       value="${narrative.hours.toFixed(1)}" 
+                                       step="0.1" 
+                                       min="0.1" 
+                                       style="width: 60px; margin-right: 5px;">
+                                <span style="margin-right: 10px;">hours</span>
+                                <textarea id="narrative-text-${index}" 
+                                          name="narrative-text-${index}"
+                                          class="narrative-text-input" 
+                                          rows="1" 
+                                          autocomplete="off"
+                                          style="flex: 1; resize: vertical; min-height: 24px;">${narrative.text}</textarea>
+                                <span class="narrative-index-inline" style="margin-left: 10px;">#${index + 1}</span>
                             </div>
                             <div class="narrative-inputs-row" id="narrative-fields-${index}">
                                 <input type="text" 
                                        id="narrative-client-${index}" 
+                                       name="client-code-${index}"
                                        placeholder="Client Code" 
                                        class="ultra-compact-input"
-                                       value="${narrative.client_code || ''}">
+                                       autocomplete="organization"
+                                       value="${narrative.clientCode || narrative.client_code || ''}">
                                 <input type="text" 
                                        id="narrative-matter-${index}" 
+                                       name="matter-number-${index}"
                                        placeholder="Matter #" 
                                        class="ultra-compact-input"
-                                       value="${narrative.matter_number || ''}">
+                                       autocomplete="off"
+                                       value="${narrative.matterNumber || narrative.matter_number || ''}">
+                                </div>
                             </div>
                         </div>
                     `).join('')}
                 </div>
                 <div class="integrated-actions">
-                    <button class="unified-action-btn primary" onclick="window.aiAssistant.confirmEntries()">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                            <path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z"/>
-                        </svg>
-                        <span>Save entries</span>
-                    </button>
-                    <button class="unified-action-btn" onclick="window.aiAssistant.requestModifications()">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                            <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
-                        </svg>
-                        <span>Edit</span>
-                    </button>
                     <button class="unified-action-btn" onclick="window.aiAssistant.startOver()">
                         <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                             <path d="M12,5V1L7,6L12,11V7A6,6 0 0,1 18,13A6,6 0 0,1 12,19A6,6 0 0,1 6,13H4A8,8 0 0,0 12,21A8,8 0 0,0 20,13A8,8 0 0,0 12,5Z"/>
@@ -598,12 +677,20 @@ class AIAssistant {
                         <span>Restart</span>
                     </button>
                     ${narrativeCount > 1 ? `
-                        <button class="unified-action-btn" onclick="window.aiAssistant.showBulkApply()">
-                            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                                <path d="M19,3H14.82C14.4,1.84 13.3,1 12,1C10.7,1 9.6,1.84 9.18,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M12,3A1,1 0 0,1 13,4A1,1 0 0,1 12,5A1,1 0 0,1 11,4A1,1 0 0,1 12,3M7,7H17V5H19V19H5V5H7V7Z"/>
-                            </svg>
-                            <span>Apply to all</span>
-                        </button>
+                        <div class="apply-to-selected-container">
+                            <button class="unified-action-btn" id="apply-to-selected-btn" onclick="window.aiAssistant.showInlineApply()">
+                                <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                                    <path d="M19,3H14.82C14.4,1.84 13.3,1 12,1C10.7,1 9.6,1.84 9.18,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M12,3A1,1 0 0,1 13,4A1,1 0 0,1 12,5A1,1 0 0,1 11,4A1,1 0 0,1 12,3M7,7H17V5H19V19H5V5H7V7Z"/>
+                                </svg>
+                                <span>Apply to Selected</span>
+                            </button>
+                            <div class="inline-apply-form hidden" id="inline-apply-form">
+                                <input type="text" placeholder="Client Code" id="inline-client-code" class="inline-apply-input" autocomplete="organization">
+                                <input type="text" placeholder="Matter #" id="inline-matter-code" class="inline-apply-input" autocomplete="off">
+                                <button class="inline-apply-btn" onclick="window.aiAssistant.applyInlineCodes()">Apply</button>
+                                <button class="inline-cancel-btn" onclick="window.aiAssistant.hideInlineApply()">Cancel</button>
+                            </div>
+                        </div>
                     ` : ''}
                 </div>
             </div>
@@ -611,42 +698,52 @@ class AIAssistant {
         this.addAssistantMessage(entryHtml, true);
         
         this.updateStatus('Review and confirm your time entries');
+        
+        // Convert main button to Save entries
+        this.convertMainButtonToSave();
+        
+        // Scroll to show the summary message after DOM updates
+        setTimeout(() => {
+            const container = document.getElementById('messages-container');
+            const messages = container.querySelectorAll('.message');
+            if (messages.length >= 2) {
+                // Find the summary message (second to last message)
+                const summaryMessage = messages[messages.length - 2];
+                summaryMessage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 100);
+    }
+    
+    convertMainButtonToSave() {
+        const recordBtn = document.getElementById('voice-record-btn');
+        if (recordBtn) {
+            // Enable the button now that processing is complete
+            recordBtn.disabled = false;
+            
+            // Update button appearance
+            recordBtn.innerHTML = `
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z"/>
+                </svg>
+                <span class="btn-text">Save entries</span>
+            `;
+            
+            // Remove old event listener and add new one
+            const newButton = recordBtn.cloneNode(true);
+            newButton.disabled = false; // Ensure the cloned button is also enabled
+            recordBtn.parentNode.replaceChild(newButton, recordBtn);
+            newButton.addEventListener('click', () => this.confirmEntries());
+            
+            // Show the button if it was hidden
+            document.getElementById('voice-interface').classList.remove('hidden');
+        }
     }
 
-    async processTextInput() {
-        console.log('Processing text input...');
-        const textInput = document.getElementById('text-input');
-        const text = textInput.value.trim();
-        
-        if (!text) {
-            this.showError('Please enter some text describing your work');
-            return;
-        }
-        
-        this.addUserMessage(`Here's what I worked on: "${text}"`);
-        this.currentMode = 'processing';
-        console.log('Hiding interfaces for processing mode...');
-        this.hideAllInterfaces();
-        
-        this.addAssistantThinking('Analyzing your work description...');
-        
-        try {
-            await this.simulateAIProcessing();
-            const response = await api.enhance(text);
-            this.showConversationalResults(response);
-        } catch (err) {
-            console.error('Error processing text:', err);
-            this.showError('Failed to process text. Please try again.');
-        }
-    }
 
-    clearTextInput() {
-        document.getElementById('text-input').value = '';
-    }
 
     // UI Helper Methods
     hideAllInterfaces() {
-        console.log('Hiding all interfaces...');
+        // console.log('Hiding all interfaces...');
         const voiceInterface = document.getElementById('voice-interface');
         const textInterface = document.getElementById('text-interface');
         const inputArea = document.getElementById('input-area');
@@ -654,24 +751,17 @@ class AIAssistant {
         if (voiceInterface) voiceInterface.classList.add('hidden');
         if (textInterface) {
             textInterface.classList.add('hidden');
-            console.log('Text interface hidden');
+            // console.log('Text interface hidden');
         }
         if (inputArea) inputArea.classList.add('hidden');
     }
 
     resetInterface() {
         this.hideAllInterfaces();
-        document.getElementById('input-area').classList.remove('hidden');
         this.clearMessages();
         this.hideLiveTranscription();
         this.clearTimer();
         this.transcriptionMessageId = null;
-        
-        // Show initial message again
-        const initialMessage = document.querySelector('.initial-message');
-        if (initialMessage) {
-            initialMessage.style.display = 'flex';
-        }
     }
 
     updateStatus(text) {
@@ -725,12 +815,6 @@ class AIAssistant {
             liveTransArea.classList.remove('hidden');
         }
         
-        // Hide the initial message when recording starts
-        const initialMessage = document.querySelector('.initial-message');
-        if (initialMessage) {
-            initialMessage.style.display = 'none';
-        }
-        
         // Add a user message that will be replaced with live transcription
         this.addUserTranscriptionMessage();
     }
@@ -761,18 +845,17 @@ class AIAssistant {
                 </svg>
             </div>
             <div class="message-content">
-                <div class="message-text" id="live-user-text" contenteditable="true" spellcheck="false">
+                <div class="message-text" id="live-user-text" contenteditable="false" spellcheck="false">
                     <span class="transcription-placeholder">Start speaking...</span>
                 </div>
-                <div class="edit-hint">Click to edit • Press Enter to save</div>
             </div>
         `;
         
         container.appendChild(messageDiv);
         container.scrollTop = container.scrollHeight;
         
-        // Set up edit handlers
-        this.setupTranscriptionEditHandlers();
+        // Edit handlers disabled - transcription is view-only
+        // this.setupTranscriptionEditHandlers();
     }
     
     setupTranscriptionEditHandlers() {
@@ -867,8 +950,7 @@ class AIAssistant {
         const userLiveText = document.getElementById('live-user-text');
         if (!userLiveText) return;
         
-        // Don't update if user is actively editing
-        if (document.activeElement === userLiveText) return;
+        // Always update the transcription display
         
         let displayHtml = '';
         
@@ -899,15 +981,6 @@ class AIAssistant {
         this.updateBrowserTranscriptionDisplay('');
     }
 
-    restartRecognition() {
-        if (this.recognition && this.isRecording && !this.isPaused) {
-            try {
-                this.recognition.start();
-            } catch (e) {
-                console.error('Failed to restart recognition:', e);
-            }
-        }
-    }
 
     startTimer() {
         this.timerInterval = setInterval(() => {
@@ -1007,16 +1080,10 @@ class AIAssistant {
 
     clearMessages() {
         const container = document.getElementById('messages-container');
-        const initialMessage = container.querySelector('.initial-message');
         
-        // Remove all messages except the initial one
-        const messages = container.querySelectorAll('.message:not(.initial-message)');
+        // Remove all messages
+        const messages = container.querySelectorAll('.message');
         messages.forEach(msg => msg.remove());
-        
-        // Make sure initial message is visible
-        if (initialMessage) {
-            initialMessage.style.display = 'flex';
-        }
         
         // Clear transcription message ID
         this.transcriptionMessageId = null;
@@ -1048,71 +1115,71 @@ class AIAssistant {
             this.toggleRecording();
         }
         
-        // Enter to submit text in text mode
-        if (e.code === 'Enter' && e.ctrlKey && this.currentMode === 'text') {
-            e.preventDefault();
-            this.processTextInput();
-        }
     }
 
-    // Show bulk apply modal
-    showBulkApply() {
-        // Create a modal for bulk apply
-        const modalHtml = `
-            <div class="bulk-apply-modal" id="bulk-apply-modal">
-                <div class="bulk-apply-content">
-                    <h3>Apply to All Entries</h3>
-                    <p>Enter client and matter codes to apply to all time entries:</p>
-                    <div class="bulk-apply-fields">
-                        <input type="text" id="bulk-client-code" placeholder="Client Code" class="bulk-apply-input">
-                        <input type="text" id="bulk-matter-code" placeholder="Matter Number" class="bulk-apply-input">
-                    </div>
-                    <div class="bulk-apply-actions">
-                        <button onclick="window.aiAssistant.applyBulkCodes()" class="apply-bulk-btn">Apply</button>
-                        <button onclick="window.aiAssistant.closeBulkApply()" class="cancel-bulk-btn">Cancel</button>
-                    </div>
-                </div>
-            </div>
-        `;
+    // Show inline apply form
+    showInlineApply() {
+        const btn = document.getElementById('apply-to-selected-btn');
+        const form = document.getElementById('inline-apply-form');
         
-        // Add modal to body
-        const modalDiv = document.createElement('div');
-        modalDiv.innerHTML = modalHtml;
-        document.body.appendChild(modalDiv.firstElementChild);
-        
-        // Focus on first input
-        setTimeout(() => {
-            document.getElementById('bulk-client-code')?.focus();
-        }, 100);
+        if (btn) btn.classList.add('hidden');
+        if (form) {
+            form.classList.remove('hidden');
+            // Focus on first input
+            setTimeout(() => {
+                document.getElementById('inline-client-code')?.focus();
+            }, 100);
+        }
     }
     
-    // Apply bulk codes to all entries
-    applyBulkCodes() {
-        const clientCode = document.getElementById('bulk-client-code')?.value || '';
-        const matterCode = document.getElementById('bulk-matter-code')?.value || '';
+    // Hide inline apply form
+    hideInlineApply() {
+        const btn = document.getElementById('apply-to-selected-btn');
+        const form = document.getElementById('inline-apply-form');
         
-        // Apply to all narrative inputs
-        this.lastResponse.entry.narratives.forEach((_, index) => {
-            const clientInput = document.getElementById(`narrative-client-${index}`);
-            const matterInput = document.getElementById(`narrative-matter-${index}`);
-            
-            if (clientInput && clientCode) clientInput.value = clientCode;
-            if (matterInput && matterCode) matterInput.value = matterCode;
-        });
+        if (btn) btn.classList.remove('hidden');
+        if (form) {
+            form.classList.add('hidden');
+            // Clear inputs
+            document.getElementById('inline-client-code').value = '';
+            document.getElementById('inline-matter-code').value = '';
+        }
+    }
+    
+    // Apply codes to selected entries
+    applyInlineCodes() {
+        const clientCode = document.getElementById('inline-client-code')?.value || '';
+        const matterCode = document.getElementById('inline-matter-code')?.value || '';
         
-        // Close modal
-        this.closeBulkApply();
+        // Get checked entries
+        const checkedBoxes = document.querySelectorAll('.narrative-checkbox:checked');
+        
+        if (checkedBoxes.length === 0) {
+            // If no entries are checked, apply to all
+            this.lastResponse.entry.narratives.forEach((_, index) => {
+                const clientInput = document.getElementById(`narrative-client-${index}`);
+                const matterInput = document.getElementById(`narrative-matter-${index}`);
+                
+                if (clientInput && clientCode) clientInput.value = clientCode;
+                if (matterInput && matterCode) matterInput.value = matterCode;
+            });
+        } else {
+            // Apply only to checked entries
+            checkedBoxes.forEach(checkbox => {
+                const index = checkbox.id.replace('select-narrative-', '');
+                const clientInput = document.getElementById(`narrative-client-${index}`);
+                const matterInput = document.getElementById(`narrative-matter-${index}`);
+                
+                if (clientInput && clientCode) clientInput.value = clientCode;
+                if (matterInput && matterCode) matterInput.value = matterCode;
+            });
+        }
+        
+        // Hide inline form
+        this.hideInlineApply();
         
         // Show confirmation
-        this.updateStatus('Applied codes to all entries');
-    }
-    
-    // Close bulk apply modal
-    closeBulkApply() {
-        const modal = document.getElementById('bulk-apply-modal');
-        if (modal) {
-            modal.remove();
-        }
+        this.updateStatus('Applied codes to selected entries');
     }
 
     // Action Methods
@@ -1125,35 +1192,57 @@ class AIAssistant {
             this.addAssistantThinking('Saving your time entries...');
             
             // Prepare narratives with client/matter codes
-            let narrativesToSave = [...this.lastResponse.entry.narratives];
+            const responseNarratives = this.lastResponse.narratives || (this.lastResponse.entry && this.lastResponse.entry.narratives) || [];
+            let narrativesToSave = [...responseNarratives];
             
-            // Since we default to individual mode now, always get individual codes
-            narrativesToSave = narrativesToSave.map((narrative, index) => {
+            // Filter to only include checked entries
+            narrativesToSave = narrativesToSave.filter((_, index) => {
+                const checkbox = document.getElementById(`select-narrative-${index}`);
+                return checkbox?.checked;
+            });
+            
+            // Get individual codes for checked entries
+            narrativesToSave = narrativesToSave.map((narrative, originalIndex) => {
+                // Find the original index from the filtered array
+                const allNarratives = this.lastResponse.narratives || (this.lastResponse.entry && this.lastResponse.entry.narratives) || [];
+                const index = allNarratives.indexOf(narrative);
+                const hoursInput = document.getElementById(`narrative-hours-${index}`);
+                const textInput = document.getElementById(`narrative-text-${index}`);
                 const clientInput = document.getElementById(`narrative-client-${index}`);
                 const matterInput = document.getElementById(`narrative-matter-${index}`);
                 
                 return {
                     ...narrative,
+                    hours: parseFloat(hoursInput?.value) || narrative.hours,
+                    text: textInput?.value || narrative.text,
                     client_code: clientInput?.value || narrative.client_code || '',
                     matter_number: matterInput?.value || narrative.matter_number || ''
                 };
             });
             
-            // Save the single entry with all narratives
-            if (this.lastResponse && this.lastResponse.entry) {
-                const entryData = this.lastResponse.entry;
-                await dbOperations.saveEntry({
-                    id: entryData.id, // Use the ID from backend
-                    original_text: entryData.original_text,
-                    cleaned_text: entryData.cleaned_text,
-                    narratives: narrativesToSave,
-                    total_hours: entryData.total_hours,
-                    status: entryData.status || 'draft',
-                    created_at: entryData.created_at,
-                    updated_at: entryData.updated_at,
-                    client_code: entryData.client_code || '',
-                    matter_number: entryData.matter_number || ''
-                });
+            // Calculate new total hours from edited values
+            const newTotalHours = narrativesToSave.reduce((sum, narrative) => sum + narrative.hours, 0);
+            
+            // Save each narrative as an individual record
+            if (this.lastResponse) {
+                const groupId = this.lastResponse.groupId || generateUUID();
+                const createdAt = this.selectedDate ? this.selectedDate.toISOString() : new Date().toISOString();
+                
+                // Save each narrative individually
+                for (const narrative of narrativesToSave) {
+                    await dbOperations.saveNarrative({
+                        narrative: narrative.text,
+                        hours: narrative.hours,
+                        clientCode: narrative.client_code || '',
+                        matterNumber: narrative.matter_number || '',
+                        taskCode: narrative.task_code || '',
+                        status: 'draft',
+                        groupId: groupId,
+                        originalText: this.lastResponse.originalText || this.lastResponse.original_text,
+                        cleanedText: this.lastResponse.cleanedText || this.lastResponse.cleaned_text,
+                        createdAt: createdAt
+                    });
+                }
             }
             
             this.clearThinking();
@@ -1176,41 +1265,18 @@ class AIAssistant {
         }
     }
 
-    requestModifications() {
-        this.addUserMessage('I\'d like to make some changes');
-        this.addAssistantMessage('No problem! What would you like to modify? You can:');
-        
-        const actionsHtml = `
-            <div class="suggested-actions">
-                <button class="suggestion-btn" onclick="window.aiAssistant.addMoreDetail()">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                        <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
-                    </svg>
-                    Add more detail
-                </button>
-                <button class="suggestion-btn" onclick="window.aiAssistant.splitEntries()">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                        <path d="M8,2V4H16V2H18V4H19A2,2 0 0,1 21,6V20A2,2 0 0,1 19,22H5A2,2 0 0,1 3,20V6A2,2 0 0,1 5,4H6V2H8Z"/>
-                    </svg>
-                    Split entries differently
-                </button>
-                <button class="suggestion-btn" onclick="window.aiAssistant.changeWording()">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                        <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
-                    </svg>
-                    Change wording
-                </button>
-            </div>
-        `;
-        this.addAssistantMessage(actionsHtml, true);
-    }
 
     startOver() {
         this.addUserMessage('Let me start over');
-        this.addAssistantMessage('Of course! Let\'s capture your billable time again. How would you like to provide the information?');
+        this.addAssistantMessage('Of course! Let\'s capture your billable time again.');
         this.resetInterface();
         this.currentMode = 'initial';
         this.updateStatus('Ready to capture your billable time');
+        
+        // Automatically switch to voice mode after reset
+        setTimeout(() => {
+            this.switchToVoiceMode();
+        }, 300);
     }
 
     addMoreDetail() {
@@ -1267,7 +1333,6 @@ class AIAssistant {
                 this.addAssistantMessage('Please describe what additional details you\'d like to include in your billing narratives. I can help you incorporate them naturally.');
                 break;
         }
-        this.switchToTextMode();
     }
 
     splitEntries() {
@@ -1313,20 +1378,54 @@ class AIAssistant {
 
     splitByTime() {
         this.addUserMessage('Split by time periods');
-        this.addAssistantMessage('I\'ll organize entries by when you did the work. Please tell me how you\'d like time periods divided (hourly, by session, morning/afternoon, etc.).');
-        this.switchToTextMode();
+        this.addAssistantMessage('I\'ll organize entries by when you did the work. For now, I\'ll use standard time divisions. You can edit the results manually.');
     }
 
     splitByClient() {
         this.addUserMessage('Split by client/matter');
-        this.addAssistantMessage('I\'ll separate entries by different clients or matters. Please clarify which clients or matters were involved in your work.');
-        this.switchToTextMode();
+        this.addAssistantMessage('I\'ll separate entries by different clients or matters based on the context. You can edit the client/matter codes in the results.');
+    }
+
+    // Checkbox handling functions
+    toggleSelectAll() {
+        const selectAll = document.getElementById('select-all-narratives');
+        const checkboxes = document.querySelectorAll('.narrative-checkbox');
+        
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = selectAll.checked;
+            this.updateNarrativeVisual(checkbox.id.replace('select-narrative-', ''));
+        });
+    }
+
+    updateNarrativeSelection(index) {
+        this.updateNarrativeVisual(index);
+        
+        // Update Select All checkbox state
+        const checkboxes = document.querySelectorAll('.narrative-checkbox');
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        const selectAll = document.getElementById('select-all-narratives');
+        if (selectAll) {
+            selectAll.checked = allChecked;
+        }
+    }
+
+    updateNarrativeVisual(index) {
+        const checkbox = document.getElementById(`select-narrative-${index}`);
+        const narrativeItem = document.querySelector(`[data-narrative-index="${index}"]`);
+        const contentWrapper = narrativeItem?.querySelector('.narrative-content-wrapper');
+        
+        if (contentWrapper) {
+            if (checkbox?.checked) {
+                contentWrapper.classList.remove('unchecked');
+            } else {
+                contentWrapper.classList.add('unchecked');
+            }
+        }
     }
 
     splitCustom() {
         this.addUserMessage('Custom split');
-        this.addAssistantMessage('Tell me exactly how you\'d like the entries organized. I can split them however makes the most sense for your billing needs.');
-        this.switchToTextMode();
+        this.addAssistantMessage('I\'ll reorganize the entries. You can edit them manually in the results.');
     }
 
     changeWording() {
@@ -1380,9 +1479,8 @@ class AIAssistant {
                 break;
             case 'specific':
                 this.addUserMessage('Tell me what to change');
-                this.addAssistantMessage('Please describe the specific changes you\'d like to the wording or tone of the billing narratives.');
-                this.switchToTextMode();
-                return;
+                this.addAssistantMessage('I\'ll adjust the wording. You can edit the narratives directly in the results.');
+                break;
         }
         this.showContextualSuggestion('style-change', style);
     }
@@ -1411,12 +1509,11 @@ document.addEventListener('DOMContentLoaded', () => {
     window.aiAssistant = aiAssistant;
     
     // Log initialization info
-    console.log('Time Composer Assistant initialized');
-    console.log('Using browser speech recognition for transcription');
+    console.log('Time Composer Assistant ready');
     
     // Check backend status
-    fetch('http://localhost:5001/api/entries')
-        .then(() => console.log('✅ Backend server is running'))
+    fetch('http://localhost:5001/api/health')
+        .then(() => {/* Backend server is running */})
         .catch(() => {
             console.warn('⚠️ Backend server is not running. Start it with: python run.py');
             console.log('The app will work with browser-only transcription and mock data processing.');

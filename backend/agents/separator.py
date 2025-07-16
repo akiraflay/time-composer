@@ -1,6 +1,7 @@
 import json
 from typing import Dict, Any
 from .base import BaseAgent
+from prompts import SEPARATOR_PROMPT
 
 class SeparatorAgent(BaseAgent):
     """Identify and separate distinct billing activities"""
@@ -9,42 +10,8 @@ class SeparatorAgent(BaseAgent):
         """This agent expects JSON output"""
         return True
     
-    def get_prompt(self, cleaned_text: str) -> str:
-        return f"""You are a legal billing expert. Analyze this text and separate distinct billable activities.
-
-Text: {cleaned_text}
-
-STRICT RULES:
-- Only use information explicitly stated in the text
-- Do NOT add details, names, or context not mentioned
-- Keep activity descriptions factual and general
-- Extract only time information that is clearly stated
-
-TIME PARSING RULES:
-- Convert all time to decimal hours
-- 1 hour = 1.0
-- 30 minutes = 0.5 hours
-- 15 minutes = 0.25 hours
-- 45 minutes = 0.75 hours
-- 1 hour 30 minutes = 1.5 hours
-- 2.5 hours = 2.5 (already in hours)
-- If someone says "spent 30 minutes", that's 0.5 hours, NOT 30 hours
-
-Output as JSON:
-{{
-    "entries": [
-        {{
-            "activity": "description of work exactly as stated",
-            "hours": 0.0,
-            "client_matter": "only if explicitly mentioned"
-        }}
-    ]
-}}
-
-Examples:
-- "spent 30 minutes working on a memo" → hours: 0.5
-- "reviewed documents for 2 hours" → hours: 2.0
-- "1.5 hour meeting" → hours: 1.5"""
+    def get_prompt(self, input_text: str) -> str:
+        return SEPARATOR_PROMPT.format(input_text=input_text)
 
     def parse_response(self, response: str) -> Dict[str, Any]:
         try:
