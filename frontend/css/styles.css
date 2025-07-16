@@ -984,8 +984,8 @@ main {
 
 /* Special handling for narrative text editing in cards */
 .narrative-text.editable-field.editing {
-    padding: 0;
-    margin: 0;
+    padding: calc(1rem - 1px) calc(0.375rem - 1px); /* Maintain padding but account for 1px border */
+    margin: 0.75rem 0 0 0; /* Preserve top margin to prevent upward shift */
     width: 100%;
     background: transparent;
     border: 1px solid rgba(37, 99, 235, 0.2);
@@ -994,13 +994,13 @@ main {
 }
 
 .narrative-text.editing .inline-textarea.seamless {
-    padding: 0.375rem;
+    padding: 0; /* No padding to match the visual appearance of non-edit state */
     background: transparent;
     border: none;
     border-radius: 0;
     width: 100%;
     font-size: inherit;
-    line-height: inherit;
+    line-height: 1.4; /* Explicit line-height to match .narrative-text in condensed table */
     color: var(--text-primary);
     font-family: inherit;
     min-height: auto;
@@ -1009,8 +1009,9 @@ main {
     word-wrap: break-word;
     resize: none;
     outline: none;
-    margin: 0;
+    margin: 0 !important; /* Override the -1px margin from base seamless class - important needed due to specificity */
     display: block;
+    box-sizing: border-box;
 }
 
 .narrative-text.editing .inline-textarea.seamless:focus {
@@ -1120,7 +1121,7 @@ main {
     transition: none;
 }
 
-.editable-field:not(.narrative-text):hover {
+.editable-field:not(.narrative-text):not(.client-field):not(.matter-field):hover {
     background-color: var(--background);
     border-color: var(--border);
 }
@@ -1133,11 +1134,11 @@ main {
     display: inline-block;
 }
 
-/* Only add padding for list view fields on hover */
-.condensed-table .editable-field.client-field:hover,
+/* Don't add padding on hover - prevents layout shift */
+/* .condensed-table .editable-field.client-field:hover,
 .condensed-table .editable-field.matter-field:hover {
-    padding-right: 1.75rem; /* Make room for edit icon */
-}
+    padding-right: 1.75rem;
+} */
 
 /* Ensure minimum width when editing */
 .editable-field.client-field.editing,
@@ -1155,12 +1156,39 @@ main {
 .condensed-client,
 .condensed-matter {
     overflow: visible;
+    position: relative; /* Ensure edit icon positioning context */
 }
 
 .editable-field.editing {
     background-color: var(--surface);
     border-color: var(--primary-color);
     box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+/* Use subtle styling for client/matter fields like narrative fields */
+.editable-field.client-field.editing,
+.editable-field.matter-field.editing {
+    background: transparent;
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.05);
+}
+
+/* Make input fields inside client/matter fields transparent like narrative */
+.editable-field.client-field.editing .inline-input,
+.editable-field.matter-field.editing .inline-input {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    outline: none;
+}
+
+/* Center align input fields in client and matter columns */
+.condensed-client .inline-input,
+.condensed-matter .inline-input,
+.client-field .inline-input,
+.matter-field .inline-input {
+    text-align: center;
 }
 
 .editable-field .edit-icon {
@@ -1182,7 +1210,7 @@ main {
 /* Specific positioning for client and matter field edit icons */
 .editable-field.client-field .edit-icon,
 .editable-field.matter-field .edit-icon {
-    right: 0.375rem;
+    right: -1.25rem; /* Position outside the field to avoid overlap */
     transition: opacity 0.15s ease 0.1s; /* Slight delay for smoother appearance */
 }
 
@@ -1267,6 +1295,7 @@ main {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
 }
+
 
 .inline-textarea {
     width: 100%;
@@ -3217,7 +3246,7 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
 .condensed-table .editable-field .edit-icon {
     position: absolute;
     top: 50%;
-    right: 0.25rem;
+    right: -1.25rem; /* Position outside to avoid overlap */
     transform: translateY(-50%);
     opacity: 0;
     visibility: hidden;
@@ -3264,6 +3293,48 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
 .condensed-table .editable-field.editing {
     background: var(--background);
     cursor: text;
+}
+
+/* Use subtle styling for client/matter fields in condensed table */
+.condensed-table .editable-field.client-field.editing,
+.condensed-table .editable-field.matter-field.editing {
+    background: transparent;
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.05);
+}
+
+/* Make input fields inside client/matter fields transparent in condensed table */
+.condensed-table .editable-field.client-field.editing .inline-input,
+.condensed-table .editable-field.matter-field.editing .inline-input {
+    background: transparent !important;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    outline: none;
+}
+
+/* Match the subtle Client/Matter field style for narrative fields in condensed table */
+.condensed-table .narrative-text.editable-field.editing {
+    background: transparent;
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.05);
+    padding: 0; /* Reset padding to match Client/Matter behavior */
+}
+
+.condensed-table .narrative-text.editing .inline-textarea.seamless {
+    background: transparent !important;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    outline: none;
+}
+
+/* Center align input fields in client and matter columns */
+.condensed-client .inline-input,
+.condensed-matter .inline-input,
+.client-field .inline-input,
+.matter-field .inline-input {
+    text-align: center;
 }
 
 /* Condensed Table Column Styles */
@@ -4634,28 +4705,9 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
     align-items: center;
 }
 
-.ultra-compact-input {
-    flex: 1;
-    padding: 0.25rem 0.5rem;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    font-size: 0.75rem;
-    background: var(--background);
-    transition: all 0.15s ease;
-    height: 28px;
-}
 
-.ultra-compact-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    background: white;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
-}
 
-.ultra-compact-input::placeholder {
-    color: var(--text-secondary);
-    font-size: 0.75rem;
-}
+
 
 /* Inline apply all button */
 .inline-apply-all-btn {

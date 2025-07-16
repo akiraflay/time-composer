@@ -1635,7 +1635,7 @@ async function handleExportClick() {
         
         if (draftEntries.length === 0) {
             // No draft entries available
-            alert("No draft entries to export. Use add entry please.");
+            alert("No draft entries detected - use Add Entry.");
         } else {
             // Show dialog to confirm exporting all draft entries
             const dialog = confirm("No entries selected. Do you want to export all Draft entries?");
