@@ -130,3 +130,4 @@ dmypy.json
 # AI Assistant Instructions
 CLAUDE.md
 */CLAUDE.md
+.claude/

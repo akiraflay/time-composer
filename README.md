@@ -15,9 +15,9 @@ Time Composer is an innovative AI-powered tool designed specifically for legal p
 ## Features
 
 - **Voice Recording**: Record billing narratives using your microphone with real-time transcription
-- **AI Processing**: Three-agent pipeline (Grammar, Separator, Refiner) processes raw notes into professional narratives
+- **AI Processing**: Two-agent pipeline (Separator, Refiner) processes raw notes into professional narratives
 - **Multi-Platform**: Web interface and API sharing the same backend
-- **Offline-First**: IndexedDB local storage with SQLite sync
+- **Offline-First**: IndexedDB local storage (no backend database)
 - **Export Options**: CSV export compatible with major billing systems
 - **Time Tracking**: Automatic time allocation parsing from voice notes
 - **Activity Tagging**: Intelligent categorization of billable activities
@@ -28,9 +28,9 @@ Time Composer is an innovative AI-powered tool designed specifically for legal p
 Time Composer uses a microservices-inspired architecture with three main components:
 
 1. **Backend API Server** (Flask/Python)
-   - RESTful API endpoints for all operations
-   - OpenAI integration for transcription and text processing
-   - SQLite database for persistent storage
+   - RESTful API endpoints for AI enhancement and export
+   - Azure OpenAI integration for text processing
+   - Stateless design (no database)
    - CORS-enabled for cross-origin requests
 
 2. **Frontend Application**
@@ -38,30 +38,30 @@ Time Composer uses a microservices-inspired architecture with three main compone
    - Communicates with the backend API via REST
 
 3. **AI Agent Pipeline**
-   - Sequential processing through three specialized agents
-   - Each agent focuses on a specific aspect of text processing
+   - Sequential processing through two specialized agents
+   - Separator: Cleans text and identifies billable activities
+   - Refiner: Transforms activities into professional narratives
    - Modular design allows for easy updates and improvements
 
 ### Data Flow
 ```
-Voice Input → Whisper API → Grammar Agent → Separator Agent → Refiner Agent → Database → Export
+Voice Input → Web Speech API → Frontend (IndexedDB) → Backend API → Separator Agent → Refiner Agent → Enhanced Text
 ```
 
 ## Tech Stack
 
-- **Backend**: Flask 3.0+, SQLAlchemy 2.0+, OpenAI API
+- **Backend**: Flask 3.0+, Azure OpenAI API
 - **Frontend**: Vanilla JavaScript (ES6+), Web Speech API, IndexedDB
-- **Database**: SQLite with JSON field support
-- **AI/ML**: OpenAI Whisper (transcription), GPT-4 (text processing)
+- **Database**: IndexedDB (frontend-only, no backend database)
+- **AI/ML**: Web Speech API (transcription), Azure OpenAI GPT (text processing)
 
 ## Prerequisites
 
 - Python 3.8 or higher
 - pip (Python package manager)
-- OpenAI API key with access to Whisper and GPT-4
+- Azure OpenAI API key with GPT deployment
 - Modern web browser (Chrome, Firefox, Safari, Edge)
 - Microphone access for voice recording
-- 100MB free disk space for database
 
 ## Installation
 
@@ -101,11 +101,14 @@ pip install -r requirements.txt
 # Copy environment template
 cp .env.example .env
 
-# Edit .env file and add your OpenAI API key
-# OPENAI_API_KEY=sk-...your-key-here...
+# Edit .env file and add your Azure OpenAI credentials
+# AZURE_OPENAI_API_KEY=your-key-here
+# AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
+# AZURE_OPENAI_API_VERSION=2024-02-01
+# AZURE_OPENAI_GPT_DEPLOYMENT=your-deployment-name
 ```
 
-**Important**: Never commit your `.env` file to version control. The OpenAI API key should remain confidential.
+**Important**: Never commit your `.env` file to version control. The Azure OpenAI API key should remain confidential.
 
 ## Running the Application
 
@@ -138,24 +141,21 @@ python -m http.server 8080 --directory frontend
 time-composer/
 ├── backend/               # Flask API server
 │   ├── app.py            # Main Flask application
-│   ├── models.py         # SQLAlchemy database models
 │   ├── config.py         # Configuration settings
-│   ├── utils.py          # Utility functions
+│   ├── prompts.py        # AI prompt templates
+│   ├── api/              # API routes
+│   │   └── routes/       # Route modules
 │   └── agents/           # AI agent pipeline
 │       ├── base.py       # Base agent class
-│       ├── grammar.py    # Grammar correction agent
-│       ├── separator.py  # Activity separation agent
+│       ├── separator.py  # Text cleanup & activity separation agent
 │       ├── refiner.py    # Narrative refinement agent
 │       └── pipeline.py   # Agent orchestration
 ├── frontend/             # Web interface
 │   ├── index.html        # Main application page
 │   ├── js/
 │   │   ├── app.js        # Main application logic
-│   │   ├── database.js   # IndexedDB management
-│   │   └── sync.js       # Offline sync logic
+│   │   └── database.js   # IndexedDB management
 │   └── css/              # Stylesheets
-├── data/                 # Database storage
-│   └── time_composer.db  # SQLite database (auto-created)
 ├── tests/                # Test suite
 │   ├── test_agents.py    # Agent pipeline tests
 │   └── test_api.py       # API endpoint tests
@@ -173,8 +173,18 @@ Currently, the API does not require authentication for local use. For production
 
 ### Endpoints
 
+#### `GET /api/health`
+Health check endpoint.
+
+**Response:**
+```json
+{
+  "status": "healthy"
+}
+```
+
 #### `POST /api/enhance`
-Process text through the AI agent pipeline.
+Process text through the AI agent pipeline. This is a stateless endpoint that returns enhanced text without storing any data.
 
 **Request:**
 ```json
@@ -186,48 +196,18 @@ Process text through the AI agent pipeline.
 **Response:**
 ```json
 {
-  "cleaned_text": "Grammar-corrected text",
   "narratives": [
     {
-      "activity": "Client meeting",
+      "activity": "Client meeting regarding contract negotiations",
       "time": 2.5,
-      "description": "Professional billing narrative"
-    }
-  ],
-  "task_codes": ["MEETING", "CONTRACT"],
-  "tags": ["client-communication", "negotiations"]
-}
-```
-
-#### `GET /api/entries`
-Retrieve all time entries with optional filtering.
-
-**Query Parameters:**
-- `start_date`: ISO date string (YYYY-MM-DD)
-- `end_date`: ISO date string (YYYY-MM-DD)
-- `status`: Entry status filter
-
-**Response:**
-```json
-{
-  "entries": [
-    {
-      "id": 1,
-      "original_text": "Original input",
-      "cleaned_text": "Cleaned version",
-      "narratives": [...],
-      "created_at": "2024-01-15T10:30:00",
-      "entry_date": "2024-01-15"
+      "description": "Attended meeting with client to discuss contract terms and negotiate key provisions including liability limitations and payment schedules"
     }
   ]
 }
 ```
 
-#### `PUT /api/entries/<id>`
-Update an existing time entry.
-
-#### `POST /api/export`
-Export entries as CSV file.
+#### `POST /api/export/narratives`
+Export narratives as CSV file. Frontend sends the narratives to be exported.
 
 ## Configuration
 
@@ -237,37 +217,34 @@ Create a `.env` file based on `.env.example`:
 
 ```bash
 # Required
-OPENAI_API_KEY=sk-...your-key-here...
+AZURE_OPENAI_API_KEY=your-key-here
+AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
+AZURE_OPENAI_API_VERSION=2024-02-01
+AZURE_OPENAI_GPT_DEPLOYMENT=your-deployment-name
 
 # Optional
 SECRET_KEY=your-flask-secret-key
-DATABASE_URL=sqlite:///data/time_composer.db
 ```
 
-### Database Schema
+### Frontend Storage (IndexedDB)
 
-The application uses a single `time_entries` table with the following key fields:
-- `id`: Primary key
-- `original_text`: Raw input text
-- `cleaned_text`: Grammar-corrected text
-- `narratives`: JSON array of billing narratives
-- `metadata`: JSON object with additional data
-- `task_codes`: JSON array of task codes
-- `tags`: JSON array of tags
-- `created_at`: Timestamp of creation
-- `entry_date`: Date of the billable work
+The application uses IndexedDB for all data persistence with the following structure:
+- Each narrative is stored as an individual record
+- Fields include: id, timestamp, transcription, narratives (array), client_code, matter_number
+- No backend database - all data stored locally in the browser
+- Export functionality reads from IndexedDB and sends to backend for CSV generation
 
 ## Security Considerations
 
 1. **API Keys**: 
-   - Store OpenAI API key in environment variables only
+   - Store Azure OpenAI API key in environment variables only
    - Never commit API keys to version control
    - Rotate keys regularly
 
-2. **Database**:
-   - SQLite database is stored locally
-   - Contains potentially sensitive client information
-   - Ensure proper file permissions (chmod 600)
+2. **Data Storage**:
+   - All data stored locally in browser IndexedDB
+   - No backend database or server-side storage
+   - Data persists only in user's browser
 
 3. **Network**:
    - API runs on localhost only by default
@@ -275,9 +252,9 @@ The application uses a single `time_entries` table with the following key fields
    - Implement HTTPS for production deployment
 
 4. **Data Privacy**:
-   - Audio files are sent to OpenAI for transcription
-   - Text is processed by OpenAI GPT models
-   - Consider data retention policies
+   - Voice transcription happens locally via Web Speech API
+   - Text is processed by Azure OpenAI GPT models
+   - No data is stored on backend servers
 
 ## Testing
 
@@ -302,9 +279,9 @@ pytest --cov=backend tests/
    - Ensure virtual environment is activated
    - Run `pip install -r requirements.txt`
 
-2. **"OpenAI API key not found"**
-   - Check `.env` file exists and contains valid key
-   - Verify key starts with "sk-"
+2. **"Azure OpenAI API key not found"**
+   - Check `.env` file exists and contains valid credentials
+   - Verify all Azure OpenAI environment variables are set
 
 3. **"Port already in use"**
    - Backend default port: 5001
@@ -314,10 +291,12 @@ pytest --cov=backend tests/
 4. **"Microphone not working"**
    - Check browser permissions for microphone access
    - Ensure HTTPS connection (or localhost)
+   - Web Speech API requires Chrome, Edge, or Safari
 
-5. **"Database locked"**
-   - Ensure only one instance of the backend is running
-   - Check file permissions on `data/time_composer.db`
+5. **"IndexedDB not available"**
+   - Check browser supports IndexedDB
+   - Clear browser cache if database errors occur
+   - Use browser dev tools to inspect IndexedDB content
 
 ### Debug Mode
 
@@ -346,6 +325,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Acknowledgments
 
-- OpenAI for Whisper and GPT-4 APIs
-- Flask and SQLAlchemy communities
+- Azure OpenAI for GPT API services
+- Flask community
 - Legal professionals who provided feedback
+- Web Speech API contributors
