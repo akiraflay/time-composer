@@ -601,6 +601,10 @@ class AIAssistant {
             <div class="ai-response ultra-compact-review">
                 <div class="response-header-compact">
                     <span>Time Entries</span>
+                    <label class="select-all-inline">
+                        <input type="checkbox" id="select-all-narratives" checked onchange="window.aiAssistant.toggleSelectAll()">
+                        <span>Select All</span>
+                    </label>
                     <div class="confidence-indicator-compact">
                         <span>Confidence:</span>
                         <div class="confidence-bar">
@@ -611,8 +615,12 @@ class AIAssistant {
                 <div class="entry-content scrollable-entries-compact" id="ai-entry-content">
                     ${narratives.map((narrative, index) => `
                         <div class="narrative-item ultra-compact-narrative" data-narrative-index="${index}">
-                            <div class="narrative-main-row">
-                                <input type="number" 
+                            <div class="narrative-checkbox-wrapper">
+                                <input type="checkbox" id="select-narrative-${index}" class="narrative-checkbox" checked onchange="window.aiAssistant.updateNarrativeSelection(${index})">
+                            </div>
+                            <div class="narrative-content-wrapper">
+                                <div class="narrative-main-row">
+                                    <input type="number" 
                                        id="narrative-hours-${index}" 
                                        name="narrative-hours-${index}"
                                        class="narrative-hours-input" 
@@ -644,23 +652,12 @@ class AIAssistant {
                                        class="ultra-compact-input"
                                        autocomplete="off"
                                        value="${narrative.matterNumber || narrative.matter_number || ''}">
+                                </div>
                             </div>
                         </div>
                     `).join('')}
                 </div>
                 <div class="integrated-actions">
-                    <button class="unified-action-btn primary" onclick="window.aiAssistant.confirmEntries()">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                            <path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z"/>
-                        </svg>
-                        <span>Save entries</span>
-                    </button>
-                    <button class="unified-action-btn" onclick="window.aiAssistant.requestModifications()">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                            <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
-                        </svg>
-                        <span>Edit</span>
-                    </button>
                     <button class="unified-action-btn" onclick="window.aiAssistant.startOver()">
                         <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                             <path d="M12,5V1L7,6L12,11V7A6,6 0 0,1 18,13A6,6 0 0,1 12,19A6,6 0 0,1 6,13H4A8,8 0 0,0 12,21A8,8 0 0,0 20,13A8,8 0 0,0 12,5Z"/>
@@ -668,12 +665,20 @@ class AIAssistant {
                         <span>Restart</span>
                     </button>
                     ${narrativeCount > 1 ? `
-                        <button class="unified-action-btn" onclick="window.aiAssistant.showBulkApply()">
-                            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                                <path d="M19,3H14.82C14.4,1.84 13.3,1 12,1C10.7,1 9.6,1.84 9.18,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M12,3A1,1 0 0,1 13,4A1,1 0 0,1 12,5A1,1 0 0,1 11,4A1,1 0 0,1 12,3M7,7H17V5H19V19H5V5H7V7Z"/>
-                            </svg>
-                            <span>Apply to all</span>
-                        </button>
+                        <div class="apply-to-selected-container">
+                            <button class="unified-action-btn" id="apply-to-selected-btn" onclick="window.aiAssistant.showInlineApply()">
+                                <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                                    <path d="M19,3H14.82C14.4,1.84 13.3,1 12,1C10.7,1 9.6,1.84 9.18,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M12,3A1,1 0 0,1 13,4A1,1 0 0,1 12,5A1,1 0 0,1 11,4A1,1 0 0,1 12,3M7,7H17V5H19V19H5V5H7V7Z"/>
+                                </svg>
+                                <span>Apply to Selected</span>
+                            </button>
+                            <div class="inline-apply-form hidden" id="inline-apply-form">
+                                <input type="text" placeholder="Client Code" id="inline-client-code" class="inline-apply-input" autocomplete="organization">
+                                <input type="text" placeholder="Matter #" id="inline-matter-code" class="inline-apply-input" autocomplete="off">
+                                <button class="inline-apply-btn" onclick="window.aiAssistant.applyInlineCodes()">Apply</button>
+                                <button class="inline-cancel-btn" onclick="window.aiAssistant.hideInlineApply()">Cancel</button>
+                            </div>
+                        </div>
                     ` : ''}
                 </div>
             </div>
@@ -681,6 +686,30 @@ class AIAssistant {
         this.addAssistantMessage(entryHtml, true);
         
         this.updateStatus('Review and confirm your time entries');
+        
+        // Convert main button to Save entries
+        this.convertMainButtonToSave();
+    }
+    
+    convertMainButtonToSave() {
+        const recordBtn = document.getElementById('voice-record-btn');
+        if (recordBtn) {
+            // Update button appearance
+            recordBtn.innerHTML = `
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z"/>
+                </svg>
+                <span class="btn-text">Save entries</span>
+            `;
+            
+            // Remove old event listener and add new one
+            const newButton = recordBtn.cloneNode(true);
+            recordBtn.parentNode.replaceChild(newButton, recordBtn);
+            newButton.addEventListener('click', () => this.confirmEntries());
+            
+            // Show the button if it was hidden
+            document.getElementById('voice-interface').classList.remove('hidden');
+        }
     }
 
 
@@ -1061,64 +1090,69 @@ class AIAssistant {
         
     }
 
-    // Show bulk apply modal
-    showBulkApply() {
-        // Create a modal for bulk apply
-        const modalHtml = `
-            <div class="bulk-apply-modal" id="bulk-apply-modal">
-                <div class="bulk-apply-content">
-                    <h3>Apply to All Entries</h3>
-                    <p>Enter client and matter codes to apply to all time entries:</p>
-                    <div class="bulk-apply-fields">
-                        <input type="text" id="bulk-client-code" name="bulk-client-code" placeholder="Client Code" class="bulk-apply-input" autocomplete="organization">
-                        <input type="text" id="bulk-matter-code" name="bulk-matter-code" placeholder="Matter Number" class="bulk-apply-input" autocomplete="off">
-                    </div>
-                    <div class="bulk-apply-actions">
-                        <button onclick="window.aiAssistant.applyBulkCodes()" class="apply-bulk-btn">Apply</button>
-                        <button onclick="window.aiAssistant.closeBulkApply()" class="cancel-bulk-btn">Cancel</button>
-                    </div>
-                </div>
-            </div>
-        `;
+    // Show inline apply form
+    showInlineApply() {
+        const btn = document.getElementById('apply-to-selected-btn');
+        const form = document.getElementById('inline-apply-form');
         
-        // Add modal to body
-        const modalDiv = document.createElement('div');
-        modalDiv.innerHTML = modalHtml;
-        document.body.appendChild(modalDiv.firstElementChild);
-        
-        // Focus on first input
-        setTimeout(() => {
-            document.getElementById('bulk-client-code')?.focus();
-        }, 100);
+        if (btn) btn.classList.add('hidden');
+        if (form) {
+            form.classList.remove('hidden');
+            // Focus on first input
+            setTimeout(() => {
+                document.getElementById('inline-client-code')?.focus();
+            }, 100);
+        }
     }
     
-    // Apply bulk codes to all entries
-    applyBulkCodes() {
-        const clientCode = document.getElementById('bulk-client-code')?.value || '';
-        const matterCode = document.getElementById('bulk-matter-code')?.value || '';
+    // Hide inline apply form
+    hideInlineApply() {
+        const btn = document.getElementById('apply-to-selected-btn');
+        const form = document.getElementById('inline-apply-form');
         
-        // Apply to all narrative inputs
-        this.lastResponse.entry.narratives.forEach((_, index) => {
-            const clientInput = document.getElementById(`narrative-client-${index}`);
-            const matterInput = document.getElementById(`narrative-matter-${index}`);
-            
-            if (clientInput && clientCode) clientInput.value = clientCode;
-            if (matterInput && matterCode) matterInput.value = matterCode;
-        });
+        if (btn) btn.classList.remove('hidden');
+        if (form) {
+            form.classList.add('hidden');
+            // Clear inputs
+            document.getElementById('inline-client-code').value = '';
+            document.getElementById('inline-matter-code').value = '';
+        }
+    }
+    
+    // Apply codes to selected entries
+    applyInlineCodes() {
+        const clientCode = document.getElementById('inline-client-code')?.value || '';
+        const matterCode = document.getElementById('inline-matter-code')?.value || '';
         
-        // Close modal
-        this.closeBulkApply();
+        // Get checked entries
+        const checkedBoxes = document.querySelectorAll('.narrative-checkbox:checked');
+        
+        if (checkedBoxes.length === 0) {
+            // If no entries are checked, apply to all
+            this.lastResponse.entry.narratives.forEach((_, index) => {
+                const clientInput = document.getElementById(`narrative-client-${index}`);
+                const matterInput = document.getElementById(`narrative-matter-${index}`);
+                
+                if (clientInput && clientCode) clientInput.value = clientCode;
+                if (matterInput && matterCode) matterInput.value = matterCode;
+            });
+        } else {
+            // Apply only to checked entries
+            checkedBoxes.forEach(checkbox => {
+                const index = checkbox.id.replace('select-narrative-', '');
+                const clientInput = document.getElementById(`narrative-client-${index}`);
+                const matterInput = document.getElementById(`narrative-matter-${index}`);
+                
+                if (clientInput && clientCode) clientInput.value = clientCode;
+                if (matterInput && matterCode) matterInput.value = matterCode;
+            });
+        }
+        
+        // Hide inline form
+        this.hideInlineApply();
         
         // Show confirmation
-        this.updateStatus('Applied codes to all entries');
-    }
-    
-    // Close bulk apply modal
-    closeBulkApply() {
-        const modal = document.getElementById('bulk-apply-modal');
-        if (modal) {
-            modal.remove();
-        }
+        this.updateStatus('Applied codes to selected entries');
     }
 
     // Action Methods
@@ -1134,8 +1168,17 @@ class AIAssistant {
             const responseNarratives = this.lastResponse.narratives || (this.lastResponse.entry && this.lastResponse.entry.narratives) || [];
             let narrativesToSave = [...responseNarratives];
             
-            // Since we default to individual mode now, always get individual codes
-            narrativesToSave = narrativesToSave.map((narrative, index) => {
+            // Filter to only include checked entries
+            narrativesToSave = narrativesToSave.filter((_, index) => {
+                const checkbox = document.getElementById(`select-narrative-${index}`);
+                return checkbox?.checked;
+            });
+            
+            // Get individual codes for checked entries
+            narrativesToSave = narrativesToSave.map((narrative, originalIndex) => {
+                // Find the original index from the filtered array
+                const allNarratives = this.lastResponse.narratives || (this.lastResponse.entry && this.lastResponse.entry.narratives) || [];
+                const index = allNarratives.indexOf(narrative);
                 const hoursInput = document.getElementById(`narrative-hours-${index}`);
                 const textInput = document.getElementById(`narrative-text-${index}`);
                 const clientInput = document.getElementById(`narrative-client-${index}`);
@@ -1195,41 +1238,18 @@ class AIAssistant {
         }
     }
 
-    requestModifications() {
-        this.addUserMessage('I\'d like to make some changes');
-        this.addAssistantMessage('No problem! What would you like to modify? You can:');
-        
-        const actionsHtml = `
-            <div class="suggested-actions">
-                <button class="suggestion-btn" onclick="window.aiAssistant.addMoreDetail()">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                        <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
-                    </svg>
-                    Add more detail
-                </button>
-                <button class="suggestion-btn" onclick="window.aiAssistant.splitEntries()">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                        <path d="M8,2V4H16V2H18V4H19A2,2 0 0,1 21,6V20A2,2 0 0,1 19,22H5A2,2 0 0,1 3,20V6A2,2 0 0,1 5,4H6V2H8Z"/>
-                    </svg>
-                    Split entries differently
-                </button>
-                <button class="suggestion-btn" onclick="window.aiAssistant.changeWording()">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                        <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
-                    </svg>
-                    Change wording
-                </button>
-            </div>
-        `;
-        this.addAssistantMessage(actionsHtml, true);
-    }
 
     startOver() {
         this.addUserMessage('Let me start over');
-        this.addAssistantMessage('Of course! Let\'s capture your billable time again. How would you like to provide the information?');
+        this.addAssistantMessage('Of course! Let\'s capture your billable time again.');
         this.resetInterface();
         this.currentMode = 'initial';
         this.updateStatus('Ready to capture your billable time');
+        
+        // Automatically switch to voice mode after reset
+        setTimeout(() => {
+            this.switchToVoiceMode();
+        }, 300);
     }
 
     addMoreDetail() {
@@ -1337,6 +1357,43 @@ class AIAssistant {
     splitByClient() {
         this.addUserMessage('Split by client/matter');
         this.addAssistantMessage('I\'ll separate entries by different clients or matters based on the context. You can edit the client/matter codes in the results.');
+    }
+
+    // Checkbox handling functions
+    toggleSelectAll() {
+        const selectAll = document.getElementById('select-all-narratives');
+        const checkboxes = document.querySelectorAll('.narrative-checkbox');
+        
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = selectAll.checked;
+            this.updateNarrativeVisual(checkbox.id.replace('select-narrative-', ''));
+        });
+    }
+
+    updateNarrativeSelection(index) {
+        this.updateNarrativeVisual(index);
+        
+        // Update Select All checkbox state
+        const checkboxes = document.querySelectorAll('.narrative-checkbox');
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        const selectAll = document.getElementById('select-all-narratives');
+        if (selectAll) {
+            selectAll.checked = allChecked;
+        }
+    }
+
+    updateNarrativeVisual(index) {
+        const checkbox = document.getElementById(`select-narrative-${index}`);
+        const narrativeItem = document.querySelector(`[data-narrative-index="${index}"]`);
+        const contentWrapper = narrativeItem?.querySelector('.narrative-content-wrapper');
+        
+        if (contentWrapper) {
+            if (checkbox?.checked) {
+                contentWrapper.classList.remove('unchecked');
+            } else {
+                contentWrapper.classList.add('unchecked');
+            }
+        }
     }
 
     splitCustom() {
