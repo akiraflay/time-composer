@@ -426,8 +426,8 @@ const displayEnhancedResults = (result) => {
             </div>
             <div class="entry-narrative">${narrative.text}</div>
             <div class="entry-metadata-inputs">
-                <input type="text" class="entry-client-code" placeholder="Client Code" data-entry="${index}">
-                <input type="text" class="entry-matter-number" placeholder="Matter Number" data-entry="${index}">
+                <input type="text" id="rec-client-${index}" name="rec-client-code-${index}" class="entry-client-code" placeholder="Client Code" data-entry="${index}" autocomplete="organization">
+                <input type="text" id="rec-matter-${index}" name="rec-matter-number-${index}" class="entry-matter-number" placeholder="Matter Number" data-entry="${index}" autocomplete="off">
             </div>
         `;
         list.appendChild(item);

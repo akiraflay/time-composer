@@ -97,14 +97,6 @@
                 <div id="entries-list" class="entries-container">
                     <!-- Entries will be populated here -->
                 </div>
-                
-                <!-- Bulk Actions Bar -->
-                <div id="bulk-actions" class="bulk-actions">
-                    <span class="bulk-actions-count" id="bulk-count">0 selected</span>
-                    <button class="bulk-duplicate-btn" id="bulk-duplicate">Duplicate</button>
-                    <button class="bulk-delete-btn" id="bulk-delete">Delete</button>
-                    <button class="bulk-cancel-btn" id="bulk-cancel">Cancel</button>
-                </div>
             </div>
 
 
@@ -192,26 +184,6 @@
             </div>
         </div>
 
-        <!-- Edit Entry Modal -->
-        <div id="edit-modal" class="edit-modal">
-            <div class="edit-modal-content">
-                <div class="edit-modal-header">
-                    <h2>Edit Time Entry</h2>
-                    <button class="close-btn" id="close-edit-modal">&times;</button>
-                </div>
-                
-                <!-- Narratives -->
-                <div id="edit-narratives-container">
-                    <!-- Narrative items will be populated here -->
-                </div>
-                
-                <div class="edit-modal-actions">
-                    <button class="secondary-btn" id="cancel-edit">Cancel</button>
-                    <button class="primary-btn" id="save-edit">Save Changes</button>
-                </div>
-            </div>
-        </div>
-
         <!-- Apply to All Modal -->
         <div id="apply-to-all-modal" class="edit-modal">
             <div class="edit-modal-content compact">
@@ -226,11 +198,11 @@
                     <div class="apply-fields-grid">
                         <div class="apply-field">
                             <label for="apply-client-code">Client Code</label>
-                            <input type="text" id="apply-client-code" placeholder="e.g., ACME-001" class="apply-input">
+                            <input type="text" id="apply-client-code" name="apply-client-code" placeholder="e.g., ACME-001" class="apply-input" autocomplete="organization">
                         </div>
                         <div class="apply-field">
                             <label for="apply-matter-number">Matter Number</label>
-                            <input type="text" id="apply-matter-number" placeholder="e.g., 2024-1234" class="apply-input">
+                            <input type="text" id="apply-matter-number" name="apply-matter-number" placeholder="e.g., 2024-1234" class="apply-input" autocomplete="off">
                         </div>
                     </div>
                     

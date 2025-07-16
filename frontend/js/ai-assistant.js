@@ -3,6 +3,9 @@ class AIAssistant {
     constructor() {
         this.isRecording = false;
         this.isPaused = false;
+        this.isRecognitionActive = false;
+        this.isIntentionalStop = false;
+        this.isStartingRecording = false; // Prevent double activation
         this.mediaRecorder = null;
         this.audioChunks = [];
         this.startTime = null;
@@ -27,12 +30,13 @@ class AIAssistant {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             this.recognition = new SpeechRecognition();
             
-            this.recognition.continuous = true;
+            this.recognition.continuous = false; // Stop after silence
             this.recognition.interimResults = true;
             this.recognition.lang = 'en-US';
             
             this.recognition.onstart = () => {
-                console.log('Speech recognition started');
+                // console.log('Speech recognition started');
+                this.isRecognitionActive = true;
                 this.showLiveTranscription();
             };
             
@@ -41,15 +45,32 @@ class AIAssistant {
             };
             
             this.recognition.onerror = (event) => {
-                console.error('Speech recognition error:', event.error);
-                if (event.error === 'no-speech' && this.isRecording) {
-                    this.restartRecognition();
+                // Ignore no-speech errors - attorneys may pause while thinking
+                if (event.error === 'no-speech') {
+                    return;
                 }
+                console.error('Speech recognition error:', event.error);
             };
             
             this.recognition.onend = () => {
-                if (this.isRecording && !this.isPaused) {
-                    this.restartRecognition();
+                // console.log('Speech recognition ended');
+                this.isRecognitionActive = false;
+                
+                // Restart recognition if we're still recording and it wasn't an intentional stop
+                if (this.isRecording && !this.isIntentionalStop && !this.isPaused) {
+                    // console.log('Restarting recognition to continue listening...');
+                    setTimeout(() => {
+                        if (this.recognition && this.isRecording && !this.isIntentionalStop) {
+                            try {
+                                this.recognition.start();
+                                this.isRecognitionActive = true;
+                            } catch (e) {
+                                // console.log('Could not restart recognition:', e);
+                            }
+                        }
+                    }, 100);
+                } else {
+                    this.hideLiveTranscription();
                 }
             };
         }
@@ -71,7 +92,10 @@ class AIAssistant {
         // Voice interface controls
         document.getElementById('voice-record-btn')?.addEventListener('click', () => this.toggleRecording());
         document.getElementById('voice-pause-btn')?.addEventListener('click', () => this.togglePause());
-        document.getElementById('voice-stop-btn')?.addEventListener('click', () => this.stopRecording());
+        document.getElementById('voice-stop-btn')?.addEventListener('click', () => {
+            this.isIntentionalStop = true;
+            this.stopRecording();
+        });
         
         
         // Voice orb click
@@ -145,19 +169,25 @@ class AIAssistant {
                 this.switchToVoiceMode();
                 break;
             default:
-                console.log('Unknown action:', action);
+                // console.log('Unknown action:', action);
         }
     }
 
     async switchToVoiceMode() {
         this.currentMode = 'voice';
-        this.hideAllInterfaces();
+        // hideAllInterfaces already called by resetInterface in open()
         document.getElementById('voice-interface').classList.remove('hidden');
         this.updateStatus('Voice mode active');
         
         // Only add the message if we don't already have messages
         if (document.querySelectorAll('#messages-container .message').length === 0) {
             this.addAssistantMessage('What work did you accomplish today? I\'ll help you turn it into professional time entries.');
+        }
+        
+        // Check if already recording or starting to record
+        if (this.isRecording || this.isRecognitionActive || this.isStartingRecording) {
+            // console.log('Recording already active or starting, skipping duplicate start');
+            return;
         }
         
         try {
@@ -179,7 +209,14 @@ class AIAssistant {
     }
 
     async startRecording() {
+        // Prevent multiple simultaneous starts
+        if (this.isStartingRecording) {
+            // console.log('Already starting recording, skipping duplicate call');
+            return;
+        }
+        
         try {
+            this.isStartingRecording = true;
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             
             // Try to use webm/opus format which is widely supported
@@ -196,7 +233,13 @@ class AIAssistant {
                 }
             };
             
-            this.mediaRecorder.onstop = () => this.processRecording();
+            this.mediaRecorder.onstop = () => {
+                if (this.isIntentionalStop) {
+                    this.processRecording();
+                }
+                // Reset the flag
+                this.isIntentionalStop = false;
+            };
             
             // Set up audio analysis for visual feedback
             this.setupAudioAnalysis(stream);
@@ -211,21 +254,32 @@ class AIAssistant {
             this.lastSpeechTime = Date.now();
             
             // Start speech recognition for live transcription
-            if (this.recognition) {
+            if (this.recognition && !this.isRecognitionActive) {
                 try {
                     this.recognition.start();
                 } catch (e) {
-                    console.error('Failed to start recognition:', e);
+                    // If recognition is already started, this is not an error
+                    if (e.name === 'InvalidStateError' && e.message.includes('already started')) {
+                        // console.log('Recognition already active');
+                        this.isRecognitionActive = true;
+                    } else {
+                        console.error('Failed to start recognition:', e);
+                    }
                 }
+            } else if (this.isRecognitionActive) {
+                // console.log('Recognition already active, skipping start');
             }
             
             this.updateRecordingUI();
             this.startTimer();
             this.updateStatus('Recording... Tell me about your billable work');
+            console.log('🎤 Recording started');
             
         } catch (err) {
             console.error('Error accessing microphone:', err);
             this.showError('Please allow microphone access to record');
+        } finally {
+            this.isStartingRecording = false;
         }
     }
     
@@ -301,7 +355,11 @@ class AIAssistant {
             this.pausedTime += Date.now() - this.startTime;
             
             if (this.recognition) {
-                this.recognition.stop();
+                try {
+                    this.recognition.stop();
+                } catch (e) {
+                    // console.log('Recognition already stopped');
+                }
             }
             
             this.updateRecordingUI();
@@ -334,7 +392,7 @@ class AIAssistant {
     async stopRecording() {
         // Prevent concurrent stop operations
         if (this.isStopping) {
-            console.log('Already stopping recording, ignoring duplicate call');
+            // console.log('Already stopping recording, ignoring duplicate call');
             return;
         }
         
@@ -352,7 +410,11 @@ class AIAssistant {
                 this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
                 
                 if (this.recognition) {
-                    this.recognition.stop();
+                    try {
+                        this.recognition.stop();
+                    } catch (e) {
+                        // console.log('Recognition already stopped');
+                    }
                 }
                 
                 // Clean up audio context
@@ -365,6 +427,7 @@ class AIAssistant {
                 
                 this.clearTimer();
                 this.updateRecordingUI();
+                console.log('⏹️ Recording stopped');
                 this.updateStatus('Processing your recording...');
                 
                 // Hide live transcription and show processing
@@ -396,7 +459,6 @@ class AIAssistant {
     async processRecording() {
         try {
             this.currentMode = 'processing';
-            this.hideAllInterfaces();
             
             // Sync any final edits
             this.syncEditedTranscription();
@@ -418,9 +480,9 @@ class AIAssistant {
             
             try {
                 // Process with enhancement API
-                console.log('Calling API enhancement with text:', this.finalTranscript);
+                console.log('🔄 Processing recorded text...');
                 const response = await api.enhance(this.finalTranscript);
-                console.log('API response:', response);
+                console.log('✅ Enhancement complete');
                 
                 // Store original text in response for later use
                 response.original_text = this.finalTranscript;
@@ -429,7 +491,7 @@ class AIAssistant {
                 this.showConversationalResults(response);
             } catch (apiError) {
                 console.error('API enhancement failed:', apiError);
-                console.log('Falling back to mock response');
+                // console.log('Falling back to mock response');
                 
                 // Create a mock response for demo purposes
                 const mockResponse = this.createMockResponse(this.finalTranscript);
@@ -552,6 +614,7 @@ class AIAssistant {
                             <div class="narrative-main-row">
                                 <input type="number" 
                                        id="narrative-hours-${index}" 
+                                       name="narrative-hours-${index}"
                                        class="narrative-hours-input" 
                                        value="${narrative.hours}" 
                                        step="0.1" 
@@ -559,21 +622,27 @@ class AIAssistant {
                                        style="width: 60px; margin-right: 5px;">
                                 <span style="margin-right: 10px;">hours</span>
                                 <textarea id="narrative-text-${index}" 
+                                          name="narrative-text-${index}"
                                           class="narrative-text-input" 
                                           rows="1" 
+                                          autocomplete="off"
                                           style="flex: 1; resize: vertical; min-height: 24px;">${narrative.text}</textarea>
                                 <span class="narrative-index-inline" style="margin-left: 10px;">#${index + 1}</span>
                             </div>
                             <div class="narrative-inputs-row" id="narrative-fields-${index}">
                                 <input type="text" 
                                        id="narrative-client-${index}" 
+                                       name="client-code-${index}"
                                        placeholder="Client Code" 
                                        class="ultra-compact-input"
+                                       autocomplete="organization"
                                        value="${narrative.clientCode || narrative.client_code || ''}">
                                 <input type="text" 
                                        id="narrative-matter-${index}" 
+                                       name="matter-number-${index}"
                                        placeholder="Matter #" 
                                        class="ultra-compact-input"
+                                       autocomplete="off"
                                        value="${narrative.matterNumber || narrative.matter_number || ''}">
                             </div>
                         </div>
@@ -618,7 +687,7 @@ class AIAssistant {
 
     // UI Helper Methods
     hideAllInterfaces() {
-        console.log('Hiding all interfaces...');
+        // console.log('Hiding all interfaces...');
         const voiceInterface = document.getElementById('voice-interface');
         const textInterface = document.getElementById('text-interface');
         const inputArea = document.getElementById('input-area');
@@ -626,7 +695,7 @@ class AIAssistant {
         if (voiceInterface) voiceInterface.classList.add('hidden');
         if (textInterface) {
             textInterface.classList.add('hidden');
-            console.log('Text interface hidden');
+            // console.log('Text interface hidden');
         }
         if (inputArea) inputArea.classList.add('hidden');
     }
@@ -720,18 +789,17 @@ class AIAssistant {
                 </svg>
             </div>
             <div class="message-content">
-                <div class="message-text" id="live-user-text" contenteditable="true" spellcheck="false">
+                <div class="message-text" id="live-user-text" contenteditable="false" spellcheck="false">
                     <span class="transcription-placeholder">Start speaking...</span>
                 </div>
-                <div class="edit-hint">Click to edit • Press Enter to save</div>
             </div>
         `;
         
         container.appendChild(messageDiv);
         container.scrollTop = container.scrollHeight;
         
-        // Set up edit handlers
-        this.setupTranscriptionEditHandlers();
+        // Edit handlers disabled - transcription is view-only
+        // this.setupTranscriptionEditHandlers();
     }
     
     setupTranscriptionEditHandlers() {
@@ -826,8 +894,7 @@ class AIAssistant {
         const userLiveText = document.getElementById('live-user-text');
         if (!userLiveText) return;
         
-        // Don't update if user is actively editing
-        if (document.activeElement === userLiveText) return;
+        // Always update the transcription display
         
         let displayHtml = '';
         
@@ -858,15 +925,6 @@ class AIAssistant {
         this.updateBrowserTranscriptionDisplay('');
     }
 
-    restartRecognition() {
-        if (this.recognition && this.isRecording && !this.isPaused) {
-            try {
-                this.recognition.start();
-            } catch (e) {
-                console.error('Failed to restart recognition:', e);
-            }
-        }
-    }
 
     startTimer() {
         this.timerInterval = setInterval(() => {
@@ -1012,8 +1070,8 @@ class AIAssistant {
                     <h3>Apply to All Entries</h3>
                     <p>Enter client and matter codes to apply to all time entries:</p>
                     <div class="bulk-apply-fields">
-                        <input type="text" id="bulk-client-code" placeholder="Client Code" class="bulk-apply-input">
-                        <input type="text" id="bulk-matter-code" placeholder="Matter Number" class="bulk-apply-input">
+                        <input type="text" id="bulk-client-code" name="bulk-client-code" placeholder="Client Code" class="bulk-apply-input" autocomplete="organization">
+                        <input type="text" id="bulk-matter-code" name="bulk-matter-code" placeholder="Matter Number" class="bulk-apply-input" autocomplete="off">
                     </div>
                     <div class="bulk-apply-actions">
                         <button onclick="window.aiAssistant.applyBulkCodes()" class="apply-bulk-btn">Apply</button>
@@ -1367,12 +1425,11 @@ document.addEventListener('DOMContentLoaded', () => {
     window.aiAssistant = aiAssistant;
     
     // Log initialization info
-    console.log('Time Composer Assistant initialized');
-    console.log('Using browser speech recognition for transcription');
+    console.log('Time Composer Assistant ready');
     
     // Check backend status
     fetch('http://localhost:5001/api/health')
-        .then(() => console.log('✅ Backend server is running'))
+        .then(() => {/* Backend server is running */})
         .catch(() => {
             console.warn('⚠️ Backend server is not running. Start it with: python run.py');
             console.log('The app will work with browser-only transcription and mock data processing.');

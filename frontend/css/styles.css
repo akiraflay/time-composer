@@ -984,13 +984,13 @@ main {
 
 /* Special handling for narrative text editing in cards */
 .narrative-text.editable-field.editing {
-    padding: calc(1rem - 1px) calc(0.375rem - 1px); /* Maintain padding but account for 1px border */
+    padding: 1rem 0.375rem; /* Keep exact same padding as non-editing state */
     margin: 0.75rem 0 0 0; /* Preserve top margin to prevent upward shift */
     width: 100%;
     background: transparent;
-    border: 1px solid rgba(37, 99, 235, 0.2);
-    border-radius: 0.25rem;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.05);
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
 }
 
 .narrative-text.editing .inline-textarea.seamless {
@@ -1000,8 +1000,8 @@ main {
     border-radius: 0;
     width: 100%;
     font-size: inherit;
-    line-height: 1.4; /* Explicit line-height to match .narrative-text in condensed table */
-    color: var(--text-primary);
+    line-height: inherit; /* Inherit line-height from parent */
+    color: inherit;
     font-family: inherit;
     min-height: auto;
     overflow: hidden;
@@ -1009,13 +1009,9 @@ main {
     word-wrap: break-word;
     resize: none;
     outline: none;
-    margin: 0 !important; /* Override the -1px margin from base seamless class - important needed due to specificity */
+    margin: 0;
     display: block;
     box-sizing: border-box;
-}
-
-.narrative-text.editing .inline-textarea.seamless:focus {
-    outline: none;
 }
 
 /* Narrative Status Icon */
@@ -1160,9 +1156,10 @@ main {
 }
 
 .editable-field.editing {
-    background-color: var(--surface);
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    /* Remove default editing styles for seamless experience */
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
 }
 
 /* Use subtle styling for client/matter fields like narrative fields */
@@ -1189,6 +1186,8 @@ main {
 .client-field .inline-input,
 .matter-field .inline-input {
     text-align: center;
+    max-width: 90%; /* Reduce width by 10% for cleaner look */
+    margin: 0 auto; /* Center the input within the field */
 }
 
 .editable-field .edit-icon {
@@ -1274,26 +1273,30 @@ main {
 .inline-input.seamless,
 .inline-textarea.seamless {
     width: 100%;
-    padding: inherit;
-    border: 1px solid transparent;
-    border-radius: 0.25rem;
+    padding: 0;
+    border: none;
+    border-radius: 0;
     font-size: inherit;
     font-family: inherit;
     line-height: inherit;
     background: transparent;
-    color: var(--text-primary);
+    color: inherit;
     outline: none;
-    transition: all 0.15s ease;
+    transition: none;
     min-width: 100%;
     box-sizing: border-box;
-    margin: -1px;
+    margin: 0;
+    -webkit-appearance: none;
+    appearance: none;
 }
 
 .inline-input.seamless:focus,
 .inline-textarea.seamless:focus {
-    background: var(--surface);
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+    background: transparent;
+    border: none;
+    outline: 2px solid rgba(37, 99, 235, 0.3);
+    outline-offset: 2px;
+    border-radius: 4px;
 }
 
 
@@ -1480,86 +1483,6 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
     backdrop-filter: blur(4px);
 }
 
-/* Edit Entry Modal */
-.edit-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(4px);
-}
-
-.edit-modal.active {
-    display: flex;
-}
-
-.edit-modal-content {
-    background: var(--surface);
-    padding: 2rem;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 800px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: var(--shadow-lg);
-    border: 1px solid var(--border);
-}
-
-.edit-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 1rem;
-}
-
-.edit-modal-header h2 {
-    font-size: 1.5rem;
-    color: var(--text-primary);
-    margin: 0;
-}
-
-
-.edit-narrative-item {
-    background: rgba(248, 250, 252, 0.5);
-    border: 1px solid rgba(226, 232, 240, 0.5);
-    border-radius: 0.375rem;
-    padding: 0.5rem;
-    margin-bottom: 0.375rem;
-    transition: all 0.2s ease;
-}
-
-.edit-narrative-item:hover {
-    background: rgba(248, 250, 252, 0.8);
-    border-color: rgba(226, 232, 240, 0.8);
-}
-
-.edit-narrative-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    font-size: 0.8125rem;
-    color: var(--text-primary);
-}
-
-.edit-narrative-header .activity-title {
-    font-weight: 600;
-}
-
-.edit-narrative-header .activity-hours {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    font-weight: 500;
-}
 
 .narrative-date-header {
     padding: 0.375rem 0.625rem;
@@ -1749,17 +1672,14 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
 
 
 
-.edit-modal-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: flex-end;
-    margin-top: 2rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border);
+
+/* Hide modals by default */
+.edit-modal {
+    display: none;
 }
 
-
-.modal.active {
+.modal.active,
+.edit-modal.active {
     display: flex;
 }
 
@@ -2565,7 +2485,7 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
     opacity: 1;
 }
 
-.edit-btn, .delete-btn, .duplicate-btn {
+.delete-btn, .duplicate-btn {
     padding: 0.375rem 0.75rem;
     border: 1px solid var(--border);
     background: var(--surface);
@@ -2577,11 +2497,6 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
     color: var(--text-secondary);
 }
 
-.edit-btn:hover {
-    background: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
-}
 
 .delete-btn:hover {
     background: var(--error-color);
@@ -2595,82 +2510,7 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
     border-color: var(--warning-color);
 }
 
-/* Bulk Selection */
-.bulk-selection-mode .entry-card {
-    position: relative;
-    padding-left: 3rem;
-}
 
-.bulk-checkbox {
-    position: absolute;
-    left: 0.75rem;
-    top: 0.75rem;
-    width: 1.25rem;
-    height: 1.25rem;
-    cursor: pointer;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-
-.bulk-selection-mode .bulk-checkbox {
-    opacity: 1;
-}
-
-.bulk-actions {
-    display: none;
-    position: fixed;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--surface);
-    padding: 1rem 1.5rem;
-    border-radius: 0.75rem;
-    box-shadow: var(--shadow-lg);
-    border: 1px solid var(--border);
-    z-index: 100;
-    gap: 0.75rem;
-    align-items: center;
-}
-
-.bulk-actions.active {
-    display: flex;
-}
-
-.bulk-actions-count {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    font-weight: 500;
-}
-
-.bulk-actions button {
-    padding: 0.5rem 1rem;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    border-radius: 0.375rem;
-    cursor: pointer;
-    font-size: 0.875rem;
-    font-weight: 500;
-    transition: all 0.2s;
-    color: var(--text-secondary);
-}
-
-.bulk-actions .bulk-delete-btn:hover {
-    background: var(--error-color);
-    color: white;
-    border-color: var(--error-color);
-}
-
-.bulk-actions .bulk-duplicate-btn:hover {
-    background: var(--warning-color);
-    color: white;
-    border-color: var(--warning-color);
-}
-
-.bulk-actions .bulk-cancel-btn:hover {
-    background: var(--text-secondary);
-    color: white;
-    border-color: var(--text-secondary);
-}
 
 /* Empty State */
 .empty-state {
@@ -2822,8 +2662,7 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
     padding: 0.5rem !important;
 }
 
-.select-all-checkbox,
-.bulk-checkbox {
+.select-all-checkbox {
     cursor: pointer;
     width: 16px;
     height: 16px;
@@ -3140,12 +2979,6 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
     border-color: var(--border);
 }
 
-.table-action-btn.edit-btn:hover {
-    background: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
-}
-
 .table-action-btn.duplicate-btn:hover {
     background: var(--success-color);
     color: white;
@@ -3316,9 +3149,11 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
 /* Match the subtle Client/Matter field style for narrative fields in condensed table */
 .condensed-table .narrative-text.editable-field.editing {
     background: transparent;
-    border: 1px solid rgba(37, 99, 235, 0.2);
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.05);
-    padding: 0; /* Reset padding to match Client/Matter behavior */
+    border: 1px solid transparent; /* No visible border for seamless look */
+    box-shadow: none;
+    padding: 0; /* Keep same padding as non-editing state */
+    display: block;
+    width: 100%;
 }
 
 .condensed-table .narrative-text.editing .inline-textarea.seamless {
@@ -3326,7 +3161,21 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
     border: none;
     box-shadow: none;
     padding: 0;
+    margin: 0 auto !important; /* Center the textarea to prevent drift */
     outline: none;
+    line-height: 1.4 !important; /* Match the non-editing line-height */
+    overflow: hidden;
+    display: block;
+    width: 100%;
+    min-height: 1.4em; /* Ensure minimum height matches line-height */
+    vertical-align: middle; /* Prevent downward drift */
+}
+
+/* Add subtle focus indicator without disrupting layout */
+.condensed-table .narrative-text.editing .inline-textarea.seamless:focus {
+    outline: 2px solid rgba(37, 99, 235, 0.2);
+    outline-offset: -2px; /* Inside outline to prevent expansion */
+    border-radius: 4px;
 }
 
 /* Center align input fields in client and matter columns */
@@ -3335,6 +3184,13 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
 .client-field .inline-input,
 .matter-field .inline-input {
     text-align: center;
+    max-width: 90%; /* Reduce width by 10% for cleaner look */
+    margin: 0 auto; /* Center the input within the field */
+}
+
+/* Specific width for matter field - narrower than client */
+.condensed-matter .inline-input {
+    max-width: 80% !important; /* Extra 10% reduction for matter fields */
 }
 
 /* Condensed Table Column Styles */
@@ -3692,21 +3548,12 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
     color: white !important;
 }
 
-/* Editable transcription text */
+/* Transcription text display */
 .user-message #live-user-text {
     outline: none;
-    cursor: text;
+    cursor: default;
     min-height: 1.5em;
     position: relative;
-    transition: box-shadow 0.2s ease;
-}
-
-.user-message #live-user-text:focus,
-.user-message #live-user-text.editing {
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
-    border-radius: 4px;
-    padding: 4px;
-    background: rgba(255, 255, 255, 0.05);
 }
 
 .user-message #live-user-text:empty:before {
@@ -3715,23 +3562,7 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
     font-style: italic;
 }
 
-/* Edit hint */
-.edit-hint {
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.6);
-    margin-top: 0.25rem;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-
-.user-message:hover .edit-hint {
-    opacity: 1;
-}
-
-#live-user-text:focus + .edit-hint {
-    opacity: 1;
-    color: rgba(255, 255, 255, 0.8);
-}
+/* Edit hint removed - transcription is view-only */
 
 .message-content {
     flex: 1;
@@ -3829,76 +3660,6 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
     margin-bottom: 1.5rem;
 }
 
-.voice-orb {
-    position: relative;
-    width: 80px;
-    height: 80px;
-    margin: 0 auto;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.orb-inner {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary-color), #1d4ed8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    box-shadow: 0 8px 30px rgba(37, 99, 235, 0.3);
-    transition: all 0.3s ease;
-    position: relative;
-    z-index: 2;
-}
-
-.orb-inner .mic-icon {
-    width: 32px;
-    height: 32px;
-}
-
-.orb-pulse {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(37, 99, 235, 0.4), transparent);
-    opacity: 0;
-    transform: scale(1);
-    animation: none;
-}
-
-.voice-orb.recording .orb-pulse {
-    animation: orbPulse 2s infinite;
-}
-
-.voice-orb.recording .orb-inner {
-    background: linear-gradient(135deg, var(--error-color), #dc2626);
-    animation: orbGlow 2s infinite;
-}
-
-@keyframes orbPulse {
-    0% {
-        opacity: 0.7;
-        transform: scale(1);
-    }
-    100% {
-        opacity: 0;
-        transform: scale(1.8);
-    }
-}
-
-@keyframes orbGlow {
-    0%, 100% {
-        box-shadow: 0 8px 30px rgba(239, 68, 68, 0.4);
-    }
-    50% {
-        box-shadow: 0 8px 40px rgba(239, 68, 68, 0.6);
-    }
-}
 
 .voice-controls {
     display: flex;
@@ -4915,128 +4676,6 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
     font-size: 0.8125rem;
 }
 
-/* Bulk Apply Section */
-.bulk-apply-section {
-    padding-top: 0.75rem;
-    border-top: 1px solid var(--border);
-    margin-top: 0.75rem;
-    text-align: center;
-}
-
-.bulk-apply-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    padding: 0.375rem 0.75rem;
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    font-size: 0.8125rem;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.bulk-apply-btn:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-    background: rgba(37, 99, 235, 0.05);
-}
-
-/* Bulk Apply Modal */
-.bulk-apply-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10000;
-    animation: fadeIn 0.2s ease;
-}
-
-.bulk-apply-content {
-    background: var(--surface);
-    border-radius: 12px;
-    padding: 1.5rem;
-    width: 90%;
-    max-width: 400px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-    animation: slideIn 0.2s ease;
-}
-
-.bulk-apply-content h3 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.125rem;
-    color: var(--text-primary);
-}
-
-.bulk-apply-content p {
-    margin: 0 0 1rem 0;
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-}
-
-.bulk-apply-fields {
-    display: flex;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-}
-
-.bulk-apply-input {
-    flex: 1;
-    padding: 0.625rem 0.875rem;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-size: 0.875rem;
-}
-
-.bulk-apply-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.bulk-apply-actions {
-    display: flex;
-    gap: 0.75rem;
-    justify-content: flex-end;
-}
-
-.apply-bulk-btn {
-    padding: 0.5rem 1.25rem;
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.apply-bulk-btn:hover {
-    background: var(--primary-color-dark);
-}
-
-.cancel-bulk-btn {
-    padding: 0.5rem 1.25rem;
-    background: none;
-    color: var(--text-secondary);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    font-size: 0.875rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.cancel-bulk-btn:hover {
-    border-color: var(--text-secondary);
-    background: var(--background);
-}
 
 /* Compact Actions */
 .suggested-actions.compact-actions {
@@ -5152,97 +4791,8 @@ input[type="number"].inline-input::-webkit-outer-spin-button {
     color: #7c3aed;
 }
 
-/* Bulk Assignment Controls */
-.bulk-assignment-controls {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 0.5rem;
-    margin-bottom: 1rem;
-    box-shadow: var(--shadow);
-}
-
-.bulk-assignment-section {
-    padding: 1rem;
-}
-
-.bulk-assignment-header {
-    margin-bottom: 1rem;
-}
-
-.bulk-assignment-header h3 {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0 0 0.25rem 0;
-}
-
-.bulk-assignment-header p {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    margin: 0;
-}
-
-.bulk-assignment-fields {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-}
-
-.bulk-field-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.bulk-field-group label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--text-primary);
-}
-
-.bulk-assignment-input {
-    padding: 0.5rem 0.75rem;
-    border: 1px solid var(--border);
-    border-radius: 0.375rem;
-    font-size: 0.875rem;
-    background: var(--background);
-    transition: border-color 0.2s ease;
-}
-
-.bulk-assignment-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
-}
-
-.bulk-apply-btn {
-    padding: 0.5rem 1rem;
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 0.375rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.bulk-apply-btn:hover {
-    background: #1d4ed8;
-    transform: translateY(-1px);
-}
-
-.bulk-apply-btn:disabled {
-    background: var(--text-secondary);
-    cursor: not-allowed;
-    transform: none;
-}
 
 /* Apply to All Modal - Redesigned Styles */
-.edit-modal-content.compact {
-    max-width: 500px;
-    padding: 1.5rem;
-}
 
 .modal-description {
     color: var(--text-secondary);

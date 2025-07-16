@@ -10,9 +10,6 @@ let hoursFilter = '';
 let taskFilter = '';
 let customDateRange = null;
 let quickTimeFilter = 'all';
-let advancedFiltersVisible = false;
-let datePickerVisible = false;
-let bulkSelectionMode = false;
 let selectedEntries = new Set();
 
 // Helper function to determine entry status based on narratives
@@ -56,7 +53,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Initialize database
     try {
         await initDB();
-        console.log('Database initialized');
+        // console.log('Database initialized');
         
         // Database initialized successfully
     } catch (err) {
@@ -190,22 +187,6 @@ function setupEventListeners() {
     
     
     
-    // Bulk actions
-    const bulkDuplicateBtn = document.getElementById('bulk-duplicate');
-    const bulkDeleteBtn = document.getElementById('bulk-delete');
-    const bulkCancelBtn = document.getElementById('bulk-cancel');
-    
-    if (bulkDuplicateBtn) {
-        bulkDuplicateBtn.addEventListener('click', bulkDuplicateEntries);
-    }
-    
-    if (bulkDeleteBtn) {
-        bulkDeleteBtn.addEventListener('click', bulkDeleteEntries);
-    }
-    
-    if (bulkCancelBtn) {
-        bulkCancelBtn.addEventListener('click', cancelBulkSelection);
-    }
     
     // Advanced filters panel controls
     const statusFilterElement = document.getElementById('status-filter');
@@ -268,58 +249,8 @@ function setupEventListeners() {
     
     
     
-    // Modal functionality for fallback
-    const modal = document.getElementById('add-modal');
-    const closeButton = document.getElementById('close-modal');
-    const cancelButton = document.getElementById('cancel-modal');
-    const saveButton = document.getElementById('save-entries');
     
-    if (closeButton) {
-        closeButton.addEventListener('click', () => closeModal());
-    }
     
-    if (cancelButton) {
-        cancelButton.addEventListener('click', () => closeModal());
-    }
-    
-    if (saveButton) {
-        saveButton.addEventListener('click', () => saveEntries());
-    }
-    
-    modal?.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            closeModal();
-        }
-    });
-    
-    // Edit modal event listeners
-    const editModal = document.getElementById('edit-modal');
-    const closeEditBtn = document.getElementById('close-edit-modal');
-    const cancelEditBtn = document.getElementById('cancel-edit');
-    const saveEditBtn = document.getElementById('save-edit');
-    const addPresetBtn = document.getElementById('add-preset-btn');
-    
-    if (closeEditBtn) {
-        closeEditBtn.addEventListener('click', closeEditModal);
-    }
-    
-    if (cancelEditBtn) {
-        cancelEditBtn.addEventListener('click', closeEditModal);
-    }
-    
-    if (saveEditBtn) {
-        saveEditBtn.addEventListener('click', saveEditChanges);
-    }
-    
-    if (addPresetBtn) {
-        addPresetBtn.addEventListener('click', addNewPreset);
-    }
-    
-    editModal?.addEventListener('click', (e) => {
-        if (e.target === editModal) {
-            closeEditModal();
-        }
-    });
     
     // Apply to All modal event listeners
     const applyToAllModal = document.getElementById('apply-to-all-modal');
@@ -356,104 +287,20 @@ function setupEventListeners() {
         }
     });
     
-    // Bulk assignment event listeners
-    const bulkApplyClientBtn = document.getElementById('bulk-apply-client');
-    const bulkApplyMatterBtn = document.getElementById('bulk-apply-matter');
-    
-    if (bulkApplyClientBtn) {
-        bulkApplyClientBtn.addEventListener('click', bulkAssignClient);
-    }
-    
-    if (bulkApplyMatterBtn) {
-        bulkApplyMatterBtn.addEventListener('click', bulkAssignMatter);
-    }
 }
 
-// View switching
+// View switching - simplified to only dashboard
 async function switchView(view) {
-    currentView = view;
-    
-    // Update views
-    document.querySelectorAll('.view').forEach(v => {
-        v.classList.toggle('active', v.id === `${view}-view`);
-    });
-    
-    // Load view data
-    switch (view) {
-        case 'dashboard':
-            loadDashboard();
-            break;
-    }
-}
-
-// View mode removed - always use list view
-
-// View mode removed - always use list view
-
-// Date picker functionality
-function toggleDatePicker() {
-    datePickerVisible = !datePickerVisible;
-    const popover = document.getElementById('date-picker-popover');
-    const btn = document.getElementById('date-picker-btn');
-    
-    if (popover) {
-        popover.classList.toggle('hidden', !datePickerVisible);
-    }
-    if (btn) {
-        btn.classList.toggle('active', datePickerVisible);
-    }
-}
-
-function updateDateDisplay() {
-    const display = document.getElementById('date-display');
-    if (!display) return;
-    
-    if (customDateRange && (customDateRange.start || customDateRange.end)) {
-        const start = customDateRange.start || 'Start';
-        const end = customDateRange.end || 'End';
-        display.textContent = `${start} to ${end}`;
-    } else {
-        const displayText = {
-            'all': 'All Time',
-            'today': 'Today',
-            'week': 'This Week',
-            'month': 'This Month'
-        };
-        display.textContent = displayText[quickTimeFilter] || 'All Time';
-    }
-}
-
-function updateCustomDateRange() {
-    const startInput = document.getElementById('custom-start');
-    const endInput = document.getElementById('custom-end');
-    
-    if (startInput?.value || endInput?.value) {
-        customDateRange = {
-            start: startInput?.value || null,
-            end: endInput?.value || null
-        };
-        
-        // Clear quick filter selection when using custom dates
-        quickTimeFilter = 'all';
-        document.querySelectorAll('.quick-date-btn').forEach(b => b.classList.remove('active'));
-        
-        updateDateDisplay();
+    // Only dashboard view exists now
+    if (view === 'dashboard') {
+        currentView = 'dashboard';
         loadDashboard();
     }
 }
 
-function toggleAdvancedFilters() {
-    advancedFiltersVisible = !advancedFiltersVisible;
-    const panel = document.getElementById('advanced-filters');
-    const btn = document.getElementById('more-filters-btn');
-    const btnMobile = document.getElementById('more-filters-btn-mobile');
-    
-    if (panel) {
-        panel.classList.toggle('hidden', !advancedFiltersVisible);
-    }
-    
-    updateActiveFiltersCount();
-}
+
+
+
 
 function updateActiveFiltersCount() {
     let activeCount = 0;
@@ -469,15 +316,7 @@ function updateActiveFiltersCount() {
     if (hoursFilter) activeCount++;
     if (taskFilter) activeCount++;
     
-    const countElement = document.getElementById('active-filters-count');
-    if (countElement) {
-        if (activeCount > 0) {
-            countElement.textContent = activeCount;
-            countElement.classList.remove('hidden');
-        } else {
-            countElement.classList.add('hidden');
-        }
-    }
+    // Active filters count element doesn't exist in HTML, removed
 }
 
 function getQuickTimeRange(period) {
@@ -853,7 +692,7 @@ async function startInlineEdit(field) {
         } else {
             currentValue = field.textContent.trim();
         }
-    } else if (fieldType === 'client_code' || fieldType === 'matter_number') {
+    } else if (fieldType === 'clientCode' || fieldType === 'matterNumber' || fieldType === 'narrative') {
         // Extract text content excluding the SVG
         // First try to find text nodes
         const textNodes = Array.from(field.childNodes).filter(node => node.nodeType === Node.TEXT_NODE);
@@ -877,19 +716,44 @@ async function startInlineEdit(field) {
     
     // Create input element
     let inputElement;
-    if (fieldType === 'text') {
+    if (fieldType === 'text' || fieldType === 'narrative') {
         inputElement = document.createElement('textarea');
         inputElement.className = 'inline-textarea seamless';
         inputElement.value = currentValue;
         inputElement.rows = 1;
-        // Copy computed styles from the original element
+        inputElement.name = `narrative-${entryId}-${narrativeIndex || 0}`;
+        inputElement.autocomplete = 'off';
+        
+        // Copy computed styles from the original element for seamless transition
         const computedStyle = window.getComputedStyle(field);
-        inputElement.style.lineHeight = computedStyle.lineHeight;
+        // For narrative fields in tables, use fixed line-height for consistency
+        if (field.closest('.condensed-table')) {
+            inputElement.style.lineHeight = '1.4';
+        } else {
+            inputElement.style.lineHeight = computedStyle.lineHeight;
+        }
         inputElement.style.fontSize = computedStyle.fontSize;
         inputElement.style.fontFamily = computedStyle.fontFamily;
         inputElement.style.fontWeight = computedStyle.fontWeight;
         inputElement.style.letterSpacing = computedStyle.letterSpacing;
-        // Auto-resize will happen after appending to DOM
+        inputElement.style.color = computedStyle.color;
+        
+        // Pre-calculate height to prevent jump
+        const tempDiv = document.createElement('div');
+        tempDiv.style.position = 'absolute';
+        tempDiv.style.visibility = 'hidden';
+        tempDiv.style.width = field.offsetWidth + 'px';
+        tempDiv.style.lineHeight = '1.4'; // Match the CSS line-height
+        tempDiv.style.fontSize = computedStyle.fontSize;
+        tempDiv.style.fontFamily = computedStyle.fontFamily;
+        tempDiv.style.whiteSpace = 'pre-wrap';
+        tempDiv.style.wordBreak = 'break-word';
+        tempDiv.style.padding = '0'; // No padding in measurement
+        tempDiv.textContent = currentValue || '\u00A0'; // Use non-breaking space for empty content
+        document.body.appendChild(tempDiv);
+        const calculatedHeight = Math.max(tempDiv.scrollHeight, parseFloat(computedStyle.fontSize) * 1.4); // Ensure minimum height
+        document.body.removeChild(tempDiv);
+        inputElement.style.height = calculatedHeight + 'px';
     } else {
         inputElement = document.createElement('input');
         inputElement.className = 'inline-input seamless';
@@ -898,40 +762,44 @@ async function startInlineEdit(field) {
             inputElement.type = 'number';
             inputElement.step = '0.1';
             inputElement.min = '0';
+            inputElement.name = `hours-${entryId}`;
         } else {
             inputElement.type = 'text';
+            // Add name and autocomplete based on field type
+            if (fieldType === 'client') {
+                inputElement.name = `client-${entryId}`;
+                inputElement.autocomplete = 'organization';
+            } else if (fieldType === 'matter') {
+                inputElement.name = `matter-${entryId}`;
+                inputElement.autocomplete = 'off';
+            } else {
+                inputElement.name = `${fieldType}-${entryId}`;
+                inputElement.autocomplete = 'off';
+            }
         }
         
         inputElement.value = currentValue;
     }
     
-    // Replace content (no action buttons)
+    // Replace content smoothly - input already has value
     field.innerHTML = '';
     field.appendChild(inputElement);
     
-    // Ensure value is set after DOM update
-    inputElement.value = currentValue;
-    
-    // Focus and select input
+    // Focus and select immediately (no delay needed)
     inputElement.focus();
     if (inputElement.select) inputElement.select();
     
     // Auto-resize textarea on input
-    if (fieldType === 'text') {
+    if (fieldType === 'text' || fieldType === 'narrative') {
         const autoResize = () => {
+            // Store scroll position to prevent jump
+            const scrollTop = inputElement.scrollTop;
             inputElement.style.height = 'auto';
-            // Add extra pixels to prevent text cutoff
-            const scrollHeight = inputElement.scrollHeight;
-            const computedStyle = window.getComputedStyle(inputElement);
-            const lineHeight = parseFloat(computedStyle.lineHeight);
-            // Add a small buffer (about 1/4 line height) to prevent cutoff
-            inputElement.style.height = (scrollHeight + lineHeight * 0.25) + 'px';
+            inputElement.style.height = inputElement.scrollHeight + 'px';
+            inputElement.scrollTop = scrollTop;
         };
         
         inputElement.addEventListener('input', autoResize);
-        
-        // Initial resize after DOM update
-        setTimeout(autoResize, 0);
     }
     
     // Handle blur (auto-save)
@@ -960,10 +828,10 @@ async function startInlineEdit(field) {
             e.stopPropagation();
             // Cancel editing without saving
             cancelInlineEditWithoutReload(field, currentValue, fieldType);
-        } else if (e.key === 'Enter' && !e.shiftKey && fieldType !== 'text') {
+        } else if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             e.stopPropagation();
-            // Save changes on Enter
+            // Save changes on Enter for all field types
             const newValue = inputElement.value.trim();
             if (newValue !== currentValue) {
                 saveInlineEdit(field, inputElement, entryId, fieldType, narrativeIndex);
@@ -1390,11 +1258,6 @@ function createCondensedRow(narrative) {
         </td>
         <td class="condensed-actions">
             <div class="table-actions">
-                <button class="table-action-btn edit-btn" onclick="editNarrative('${narrative.id}')" title="Edit">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                        <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
-                    </svg>
-                </button>
                 <button class="table-action-btn duplicate-btn" onclick="duplicateNarrative('${narrative.id}')" title="Duplicate">
                     <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                         <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"/>
@@ -1672,18 +1535,6 @@ function openModal() {
 }
 
 
-
-
-
-
-
-// Modal functions
-function openModal() {
-    const modal = document.getElementById('add-modal');
-    modal.classList.add('active');
-    resetModal();
-}
-
 function closeModal() {
     const modal = document.getElementById('add-modal');
     modal.classList.remove('active');
@@ -1752,57 +1603,6 @@ async function saveEntries() {
 }
 
 // Entry actions
-async function editEntry(id) {
-    // Legacy function - redirects to editNarrative
-    return editNarrative(id);
-}
-
-async function editNarrative(id) {
-    try {
-        const narrative = await dbOperations.getNarrative(id);
-        if (!narrative) return;
-        
-        // Convert narrative to entry-like structure for compatibility
-        currentEntry = {
-            id: narrative.id,
-            narratives: [{
-                text: narrative.narrative,
-                hours: narrative.hours,
-                client_code: narrative.clientCode,
-                matter_number: narrative.matterNumber
-            }],
-            original_text: narrative.originalText || narrative.narrative,
-            client_code: narrative.clientCode,
-            matter_number: narrative.matterNumber,
-            total_hours: narrative.hours,
-            status: narrative.status
-        };
-        
-        // Open modal with narrative data
-        openModal();
-        
-        // Populate fields (handled by displayEnhancedResults for new interface)
-        // Legacy support for old interface
-        const legacyClientCode = document.getElementById('client-code');
-        const legacyMatterNumber = document.getElementById('matter-number');
-        if (legacyClientCode) legacyClientCode.value = narrative.clientCode || '';
-        if (legacyMatterNumber) legacyMatterNumber.value = narrative.matterNumber || '';
-        
-        // Show transcription and results
-        document.getElementById('transcription').classList.remove('hidden');
-        document.getElementById('transcription-text').textContent = narrative.originalText || narrative.narrative;
-        
-        displayEnhancedResults({
-            narratives: currentEntry.narratives,
-            cleaned: narrative.cleanedText || narrative.narrative,
-            total_hours: narrative.hours
-        });
-        
-    } catch (err) {
-        console.error('Error editing entry:', err);
-        showNotification('Failed to load entry', 'error');
-    }
-}
 
 async function deleteEntry(id) {
     // Legacy function - redirects to deleteNarrative
@@ -1890,114 +1690,6 @@ async function duplicateNarrative(id) {
     }
 }
 
-// Bulk Selection Functions
-function toggleBulkSelection() {
-    bulkSelectionMode = !bulkSelectionMode;
-    const container = document.getElementById('entries-list');
-    const bulkSelectBtn = document.getElementById('bulk-select-btn');
-    const btnText = bulkSelectBtn.querySelector('.btn-text');
-    
-    if (bulkSelectionMode) {
-        container.classList.add('bulk-selection-mode');
-        btnText.textContent = 'Cancel';
-    } else {
-        container.classList.remove('bulk-selection-mode');
-        btnText.textContent = 'Select';
-        selectedEntries.clear();
-        updateBulkActionsDisplay();
-        
-        // Clear all checkboxes
-        document.querySelectorAll('.bulk-checkbox').forEach(cb => {
-            cb.checked = false;
-        });
-    }
-}
-
-function updateBulkSelection() {
-    const entryId = parseInt(this.dataset.entryId);
-    
-    if (this.checked) {
-        selectedEntries.add(entryId);
-    } else {
-        selectedEntries.delete(entryId);
-    }
-    
-    updateBulkActionsDisplay();
-}
-
-function updateBulkActionsDisplay() {
-    const bulkActions = document.getElementById('bulk-actions');
-    const bulkCount = document.getElementById('bulk-count');
-    
-    if (selectedEntries.size > 0) {
-        bulkActions.classList.add('active');
-        bulkCount.textContent = `${selectedEntries.size} selected`;
-    } else {
-        bulkActions.classList.remove('active');
-    }
-}
-
-function cancelBulkSelection() {
-    toggleBulkSelection();
-}
-
-async function bulkDeleteEntries() {
-    if (selectedEntries.size === 0) return;
-    
-    const count = selectedEntries.size;
-    if (!confirm(`Are you sure you want to delete ${count} entries?`)) return;
-    
-    try {
-        // Delete from backend first, then from IndexedDB
-        const promises = Array.from(selectedEntries).map(async (id) => {
-            const entryId = parseInt(id);
-            // Delete from backend
-            await api.deleteEntry(entryId);
-            // Then delete from local IndexedDB
-            await dbOperations.deleteEntry(entryId);
-        });
-        
-        await Promise.all(promises);
-        
-        selectedEntries.clear();
-        updateBulkActionsDisplay();
-        loadDashboard();
-        showNotification(`${count} entries deleted successfully`, 'success');
-    } catch (err) {
-        console.error('Error deleting entries:', err);
-        showNotification('Failed to delete some entries', 'error');
-    }
-}
-
-async function bulkDuplicateEntries() {
-    if (selectedEntries.size === 0) return;
-    
-    try {
-        const promises = Array.from(selectedEntries).map(async (id) => {
-            const originalEntry = await dbOperations.getEntry(parseInt(id));
-            if (originalEntry) {
-                const duplicatedEntry = {
-                    ...originalEntry,
-                    created_at: new Date().toISOString(),
-                    status: 'draft'
-                };
-                delete duplicatedEntry.id;
-                return dbOperations.saveEntry(duplicatedEntry);
-            }
-        });
-        
-        await Promise.all(promises);
-        
-        const count = selectedEntries.size;
-        selectedEntries.clear();
-        updateBulkActionsDisplay();
-        loadDashboard();
-        showNotification(`${count} entries duplicated successfully`, 'success');
-    } catch (err) {
-        console.error('Error duplicating entries:', err);
-        showNotification('Failed to duplicate some entries', 'error');
-    }
-}
 
 // Utility functions
 function debounce(func, wait) {
@@ -2048,146 +1740,10 @@ function applyPreset(preset) {
     });
 }
 
-function addNewPreset() {
-    const client = prompt('Enter client code:');
-    if (!client) return;
-    
-    const matter = prompt('Enter matter number (optional):') || '';
-    
-    const preset = {
-        client_code: client,
-        matter_number: matter
-    };
-    
-    clientMatterPresets.push(preset);
-    savePresets();
-    loadPresets();
-}
 
 // Edit Modal Functions
 let currentEditingEntry = null;
 
-function openEditModal(entryId) {
-    // Find the entry
-    const entry = currentEntries.find(e => e.id == entryId);
-    if (!entry) {
-        console.error('Entry not found:', entryId);
-        return;
-    }
-    
-    currentEditingEntry = entry;
-    
-    // Populate the modal
-    populateEditModal(entry);
-    
-    // Show the modal
-    document.getElementById('edit-modal').classList.add('active');
-}
-
-function closeEditModal() {
-    document.getElementById('edit-modal').classList.remove('active');
-    currentEditingEntry = null;
-}
-
-function populateEditModal(entry) {
-    
-    // Populate narratives
-    const container = document.getElementById('edit-narratives-container');
-    container.innerHTML = '';
-    
-    (entry.narratives || []).forEach((narrative, index) => {
-        const narrativeItem = document.createElement('div');
-        narrativeItem.className = 'edit-narrative-item';
-        narrativeItem.innerHTML = `
-            <div class="edit-narrative-header">
-                <span class="activity-title">Activity ${index + 1}</span>
-                <span class="activity-hours">${narrative.hours} hours</span>
-            </div>
-            <div class="edit-form-grid">
-                <div class="edit-form-group compact">
-                    <label>Hours</label>
-                    <input type="number" step="0.1" min="0" class="narrative-hours-input" value="${narrative.hours}" data-index="${index}">
-                </div>
-                <div class="edit-form-group compact">
-                    <label>Client Code</label>
-                    <input type="text" class="narrative-client-input" value="${narrative.client_code || entry.client_code || ''}" data-index="${index}" placeholder="e.g., ABC123">
-                </div>
-                <div class="edit-form-group compact">
-                    <label>Matter Number</label>
-                    <input type="text" class="narrative-matter-input" value="${narrative.matter_number || entry.matter_number || ''}" data-index="${index}" placeholder="e.g., 2024-001">
-                </div>
-                <div class="edit-form-group compact">
-                    <label>Status</label>
-                    <select class="narrative-status-input" data-index="${index}">
-                        <option value="draft" ${(narrative.status || entry.status || 'draft') === 'draft' ? 'selected' : ''}>Draft</option>
-                        <option value="exported" ${(narrative.status || entry.status || 'draft') === 'exported' || (narrative.status || entry.status || 'draft') === 'billed' ? 'selected' : ''}>Exported</option>
-                    </select>
-                </div>
-            </div>
-            <div class="edit-form-grid narrative-row">
-                <div class="edit-form-group">
-                    <label>Narrative Text</label>
-                    <textarea rows="2" class="narrative-text-input auto-resize" data-index="${index}" placeholder="Describe the billable activity...">${narrative.text}</textarea>
-                </div>
-                <button type="button" class="details-toggle subtle" data-index="${index}">
-                    ⋯
-                </button>
-            </div>
-            <div class="details-section" data-index="${index}">
-                <div class="edit-form-grid details-grid">
-                    <div class="edit-form-group">
-                        <label>Task Code</label>
-                        <input type="text" class="narrative-task-input" value="${narrative.task_code || ''}" data-index="${index}" placeholder="e.g., RESEARCH">
-                    </div>
-                </div>
-            </div>
-        `;
-        container.appendChild(narrativeItem);
-    });
-    
-    // Add event listeners for details toggles
-    document.querySelectorAll('.details-toggle').forEach(toggle => {
-        toggle.addEventListener('click', function() {
-            const index = this.dataset.index;
-            const detailsSection = document.querySelector(`.details-section[data-index="${index}"]`);
-            const isExpanded = detailsSection.classList.contains('expanded');
-            
-            if (isExpanded) {
-                detailsSection.classList.remove('expanded');
-                this.textContent = 'Details';
-                this.classList.remove('active');
-            } else {
-                detailsSection.classList.add('expanded');
-                this.textContent = 'Hide';
-                this.classList.add('active');
-            }
-        });
-    });
-    
-    // Add auto-resize functionality for textareas
-    document.querySelectorAll('.auto-resize').forEach(textarea => {
-        textarea.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-        });
-        
-        // Trigger resize on load
-        textarea.style.height = 'auto';
-        textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
-    });
-    
-    // Update hours display when hours input changes
-    document.querySelectorAll('.narrative-hours-input').forEach(input => {
-        input.addEventListener('input', function() {
-            const index = this.dataset.index;
-            const hoursDisplay = document.querySelector(`.edit-narrative-item:nth-child(${parseInt(index) + 1}) .activity-hours`);
-            if (hoursDisplay) {
-                const hours = parseFloat(this.value) || 0;
-                hoursDisplay.textContent = `${hours} hour${hours !== 1 ? 's' : ''}`;
-            }
-        });
-    });
-}
 
 // Apply to All Modal Functions
 let currentApplyToAllEntry = null;
@@ -2337,56 +1893,6 @@ async function applyToAllNarratives() {
     }
 }
 
-async function saveEditChanges() {
-    if (!currentEditingEntry) return;
-    
-    try {
-        // Collect the updated data
-        const updatedEntry = {
-            ...currentEditingEntry,
-            narratives: []
-        };
-        
-        // Collect narratives data
-        const narrativeItems = document.querySelectorAll('.edit-narrative-item');
-        narrativeItems.forEach((item, index) => {
-            const narrative = {
-                hours: parseFloat(item.querySelector('.narrative-hours-input').value) || 0,
-                task_code: item.querySelector('.narrative-task-input').value,
-                client_code: item.querySelector('.narrative-client-input').value,
-                matter_number: item.querySelector('.narrative-matter-input').value,
-                text: item.querySelector('.narrative-text-input').value,
-                status: item.querySelector('.narrative-status-input').value
-            };
-            updatedEntry.narratives.push(narrative);
-        });
-        
-        // Recalculate total hours
-        updatedEntry.total_hours = updatedEntry.narratives.reduce((sum, n) => sum + n.hours, 0);
-        
-        // Determine entry-level status based on individual narrative statuses
-        // Use the least advanced status (draft < exported)
-        const statuses = updatedEntry.narratives.map(n => n.status);
-        if (statuses.includes('draft')) {
-            updatedEntry.status = 'draft';
-        } else {
-            updatedEntry.status = 'exported';
-        }
-        
-        // Save to database
-        await dbOperations.updateEntry(updatedEntry.id, updatedEntry);
-        
-        // Close modal and refresh dashboard
-        closeEditModal();
-        loadDashboard();
-        
-        showNotification('Entry updated successfully', 'success');
-        
-    } catch (error) {
-        console.error('Error saving changes:', error);
-        showNotification('Failed to save changes', 'error');
-    }
-}
 
 // Status change function for card view
 async function changeEntryStatus(entryId, newStatus) {
@@ -2684,169 +2190,16 @@ function updateEntryStatusInDOM(entryId, entry) {
 
 
 // Make functions available globally
-window.editEntry = editEntry;
 window.deleteEntry = deleteEntry;
-window.openEditModal = openEditModal;
-window.closeEditModal = closeEditModal;
-window.saveEditChanges = saveEditChanges;
 window.toggleNarrativeStatus = toggleNarrativeStatus;
 window.toggleEntryStatus = toggleEntryStatus;
 window.safeToggleNarrativeStatus = safeToggleNarrativeStatus;
 window.safeToggleEntryStatus = safeToggleEntryStatus;
 window.openApplyToAllModal = openApplyToAllModal;
-window.addNewPreset = addNewPreset;
 window.duplicateEntry = duplicateEntry;
 window.toggleNarrative = toggleNarrative;
 window.changeEntryStatus = changeEntryStatus;
 
-// Bulk assignment removed - not needed for list view
-
-// Bulk assignment removed - not needed for list view
-
-// Bulk assignment removed - not needed for list view
-
-// Confirmation dialog for bulk assignments
-function showBulkAssignmentDialog(type, value) {
-    return new Promise((resolve) => {
-        // Create modal HTML
-        const modal = document.createElement('div');
-        modal.className = 'bulk-assignment-modal';
-        modal.innerHTML = `
-            <div class="bulk-assignment-dialog">
-                <div class="bulk-assignment-dialog-header">
-                    <h3>Confirm Bulk Assignment</h3>
-                </div>
-                <div class="bulk-assignment-dialog-content">
-                    <p>Are you sure you want to apply <strong>${type} code "${value}"</strong> to all visible entries?</p>
-                    <p class="warning-text">This action will update all entries currently displayed in the card view and cannot be undone.</p>
-                </div>
-                <div class="bulk-assignment-dialog-actions">
-                    <button class="bulk-cancel-btn" onclick="closeBulkDialog(false)">Cancel</button>
-                    <button class="bulk-confirm-btn" onclick="closeBulkDialog(true)">Apply to All</button>
-                </div>
-            </div>
-        `;
-        
-        // Add to page
-        document.body.appendChild(modal);
-        
-        // Store resolve function globally so buttons can access it
-        window.bulkDialogResolve = resolve;
-        
-        // Add styles if not already added
-        if (!document.getElementById('bulk-modal-styles')) {
-            const styles = document.createElement('style');
-            styles.id = 'bulk-modal-styles';
-            styles.textContent = `
-                .bulk-assignment-modal {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: rgba(0, 0, 0, 0.5);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    z-index: 10000;
-                }
-                
-                .bulk-assignment-dialog {
-                    background: var(--surface);
-                    border-radius: 0.5rem;
-                    padding: 1.5rem;
-                    max-width: 500px;
-                    width: 90%;
-                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-                }
-                
-                .bulk-assignment-dialog-header h3 {
-                    margin: 0 0 1rem 0;
-                    color: var(--text-primary);
-                    font-size: 1.25rem;
-                }
-                
-                .bulk-assignment-dialog-content p {
-                    margin: 0 0 1rem 0;
-                    color: var(--text-primary);
-                    line-height: 1.5;
-                }
-                
-                .warning-text {
-                    color: var(--warning-color);
-                    font-size: 0.875rem;
-                }
-                
-                .bulk-assignment-dialog-actions {
-                    display: flex;
-                    gap: 0.75rem;
-                    justify-content: flex-end;
-                    margin-top: 1.5rem;
-                }
-                
-                .bulk-cancel-btn, .bulk-confirm-btn {
-                    padding: 0.5rem 1rem;
-                    border: none;
-                    border-radius: 0.375rem;
-                    font-size: 0.875rem;
-                    font-weight: 500;
-                    cursor: pointer;
-                    transition: all 0.2s ease;
-                }
-                
-                .bulk-cancel-btn {
-                    background: var(--background);
-                    color: var(--text-secondary);
-                    border: 1px solid var(--border);
-                }
-                
-                .bulk-cancel-btn:hover {
-                    background: var(--surface);
-                    color: var(--text-primary);
-                }
-                
-                .bulk-confirm-btn {
-                    background: var(--primary-color);
-                    color: white;
-                }
-                
-                .bulk-confirm-btn:hover {
-                    background: #1d4ed8;
-                }
-            `;
-            document.head.appendChild(styles);
-        }
-    });
-}
-
-function closeBulkDialog(confirmed) {
-    // Remove modal
-    const modal = document.querySelector('.bulk-assignment-modal');
-    if (modal) {
-        modal.remove();
-    }
-    
-    // Resolve promise
-    if (window.bulkDialogResolve) {
-        window.bulkDialogResolve(confirmed);
-        delete window.bulkDialogResolve;
-    }
-}
-
-// Bulk assignment functions
-function bulkAssignClient(client) {
-    console.log('Bulk assign client:', client);
-    // This functionality is no longer needed with individual narratives
-}
-
-function bulkAssignMatter(matter) {
-    console.log('Bulk assign matter:', matter);
-    // This functionality is no longer needed with individual narratives
-}
-
-window.bulkAssignClient = bulkAssignClient;
-window.bulkAssignMatter = bulkAssignMatter;
-window.closeBulkDialog = closeBulkDialog;
 
 // Helper function for narrative expansion
 function toggleNarrative(btn) {

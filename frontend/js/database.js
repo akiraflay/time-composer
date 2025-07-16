@@ -16,7 +16,7 @@ const initDB = async () => {
         
         request.onsuccess = () => {
             db = request.result;
-            console.log('IndexedDB initialized');
+            // console.log('IndexedDB initialized');
             resolve(db);
         };
         
